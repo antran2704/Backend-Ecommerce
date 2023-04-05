@@ -1,15 +1,24 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const slug = require("mongoose-slug-generator");
+
+// add slug
+mongoose.plugin(slug);
 
 const CategoryModel = new Schema(
   {
-    name: {
+    title: {
       type: String,
       default: "",
     },
     thumbnail: {
       type: String,
       default: null,
+    },
+    slug: {
+      type: String,
+      slug: "title",
+      unique: true,
     },
   },
   { timestamps: true }

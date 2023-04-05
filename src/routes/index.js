@@ -1,7 +1,7 @@
+const CategoryRoutes = require("./CategoryRoutes/index");
+
 const routes = (app) => {
-  app.use("/", (req, res) => {
-    res.json("hello from server");
-  });
+  app.use("/api/category", CategoryRoutes);
 };
 
 module.exports = routes;
