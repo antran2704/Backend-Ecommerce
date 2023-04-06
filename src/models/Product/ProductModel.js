@@ -12,8 +12,8 @@ const ProductModel = new Schema(
       default: "",
     },
     category: {
-      type: String,
-      default: null,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "category"
     },
     description: {
       type: String,

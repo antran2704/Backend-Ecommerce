@@ -5,7 +5,10 @@ const ProductController = {
   getAllProduct: async (req, res) => {
     try {
       const products = await Product.find({});
-      res.status(200).json(products);
+      res.status(200).json({
+        status: 200,
+        payload: products,
+      });
     } catch (error) {
       res.status(500).json(error);
     }
@@ -14,8 +17,18 @@ const ProductController = {
   getAProduct: async (req, res) => {
     const { slug } = req.params;
     try {
-      const product = await Product.find({slug});
-      res.status(200).json(product);
+      const product = await Product.find({ slug });
+      if (!product) {
+        res.status(404).json({
+          status: 404,
+          message: "Product not exit",
+        });
+        return;
+      }
+      res.status(200).json({
+        status: 200,
+        payload: product,
+      });
     } catch (error) {
       res.status(500).json(error);
     }
@@ -26,7 +39,10 @@ const ProductController = {
       const data = req.body;
       const newProduct = await new Product(data);
       newProduct.save();
-      res.status(200).json("Add new product succesfully");
+      res.status(200).json({
+        status: 200,
+        message: "Add new product succesfully",
+      });
     } catch (error) {
       res.status(500).json(error);
     }
@@ -38,11 +54,17 @@ const ProductController = {
     try {
       const product = await Product.findById({ _id: id });
       if (!product) {
-        res.status(404).json("Product not exit");
+        res.status(404).json({
+          status: 404,
+          message: "Product not exit",
+        });
         return;
       }
       await product.update(data);
-      res.status(200).json("Updated product succesfully");
+      res.status(200).json({
+        status: 200,
+        message: "Updated product succesfully",
+      });
     } catch (error) {
       res.status(500).json(error);
     }
@@ -57,7 +79,10 @@ const ProductController = {
         return;
       }
       await product.remove();
-      res.status(200).json("Deleted product succesfully");
+      res.status(200).json({
+        status: 200,
+        message: "Deleted product succesfully",
+      });
     } catch (error) {
       res.status(500).json(error);
     }
