@@ -36,9 +36,17 @@ const ProductModel = new Schema(
       type: Boolean,
       default: false,
     },
+    quantity: {
+      type: Number,
+      default: 0,
+    },
     sold: {
       type: Number,
       default: 0,
+    },
+    outOfStock: {
+      type: Boolean,
+      default: false,
     },
     viewer: {
       type: Number,

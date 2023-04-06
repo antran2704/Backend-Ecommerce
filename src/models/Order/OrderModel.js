@@ -35,6 +35,10 @@ const OrderModel = new Schema(
       type: String,
       default: null,
     },
+    status: {
+      type: String,
+      default: null
+    }
   },
   { timestamps: true }
 );
