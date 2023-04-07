@@ -5,19 +5,27 @@ const UserModel = new Schema(
   {
     name: {
       type: String,
-      default: "",
+      default: null,
     },
     email: {
       type: String,
       default: null,
     },
+    password: {
+      type: String,
+      default: null,
+    },
+    checkedEmail: {
+      type: Boolean,
+      default: false,
+    },
     avatar: {
       type: String,
       default: null,
     },
-    role: {
-      type: String,
-      default: null,
+    admin: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

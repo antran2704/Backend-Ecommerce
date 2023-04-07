@@ -15,6 +15,10 @@ const ProductModel = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "category"
     },
+    shortDescription: {
+      type: String,
+      default: "",
+    },
     description: {
       type: String,
       default: "",
@@ -31,7 +35,7 @@ const ProductModel = new Schema(
       type: String,
       default: null,
     },
-    listImages: [{ type: String }],
+    listImages: [{ type: String, default: null }],
     hotProduct: {
       type: Boolean,
       default: false,
