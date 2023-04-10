@@ -38,6 +38,14 @@ const OrderModel = new Schema(
     status: {
       type: String,
       default: null
+    },
+    color: {
+      type: String,
+      default: null
+    },
+    size: {
+      type: String,
+      default: null
     }
   },
   { timestamps: true }

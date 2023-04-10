@@ -1,4 +1,5 @@
 const { Product } = require("../../models/index");
+const { Category } = require("../../models/index");
 
 const ProductController = {
   // [GET] ALL PRODUCT
@@ -35,10 +36,47 @@ const ProductController = {
   },
   // [POST] A PRODUCT
   addProduct: async (req, res) => {
+    const { category, brand } = req.body;
+    const name = "Brand"
+    const categoryId = category;
     try {
       const data = req.body;
       const newProduct = await new Product(data);
       newProduct.save();
+
+      const categoryExit = await Category.findById({ _id: categoryId });
+
+      if (!categoryExit) {
+        res.status(404).json("Category not exit");
+        return;
+      }
+
+      const categoryFilterExit = await Category.findOne({
+        filters: { $elemMatch: { title: name } },
+      });
+
+      if (!categoryFilterExit) {
+        await categoryExit.updateOne({
+          $push: {
+            filters: {
+              title: name,
+              listFilterItem: [brand],
+            },
+          },
+        });
+      } else {
+        const listFilter = categoryExit.filters;
+        const index = listFilter.findIndex((item) => {
+          if (item.title === name && !item.listFilterItem.includes(brand)) {
+            return item;
+          }
+        });
+        
+        if (index !== -1) {
+          listFilter[index].listFilterItem.push(brand);
+          await categoryExit.updateOne({ filters: listFilter });
+        }
+      }
       res.status(200).json({
         status: 200,
         message: "Add new product succesfully",

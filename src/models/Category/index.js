@@ -26,20 +26,10 @@ const CategoryModel = new Schema(
           type: String,
           default: null,
         },
-        paramFilter: {
-          type: String,
-          default: null,
-        },
         listFilterItem: [
           {
-            label: {
-              type: String,
-              default: null,
-            },
-            value: {
-              type: String,
-              default: null,
-            },
+            type: String,
+            default: null,
           },
         ],
       },

@@ -13,7 +13,7 @@ const ProductModel = new Schema(
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "category"
+      ref: "category",
     },
     shortDescription: {
       type: String,
@@ -60,9 +60,9 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    sizes: {
-      type: Boolean,
-      default: false,
+    brand: {
+      type: String,
+      default: null,
     },
     listSizes: [
       {
@@ -70,17 +70,21 @@ const ProductModel = new Schema(
           type: String,
           default: null,
         },
+        outOfStock: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
-    colors: {
-      type: Boolean,
-      default: false,
-    },
     listColors: [
       {
         value: {
           type: String,
           default: null,
+        },
+        outOfStock: {
+          type: Boolean,
+          default: false,
         },
       },
     ],

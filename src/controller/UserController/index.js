@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const { User } = require("../../models/index");
 const handleSendMail = require("../../configs/mailServices");
-const { checkBcrypt } = require("../../helpers/bcrypt");
+const { checkBcrypt, generateBcrypt } = require("../../helpers/bcrypt");
 const { generateToken } = require("../../helpers/jwt");
 
 const UserController = {
@@ -21,21 +21,14 @@ const UserController = {
 
   sendConfirmEmail: async (req, res) => {
     const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      res.status(400).json({
-        status: 400,
-        message: "Error in send confirm email",
-      });
-      return;
-    }
+    const passwordHash = await generateBcrypt(password);
 
     const mailContent = {
       from: process.env.MAIL_USERNAME,
       to: email,
       subject: "Antrandev blog thông báo:",
       text: "Vui lòng nhấn vào link này để xác nhận",
-      html: `<a href='${process.env.HOST_URL}?name=${name}&p=${password}&emai=${email}'>Link</a>`,
+      html: `<a href='${process.env.HOST_URL}?name=${name}&p=${passwordHash}&emai=${email}'>Link</a>`,
     };
     handleSendMail(mailContent);
 
@@ -49,17 +42,12 @@ const UserController = {
     // p is password
     const { name, p, email } = req.body;
     const password = p;
-    const saltRounds = 10;
-    const passwordHash = await bcrypt
-      .hash(password, saltRounds)
-      .then(function (hash) {
-        return hash;
-      });
+
     try {
       const newUser = await new User({
         name,
         email,
-        password: passwordHash,
+        password,
         checkedEmail: true,
       });
       await newUser.save();
@@ -86,8 +74,8 @@ const UserController = {
       const isAuth = await checkBcrypt(password, user.password);
 
       if (!isAuth) {
-        res.status(400).status({
-          status: 400,
+        res.status(403).status({
+          status: 403,
           message: "Password is incorrect",
         });
         return;
@@ -109,6 +97,50 @@ const UserController = {
           token,
           refreshToken,
         },
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  refreshToken: async (req, res) => {
+    const authorization = req.header("Authorization");
+    const token = authorization.split(" ")[1];
+    const secretKey = process.env.PRIVATE_JWT_ID;
+
+    if (!token) {
+      res.status(400).json({
+        status: 400,
+        message: "Token is invalid",
+      });
+    }
+    try {
+      const decoded = await verifyToken(token, secretKey);
+      const token = generateToken({ id: decoded.id }, secretKey, "1h");
+      res.status(200).json({
+        status: 200,
+        payload: {
+          token,
+        },
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  deleteUser: async (req, res) => {
+    const { id } = req.body;
+    try {
+      const user = await User.findByIdAndDelete({ _id: id });
+
+      if (!user) {
+        res.status(404).json({
+          status: 404,
+          message: "User is not exit",
+        });
+      }
+
+      res.status(200).json({
+        status: 200,
+        message: "Delete user successfully",
       });
     } catch (error) {
       res.status(500).json(error);

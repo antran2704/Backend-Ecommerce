@@ -7,7 +7,7 @@ const CategoryController = {
       const categories = await Category.find({});
       res.status(200).json({
         status: 200,
-        payload: categories
+        payload: categories,
       });
     } catch (error) {
       res.status(500).json(error);
@@ -27,7 +27,7 @@ const CategoryController = {
       }
       res.status(200).json({
         status: 200,
-        payload: category
+        payload: category,
       });
     } catch (error) {
       res.status(500).json(error);
@@ -41,7 +41,7 @@ const CategoryController = {
       newCategory.save();
       res.status(200).json({
         status: 200,
-        message: "Add new category succesfully"
+        message: "Add new category succesfully",
       });
     } catch (error) {
       res.status(500).json(error);
@@ -63,7 +63,7 @@ const CategoryController = {
       await category.update(data);
       res.status(200).json({
         status: 200,
-        message: "Updated category succesfully"
+        message: "Updated category succesfully",
       });
     } catch (error) {
       res.status(500).json(error);
@@ -77,15 +77,32 @@ const CategoryController = {
       if (!category) {
         res.status(404).json({
           status: 404,
-          message: "Category not exit"
+          message: "Category not exit",
         });
         return;
       }
       await category.remove();
       res.status(200).json({
         status: 200,
-        message: "Deleted category succesfully"
+        message: "Deleted category succesfully",
       });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  test: async (req, res) => {
+    const { name } = req.body;
+
+    try {
+      const category = await Category.findOne({
+        filters: { $elemMatch: { title: name } },
+      });
+
+      if (!category) {
+        res.status(404).json("Category not exit");
+        return;
+      }
+      res.status(200).json(category);
     } catch (error) {
       res.status(500).json(error);
     }

@@ -11,6 +11,8 @@ router.get("/:slug", CategoryController.getACategory);
 // [POST] A CATEGORY
 router.post("/", CategoryController.addCategory);
 
+router.post("/test", CategoryController.test);
+
 // [PATCH] A CATEGORY
 router.patch("/:id", CategoryController.changeCategory)
 
