@@ -1,3 +1,4 @@
+const slugify = require("slugify");
 const { Category } = require("../../models/index");
 
 const CategoryController = {
@@ -37,8 +38,10 @@ const CategoryController = {
   addCategory: async (req, res) => {
     try {
       const data = req.body;
+
       const newCategory = await new Category(data);
       newCategory.save();
+
       res.status(200).json({
         status: 200,
         message: "Add new category succesfully",

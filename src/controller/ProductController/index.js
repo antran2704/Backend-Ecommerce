@@ -14,6 +14,28 @@ const ProductController = {
       res.status(500).json(error);
     }
   },
+  // [GET] ALL PRODUCT FOLLOW CATEGORY
+  getAllProductInCategory: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const products = await Product.find({ category: id });
+
+      if (!products) {
+        res.status(404).json({
+          status: 404,
+          message: "No products in category",
+        });
+        return;
+      }
+
+      res.status(200).json({
+        status: 200,
+        payload: products,
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
   // [GET] A PRODUCT
   getAProduct: async (req, res) => {
     const { slug } = req.params;
@@ -37,7 +59,7 @@ const ProductController = {
   // [POST] A PRODUCT
   addProduct: async (req, res) => {
     const { category, brand } = req.body;
-    const name = "Brand"
+    const name = "Brand";
     const categoryId = category;
     try {
       const data = req.body;
@@ -71,7 +93,7 @@ const ProductController = {
             return item;
           }
         });
-        
+
         if (index !== -1) {
           listFilter[index].listFilterItem.push(brand);
           await categoryExit.updateOne({ filters: listFilter });

@@ -20,6 +20,18 @@ const CategoryModel = new Schema(
       slug: "title",
       unique: true,
     },
+    subCategories: [
+      {
+        label: {
+          type: String,
+          default: null,
+        },
+        slug: {
+          type: String,
+          default: null,
+        },
+      },
+    ],
     filters: [
       {
         title: {
