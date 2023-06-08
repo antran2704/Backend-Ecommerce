@@ -38,7 +38,6 @@ const CategoryController = {
   addCategory: async (req, res) => {
     try {
       const data = req.body;
-
       const newCategory = await new Category(data);
       newCategory.save();
 
@@ -49,6 +48,16 @@ const CategoryController = {
     } catch (error) {
       res.status(500).json(error);
     }
+  },
+  uploadThumbnail: async (req, res) => {
+    const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
+
+    res.status(200).json({
+      status: 200,
+      payload: {
+        thumbnail,
+      },
+    });
   },
   // [PATCH] A CATEGORY
   changeCategory: async (req, res) => {

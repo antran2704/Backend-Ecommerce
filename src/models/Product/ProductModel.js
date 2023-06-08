@@ -56,7 +56,7 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    stars: {
+    rate: {
       type: Number,
       default: 0,
     },
