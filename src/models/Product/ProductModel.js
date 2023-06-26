@@ -35,7 +35,7 @@ const ProductModel = new Schema(
       type: String,
       default: null,
     },
-    listImages: [{ type: String, default: null }],
+    gallery: [{ type: String, default: null }],
     hotProduct: {
       type: Boolean,
       default: false,
@@ -48,7 +48,7 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    outOfStock: {
+    inStock: {
       type: Boolean,
       default: false,
     },
@@ -64,29 +64,17 @@ const ProductModel = new Schema(
       type: String,
       default: null,
     },
-    listSizes: [
+    options: [
       {
-        value: {
-          type: String,
-          default: null,
-        },
-        outOfStock: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
-    listColors: [
-      {
-        value: {
-          type: String,
-          default: null,
-        },
-        outOfStock: {
-          type: Boolean,
-          default: false,
-        },
-      },
+        title: String,
+        list: [
+          {
+            title: String,
+            value: String,
+            inStock: Boolean
+          }
+        ]
+      }
     ],
     slug: {
       type: String,

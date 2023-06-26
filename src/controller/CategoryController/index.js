@@ -1,17 +1,29 @@
-const slugify = require("slugify");
 const { Category } = require("../../models/index");
+
+const PAGE_SIZE = 16;
 
 const CategoryController = {
   // [GET] ALL CATEGORY
   getAllCategories: async (req, res) => {
+    const currentPage = req.query.page ? req.query.page : 1;
     try {
-      const categories = await Category.find({});
-      res.status(200).json({
+      const totalItems = await Category.find({});
+
+      const categories = await Category.find({})
+        .skip((currentPage - 1) * PAGE_SIZE)
+        .limit(PAGE_SIZE);
+
+      return res.status(200).json({
         status: 200,
         payload: categories,
+        pagination: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   // [GET] A CATEGORY
@@ -20,18 +32,18 @@ const CategoryController = {
     try {
       const category = await Category.findOne({ slug });
       if (!category) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 404,
           message: "Category not exit",
         });
-        return;
       }
-      res.status(200).json({
+
+      return res.status(200).json({
         status: 200,
         payload: category,
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   // [POST] A CATEGORY
@@ -41,18 +53,18 @@ const CategoryController = {
       const newCategory = await new Category(data);
       newCategory.save();
 
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Add new category succesfully",
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   uploadThumbnail: async (req, res) => {
     const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 200,
       payload: {
         thumbnail,
@@ -65,20 +77,22 @@ const CategoryController = {
     const data = req.body;
     try {
       const category = await Category.findById({ _id: id });
+
       if (!category) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 404,
           message: "Category not exit",
         });
-        return;
       }
-      await category.update(data);
-      res.status(200).json({
+
+      await category.updateOne(data);
+
+      return res.status(200).json({
         status: 200,
         message: "Updated category succesfully",
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   // [DELETE] A CATEGORY
@@ -87,19 +101,20 @@ const CategoryController = {
     try {
       const category = await Category.findById({ _id: id });
       if (!category) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 404,
           message: "Category not exit",
         });
-        return;
       }
+
       await category.remove();
-      res.status(200).json({
+
+      return res.status(200).json({
         status: 200,
         message: "Deleted category succesfully",
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   test: async (req, res) => {

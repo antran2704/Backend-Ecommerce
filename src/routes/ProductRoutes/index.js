@@ -8,6 +8,9 @@ router.get("/getAllProducts", ProductController.getAllProduct);
 // [GET] ALL PRODUCTS
 router.get("/getAllProductsInCategory/:id", ProductController.getAllProductInCategory);
 
+// [SEARCH] A PRODUCT
+router.get("/search", ProductController.searchProduct);
+
 // [GET] A PRODUCT
 router.get("/:slug", ProductController.getAProduct);
 
