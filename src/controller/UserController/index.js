@@ -1,4 +1,3 @@
-const bcrypt = require("bcrypt");
 const { User } = require("../../models/index");
 const handleSendMail = require("../../configs/mailServices");
 const { checkBcrypt, generateBcrypt } = require("../../helpers/bcrypt");
@@ -6,15 +5,16 @@ const { generateToken } = require("../../helpers/jwt");
 
 const UserController = {
   // [GET] ALL USERS
-  getAllUsers: async () => {
+  getAllUsers: async (req, res) => {
     try {
       const users = await User.find({});
-      res.status(200).json({
+      console.log(users)
+      return res.status(200).json({
         status: 200,
         payload: users,
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   // [POST] SEND CONFIRM EMAIL
@@ -32,7 +32,7 @@ const UserController = {
     };
     handleSendMail(mailContent);
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 200,
       message: "Email sent successfully",
     });
@@ -50,13 +50,15 @@ const UserController = {
         password,
         checkedEmail: true,
       });
+
       await newUser.save();
-      res.status(200).json({
+
+      return res.status(200).json({
         status: 200,
         message: "Add user successfully",
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   login: async (req, res) => {
@@ -65,20 +67,18 @@ const UserController = {
     try {
       const user = await User.findOne({ email });
       if (!user) {
-        res.status(404).status({
+        return res.status(404).status({
           status: 404,
           message: "User is not exit",
         });
-        return;
       }
       const isAuth = await checkBcrypt(password, user.password);
 
       if (!isAuth) {
-        res.status(403).status({
+        return res.status(403).status({
           status: 403,
           message: "Password is incorrect",
         });
-        return;
       }
 
       const refreshToken = generateToken(
@@ -88,7 +88,7 @@ const UserController = {
       );
       const token = generateToken({ id: user._id }, secretKey, "1h");
 
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         payload: {
           name: user.name,
@@ -99,7 +99,7 @@ const UserController = {
         },
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   refreshToken: async (req, res) => {
@@ -108,7 +108,7 @@ const UserController = {
     const secretKey = process.env.PRIVATE_JWT_ID;
 
     if (!token) {
-      res.status(400).json({
+      return res.status(400).json({
         status: 400,
         message: "Token is invalid",
       });
@@ -123,7 +123,7 @@ const UserController = {
         },
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
   deleteUser: async (req, res) => {
@@ -132,18 +132,18 @@ const UserController = {
       const user = await User.findByIdAndDelete({ _id: id });
 
       if (!user) {
-        res.status(404).json({
+        return res.status(404).json({
           status: 404,
           message: "User is not exit",
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         status: 200,
         message: "Delete user successfully",
       });
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error);
     }
   },
 };

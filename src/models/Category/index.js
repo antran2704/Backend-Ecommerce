@@ -4,17 +4,7 @@ const slug = require("mongoose-slug-generator");
 
 // add slug
 mongoose.plugin(slug);
-/* add product -> show category 
-[
-  "Mobile" -> get id category,
-  "tablet"
-] 
-->
-[
-  "ốp lưng" -> get id option,
-  "dây sạc"
-]
-*/
+
 const CategoryModel = new Schema(
   {
     title: {
@@ -22,7 +12,7 @@ const CategoryModel = new Schema(
       default: "",
     },
     description: {
-      type: String
+      type: String,
     },
     thumbnail: {
       type: String,
@@ -33,12 +23,12 @@ const CategoryModel = new Schema(
       slug: "title",
       unique: true,
     },
-    options: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "option",
-      }, 
-    ],
+    options: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "option",
+    },
+
+    // option: [OptionId]
   },
   { timestamps: true }
 );

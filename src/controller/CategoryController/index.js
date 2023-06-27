@@ -1,4 +1,4 @@
-const { Category } = require("../../models/index");
+const { Category, Option } = require("../../models/index");
 
 const PAGE_SIZE = 16;
 
@@ -49,8 +49,20 @@ const CategoryController = {
   // [POST] A CATEGORY
   addCategory: async (req, res) => {
     try {
-      const data = req.body;
-      const newCategory = await new Category(data);
+      const { title, description, thumbnail, options } = req.body;
+
+      const newOption = await new Option({
+        list: options,
+      });
+
+      const newCategory = await new Category({
+        title,
+        description,
+        thumbnail,
+        options: newOption._id,
+      });
+
+      newOption.save();
       newCategory.save();
 
       return res.status(200).json({

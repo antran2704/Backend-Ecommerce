@@ -3,11 +3,11 @@ const Schema = mongoose.Schema;
 
 const OptionModel = new Schema(
   {
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "category",
-    },
-    title: String
+    list: [
+      {
+        title: String,
+      },
+    ],
   },
   { timestamps: true }
 );
