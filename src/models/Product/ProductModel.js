@@ -17,8 +17,8 @@ const ProductModel = new Schema(
     },
     type: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "option", 
+        name: String,
+        id: String
       }
     ],
     shortDescription: {
@@ -54,7 +54,7 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    inStock: {
+    status: {
       type: Boolean,
       default: false,
     },

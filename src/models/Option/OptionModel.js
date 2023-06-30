@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const OptionModel = new Schema(
   {
+    category_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "category",
+    },
     list: [
       {
         title: String,

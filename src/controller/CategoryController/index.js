@@ -30,7 +30,7 @@ const CategoryController = {
   getACategory: async (req, res) => {
     const { slug } = req.params;
     try {
-      const category = await Category.findOne({ slug });
+      const category = await Category.findOne({ slug }).populate("options");
       if (!category) {
         return res.status(404).json({
           status: 404,
@@ -86,18 +86,20 @@ const CategoryController = {
   // [PATCH] A CATEGORY
   changeCategory: async (req, res) => {
     const { id } = req.params;
-    const data = req.body;
+    const { title, description, thumbnail, options, optionId } = req.body;
+    // update: post contains [optionId] -> find option and change
     try {
       const category = await Category.findById({ _id: id });
-
-      if (!category) {
+      const option = await Option.findById({ _id: optionId });
+      if (!category || !option) {
         return res.status(404).json({
           status: 404,
           message: "Category not exit",
         });
       }
 
-      await category.updateOne(data);
+      await option.updateOne({ list: options });
+      await category.updateOne({ title, description, thumbnail });
 
       return res.status(200).json({
         status: 200,

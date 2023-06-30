@@ -126,49 +126,34 @@ const ProductController = {
       return res.status(500).json(error);
     }
   },
+  // [GET] CATEGORY
+  getCategories: async (req, res) => {
+    try {
+      const categories = await Category.find({}, {title: 1, options: 1});
+
+      if (!categories) {
+        return res.status(404).json({
+          status: 404,
+          message: "Categories not exit",
+        });
+      }
+
+      return res.status(200).json({
+        status: 200,
+        payload: categories,
+      });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
   // [POST] A PRODUCT
   addProduct: async (req, res) => {
     const data = req.body;
-    // const { category: categoryId, brand, options } = data;
-    // const name = "Brand";
+   
     try {
       const newProduct = await new Product(data);
       newProduct.save();
 
-      // const categoryExit = await Category.findById({ _id: categoryId });
-
-      // if (!categoryExit) {
-      //   res.status(404).json("Category not exit");
-      //   return;
-      // }
-
-      // filter change by options
-      // const categoryFilterExit = await Category.findOne({
-      //   options: { $elemMatch: { title: name } },
-      // });
-
-      // if (!categoryFilterExit) {
-      //   await categoryExit.updateOne({
-      //     $push: {
-      //       filters: {
-      //         title: name,
-      //         listFilterItem: [brand],
-      //       },
-      //     },
-      //   });
-      // } else {
-      //   const listFilter = categoryExit.filters;
-      //   const index = listFilter.findIndex((item) => {
-      //     if (item.title === name && !item.listFilterItem.includes(brand)) {
-      //       return item;
-      //     }
-      //   });
-
-      //   if (index !== -1) {
-      //     listFilter[index].listFilterItem.push(brand);
-      //     await categoryExit.updateOne({ filters: listFilter });
-      //   }
-      // }
       res.status(200).json({
         status: 200,
         message: "Add new product succesfully",

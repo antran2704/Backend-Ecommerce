@@ -6,6 +6,9 @@ const ProductController = require("../../controller/ProductController");
 router.get("/getAllProducts", ProductController.getAllProduct);
 
 // [GET] ALL PRODUCTS
+router.get("/getCategories", ProductController.getCategories);
+
+// [GET] ALL PRODUCTS
 router.get("/getAllProductsInCategory/:id", ProductController.getAllProductInCategory);
 
 // [SEARCH] A PRODUCT
