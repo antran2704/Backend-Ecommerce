@@ -4,7 +4,8 @@ const router = express.Router();
 const fs = require("fs");
 
 router.post("/", (req, res) => {
-  const filePath = req.body.path;
+  const path = req.body.filePath;
+  const filePath = path.replace(process.env.API_ENDPOINT, "./");
   fs.unlinkSync(filePath);
 
   res.status(200).json({

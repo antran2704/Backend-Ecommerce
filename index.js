@@ -10,7 +10,7 @@ const port = 3001;
 env.config();
 
 app.use(cors());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 db.connect();

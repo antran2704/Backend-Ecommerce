@@ -75,9 +75,8 @@ const ProductModel = new Schema(
         title: String,
         list: [
           {
-            title: String,
-            value: String,
-            inStock: Boolean
+            name: String,
+            status: Boolean
           }
         ]
       }

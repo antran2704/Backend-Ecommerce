@@ -129,7 +129,7 @@ const ProductController = {
   // [GET] CATEGORY
   getCategories: async (req, res) => {
     try {
-      const categories = await Category.find({}, {title: 1, options: 1});
+      const categories = await Category.find({}, { title: 1, options: 1 });
 
       if (!categories) {
         return res.status(404).json({
@@ -149,7 +149,7 @@ const ProductController = {
   // [POST] A PRODUCT
   addProduct: async (req, res) => {
     const data = req.body;
-   
+
     try {
       const newProduct = await new Product(data);
       newProduct.save();
@@ -161,6 +161,44 @@ const ProductController = {
     } catch (error) {
       res.status(500).json(error);
     }
+  },
+  uploadThumbnail: async (req, res) => {
+    if (!req.file) {
+      return res.status(404).json({
+        status: 404,
+        message: "Image invalid",
+      });
+    }
+
+    const path = req.file.path;
+    const thumbnail = `${process.env.API_ENDPOINT}/${path}`;
+
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        thumbnail,
+      },
+    });
+  },
+  uploadGallery: async (req, res) => {
+    if (req.files.length === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: "Image invalid",
+      });
+    }
+
+    const list = req.files;
+    const gallery = list.map(
+      (item) => `${process.env.API_ENDPOINT}/${item.path}`
+    );
+
+    return res.status(200).json({
+      status: 200,
+      payload: {
+        gallery,
+      },
+    });
   },
   // [PATCH] A PRODUCT
   changeProduct: async (req, res) => {
