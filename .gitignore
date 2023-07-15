@@ -1,6 +1,6 @@
 /node_modules
-/pakage.json
-/pakage-lock.json
+/package.json
+/package-lock.json
 # env
 .env
 
