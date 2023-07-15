@@ -1,3 +1,4 @@
+const slug = require('slug')
 const { Product } = require("../../models/index");
 const { Category } = require("../../models/index");
 
@@ -45,7 +46,7 @@ const ProductController = {
             ...req.query,
           });
 
-          products = await await Product.find({
+          products = await Product.find({
             category: id,
             ...req.query,
           })
@@ -109,6 +110,7 @@ const ProductController = {
       const product = await Product.findOne({ slug }).populate("category", {
         title: 1,
         slug: 1,
+        options: 1,
       });
 
       if (!product) {
@@ -204,6 +206,7 @@ const ProductController = {
   changeProduct: async (req, res) => {
     const { id } = req.params;
     const data = req.body;
+    const newSlug =  slug(data.title);
     try {
       const product = await Product.findById({ _id: id });
 
@@ -214,7 +217,7 @@ const ProductController = {
         });
       }
 
-      await product.update(data);
+      await product.updateOne({...data, slug: newSlug});
 
       return res.status(200).json({
         status: 200,
@@ -228,14 +231,14 @@ const ProductController = {
   searchProduct: async (req, res) => {
     const query = req.query;
     const searchText = query.search;
-    console.log(query);
+
     const currentPage = query.page ? query.page : 1;
     try {
       const totalItems = await Product.find({
-        name: { $regex: searchText, $options: "i" },
+        title: { $regex: searchText, $options: "i" },
       });
       const products = await Product.find({
-        name: { $regex: searchText, $options: "i" },
+        title: { $regex: searchText, $options: "i" },
       })
         .skip((currentPage - 1) * PAGE_SIZE)
         .limit(PAGE_SIZE);

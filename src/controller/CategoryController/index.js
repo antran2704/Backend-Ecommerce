@@ -73,6 +73,34 @@ const CategoryController = {
       return res.status(500).json(error);
     }
   },
+  searchCategories: async (req, res) => {
+    const query = req.query;
+    const searchText = query.search;
+
+    const currentPage = query.page ? query.page : 1;
+    try {
+      const totalItems = await Category.find({
+        title: { $regex: searchText, $options: "i" },
+      });
+      const products = await Category.find({
+        title: { $regex: searchText, $options: "i" },
+      })
+        .skip((currentPage - 1) * PAGE_SIZE)
+        .limit(PAGE_SIZE);
+
+      return res.status(200).json({
+        status: 200,
+        payload: products,
+        pagination: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  },
   uploadThumbnail: async (req, res) => {
     const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
 

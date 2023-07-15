@@ -7,7 +7,7 @@ mongoose.plugin(slug);
 
 const ProductModel = new Schema(
   {
-    name: {
+    title: {
       type: String,
       default: "",
     },
@@ -17,8 +17,8 @@ const ProductModel = new Schema(
     },
     type: [
       {
-        name: String,
-        id: String
+        title: String,
+        _id: String
       }
     ],
     shortDescription: {
@@ -83,7 +83,7 @@ const ProductModel = new Schema(
     ],
     slug: {
       type: String,
-      slug: "name",
+      slug: "title",
       unique: true,
     },
   },

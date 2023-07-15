@@ -16,6 +16,14 @@ const OptionController = {
   //[GET] AN OPTION
   getAnOption: async (req, res) => {
     const id = req.params.id;
+
+    if (!id) {
+      return res.status(404).json({
+        status: 404,
+        message: "Id Option is invalid",
+      });
+    }
+
     try {
       const option = await Option.findById(id);
 
