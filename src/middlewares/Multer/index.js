@@ -25,7 +25,8 @@ const upload = (destination) => {
       cb(null, destination);
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname));
+      console.log(file)
+      cb(null, Date.now() + file.originalname);
     },
   });
 

@@ -1,4 +1,5 @@
 const express = require("express");
+const util = require("util");
 const router = express.Router();
 const multer = require("../../middlewares/Multer");
 
@@ -25,14 +26,14 @@ router.get("/:slug", ProductController.getAProduct);
 // UPLOAD THUMBNAIL
 router.post(
   "/uploadThumbnail",
-  multer.upload("./uploads/product").single("thumbnail"),
+  util.promisify(multer.upload("./uploads/product").single("thumbnail")),
   ProductController.uploadThumbnail
 );
 
 // UPLOAD GALLERY
 router.post(
   "/uploadGallery",
-  multer.upload("./uploads/product").array("gallery", 6),
+  util.promisify(multer.upload("./uploads/product").array("gallery", 6)),
   ProductController.uploadGallery
 );
 

@@ -191,9 +191,11 @@ const ProductController = {
     }
 
     const list = req.files;
+    console.log("list", list)
     const gallery = list.map(
       (item) => `${process.env.API_ENDPOINT}/${item.path}`
     );
+    console.log("gallery", gallery)
 
     return res.status(200).json({
       status: 200,
@@ -216,7 +218,6 @@ const ProductController = {
           message: "Product not exit",
         });
       }
-
       await product.updateOne({...data, slug: newSlug});
 
       return res.status(200).json({
