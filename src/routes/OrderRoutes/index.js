@@ -8,6 +8,9 @@ router.get("/getAllOrders", OrderController.getAllOrders);
 // [GET] AN ORDER
 router.get("/:id", OrderController.getAnOrder);
 
+// [POST] SEND EMAIL
+router.post("/sendEmail", OrderController.sendEmail);
+
 // [POST] AN ORDER
 router.post("/", OrderController.addOrder);
 

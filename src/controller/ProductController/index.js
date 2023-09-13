@@ -1,6 +1,7 @@
 const slug = require('slug')
 const { Product } = require("../../models/index");
 const { Category } = require("../../models/index");
+const { getDateTime } = require('../../helpers/getDateTime');
 
 const PAGE_SIZE = 16;
 
@@ -205,10 +206,12 @@ const ProductController = {
     });
   },
   // [PATCH] A PRODUCT
-  changeProduct: async (req, res) => {
+  updateProduct: async (req, res) => {
     const { id } = req.params;
     const data = req.body;
     const newSlug =  slug(data.title);
+    const date = getDateTime();
+    
     try {
       const product = await Product.findById({ _id: id });
 
@@ -218,7 +221,7 @@ const ProductController = {
           message: "Product not exit",
         });
       }
-      await product.updateOne({...data, slug: newSlug});
+      await product.updateOne({...data, slug: newSlug, updatedAt: date});
 
       return res.status(200).json({
         status: 200,

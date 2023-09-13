@@ -3,13 +3,13 @@ const Schema = mongoose.Schema;
 
 const OrderModel = new Schema(
   {
-    nameCustomer: {
+    name: {
       type: String,
-      default: "",
+      default: null,
     },
-    addressCustomer: {
+    address: {
       type: String,
-      default: "",
+      default: null,
     },
     email: {
       type: String,
@@ -19,34 +19,34 @@ const OrderModel = new Schema(
       type: String,
       default: null,
     },
-    idProduct: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "product",
-    },
-    price: {
+    items: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product",
+        },
+        price: {
+          type: Number,
+          default: 0,
+        },
+        quantity: {
+          type: Number,
+          default: 0,
+        },
+        link: {
+          type: String,
+          default: null,
+        },
+      },
+    ],
+    total: {
       type: Number,
       default: 0,
     },
-    promotionPrice: {
-      type: Number,
-      default: null,
-    },
-    thumbnail: {
-      type: String,
-      default: null,
-    },
     status: {
       type: String,
-      default: null
+      default: null,
     },
-    color: {
-      type: String,
-      default: null
-    },
-    size: {
-      type: String,
-      default: null
-    }
   },
   { timestamps: true }
 );

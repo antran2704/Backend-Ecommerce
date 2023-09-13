@@ -23,10 +23,8 @@ router.post(
   CategoryController.uploadThumbnail
 );
 
-router.post("/test", CategoryController.test);
-
 // [PATCH] A CATEGORY
-router.patch("/:id", CategoryController.changeCategory);
+router.patch("/:id", CategoryController.updateCategory);
 
 // [DELETE] A CATEGORY
 router.delete("/:id", CategoryController.deleteCategory);

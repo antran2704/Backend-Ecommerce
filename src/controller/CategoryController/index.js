@@ -1,3 +1,4 @@
+const { getDateTime } = require("../../helpers/getDateTime");
 const { Category, Option } = require("../../models/index");
 
 const PAGE_SIZE = 16;
@@ -59,7 +60,7 @@ const CategoryController = {
         title,
         description,
         thumbnail,
-        options: newOption._id,
+        options: newOption._id
       });
 
       newOption.save();
@@ -112,9 +113,11 @@ const CategoryController = {
     });
   },
   // [PATCH] A CATEGORY
-  changeCategory: async (req, res) => {
+  updateCategory: async (req, res) => {
     const { id } = req.params;
     const { title, description, thumbnail, options, optionId } = req.body;
+    const date = getDateTime();
+
     // update: post contains [optionId] -> find option and change
     try {
       const category = await Category.findById({ _id: id });
@@ -126,8 +129,8 @@ const CategoryController = {
         });
       }
 
-      await option.updateOne({ list: options });
-      await category.updateOne({ title, description, thumbnail });
+      await option.updateOne({ list: options, updatedAt: date });
+      await category.updateOne({ title, description, thumbnail, updatedAt: date });
 
       return res.status(200).json({
         status: 200,

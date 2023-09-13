@@ -1,4 +1,7 @@
+const { getDateTime } = require("../../helpers/getDateTime");
+const { readHTMLFile, createHTML } = require("../../helpers/nodemailer");
 const { Order } = require("../../models/index");
+const path = require("path");
 
 const OrderController = {
   // [GET] All ORDER
@@ -7,7 +10,7 @@ const OrderController = {
       const orders = await Order.find({});
       res.status(200).json({
         status: 200,
-        payload: orders
+        payload: orders,
       });
     } catch (error) {
       res.status(500).json(error);
@@ -17,8 +20,8 @@ const OrderController = {
   getAnOrder: async (req, res) => {
     const { id } = req.params;
     try {
-      const order = await Order.findById({_id: id});
-      if(!order) {
+      const order = await Order.findById({ _id: id });
+      if (!order) {
         res.status(404).json({
           status: 404,
           message: "Order not exit",
@@ -27,7 +30,7 @@ const OrderController = {
       }
       res.status(200).json({
         status: 200,
-        payload: order
+        payload: order,
       });
     } catch (error) {
       res.status(500).json(error);
@@ -41,7 +44,7 @@ const OrderController = {
       newOrder.save();
       res.status(200).json({
         status: 200,
-        message: "Add new order succesfully"
+        message: "Add new order succesfully",
       });
     } catch (error) {
       res.status(500).json(error);
@@ -51,6 +54,7 @@ const OrderController = {
   changeOrder: async (req, res) => {
     const { id } = req.params;
     const data = req.body;
+    const date = getDateTime();
     try {
       const order = await Order.findById({ _id: id });
       if (!order) {
@@ -60,10 +64,40 @@ const OrderController = {
         });
         return;
       }
-      await order.update(data);
+      await order.update({ ...data, updatedAt: date });
       res.status(200).json({
         status: 200,
-        message: "Updated order succesfully"
+        message: "Updated order succesfully",
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  changeStatusOrder: async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    const date = getDateTime();
+
+    if (!status || status !== "success" || status !== "cancle") {
+      res.status(400).json({
+        status: 400,
+        message: "Invalid status",
+      });
+    }
+
+    try {
+      const order = await Order.findById({ _id: id });
+      if (!order) {
+        res.status(404).json({
+          status: 404,
+          message: "Order not exit",
+        });
+        return;
+      }
+      await order.update({ status, updatedAt: date });
+      res.status(200).json({
+        status: 200,
+        message: "Updated order succesfully",
       });
     } catch (error) {
       res.status(500).json(error);
@@ -84,7 +118,27 @@ const OrderController = {
       await order.remove();
       res.status(200).json({
         status: 200,
-        message: "Deleted order succesfully"
+        message: "Deleted order succesfully",
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  sendEmail: async (req, res) => {
+    const mailContent = {
+      to: "phamtrangiaan27@gmail.com",
+      subject: "Antrandev blog thông báo:",
+      text: "Bạn đang đang đăng ký thành viên tại Antrandev blog , vui lòng nhấn link dưới đây để hoàn tất đăng ký",
+      template: "email/cancleEmail",
+    };
+
+    try {
+      const pathName = path.resolve(__dirname, "../../views/email/index.hbs");
+      readHTMLFile(pathName, createHTML.email, mailContent);
+
+      return res.status(200).json({
+        status: 200,
+        message: "succesfully",
       });
     } catch (error) {
       res.status(500).json(error);
