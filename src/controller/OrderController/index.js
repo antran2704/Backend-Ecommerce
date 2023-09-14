@@ -1,7 +1,7 @@
+const { typeStatus, templateEmail } = require("./status");
+const handleSendMail = require("../../configs/mailServices");
 const { getDateTime } = require("../../helpers/getDateTime");
-const { readHTMLFile, createHTML } = require("../../helpers/nodemailer");
 const { Order } = require("../../models/index");
-const path = require("path");
 
 const OrderController = {
   // [GET] All ORDER
@@ -38,10 +38,18 @@ const OrderController = {
   },
   // [POST] AN ORDER
   addOrder: async (req, res) => {
+    let mailContent = {
+      to: "phamtrangiaan27@gmail.com",
+      subject: "Antran shop thông báo:",
+      template: "email/newOrder",
+    };
+
     try {
       const data = req.body;
       const newOrder = await new Order(data);
-      newOrder.save();
+      await newOrder.save();
+      handleSendMail(mailContent);
+
       res.status(200).json({
         status: 200,
         message: "Add new order succesfully",
@@ -78,7 +86,7 @@ const OrderController = {
     const { status } = req.body;
     const date = getDateTime();
 
-    if (!status || status !== "success" || status !== "cancle") {
+    if (!status || !typeStatus.includes(status)) {
       res.status(400).json({
         status: 400,
         message: "Invalid status",
@@ -94,7 +102,16 @@ const OrderController = {
         });
         return;
       }
-      await order.update({ status, updatedAt: date });
+
+      let mailContent = {
+        to: order.email,
+        subject: "Antran shop thông báo:",
+        template: templateEmail[status].template,
+      };
+
+      await order.updateOne({ status, updatedAt: date });
+      handleSendMail(mailContent);
+
       res.status(200).json({
         status: 200,
         message: "Updated order succesfully",
@@ -127,19 +144,12 @@ const OrderController = {
   sendEmail: async (req, res) => {
     const mailContent = {
       to: "phamtrangiaan27@gmail.com",
-      subject: "Antrandev blog thông báo:",
-      text: "Bạn đang đang đăng ký thành viên tại Antrandev blog , vui lòng nhấn link dưới đây để hoàn tất đăng ký",
+      subject: "Antrand shop thông báo:",
       template: "email/cancleEmail",
     };
 
     try {
-      const pathName = path.resolve(__dirname, "../../views/email/index.hbs");
-      readHTMLFile(pathName, createHTML.email, mailContent);
-
-      return res.status(200).json({
-        status: 200,
-        message: "succesfully",
-      });
+      handleSendMail(mailContent);
     } catch (error) {
       res.status(500).json(error);
     }

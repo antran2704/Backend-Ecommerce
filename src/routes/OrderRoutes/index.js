@@ -14,6 +14,9 @@ router.post("/sendEmail", OrderController.sendEmail);
 // [POST] AN ORDER
 router.post("/", OrderController.addOrder);
 
+// [PATCH] STATUS ORDER
+router.patch("/status/:id", OrderController.changeStatusOrder)
+
 // [PATCH] AN ORDER
 router.patch("/:id", OrderController.changeOrder)
 

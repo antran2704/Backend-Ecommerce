@@ -45,7 +45,8 @@ const OrderModel = new Schema(
     },
     status: {
       type: String,
-      default: null,
+      enum: ["pending", "cancle", "success"],
+      default: "pending",
     },
   },
   { timestamps: true }
