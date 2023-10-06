@@ -1,4 +1,8 @@
-const typeStatus = ["pending", "cancle", "success"];
+const typeStatus = {
+  pending: "pending",
+  success: "success",
+  cancle: "cancle",
+};
 
 const templateEmail = {
   pending: {

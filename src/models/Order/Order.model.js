@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const OrderModel = new Schema(
   {
+    _id: {
+      type: Schema.Types.ObjectId,
+      default: () => mongoose.Types.ObjectId(),
+    },
     name: {
       type: String,
       default: null,
@@ -21,7 +25,7 @@ const OrderModel = new Schema(
     },
     items: [
       {
-        productId: {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "product",
         },
@@ -47,6 +51,14 @@ const OrderModel = new Schema(
       type: String,
       enum: ["pending", "cancle", "success"],
       default: "pending",
+    },
+    cancleContent: {
+      type: String,
+      default: null,
+    },
+    note: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }

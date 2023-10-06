@@ -1,116 +1,139 @@
+const {
+  InternalServerError,
+  NotFoundError,
+} = require("../../helpers/errorResponse");
+const {
+  GetResponse,
+  CreatedResponse,
+} = require("../../helpers/successResponse");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { Category, Option } = require("../../models/index");
-
-const PAGE_SIZE = 16;
+const { CategoriesServices } = require("../../services/index");
+const categoriesServices = require("../../services/Categories/categories.services");
 
 const CategoryController = {
   // [GET] ALL CATEGORY
   getAllCategories: async (req, res) => {
-    const currentPage = req.query.page ? req.query.page : 1;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = req.query.page ? Number(req.query.page) : 1;
+
     try {
-      const totalItems = await Category.find({});
+      const totalItems = await CategoriesServices.getAllCategories();
 
-      const categories = await Category.find({})
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE);
+      if (!totalItems) {
+        return new NotFoundError(404, "No category found!").send(res);
+      }
 
-      return res.status(200).json({
-        status: 200,
-        payload: categories,
-        pagination: {
+      const categories = await CategoriesServices.getCategoriesWithPage(
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!categories) {
+        return new NotFoundError(404, "No category found!").send(res);
+      }
+
+      return new GetResponse(200, categories).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [GET] A CATEGORY
-  getACategory: async (req, res) => {
+  getCategory: async (req, res) => {
     const { slug } = req.params;
     try {
-      const category = await Category.findOne({ slug }).populate("options");
+      const category = await CategoriesServices.findCategory(slug);
+
       if (!category) {
-        return res.status(404).json({
-          status: 404,
-          message: "Category not exit",
-        });
+        return new NotFoundError(404, "No category found!").send(res);
       }
 
-      return res.status(200).json({
-        status: 200,
-        payload: category,
-      });
+      return new GetResponse(200, category).send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
+    }
+  },
+  // [GET] A CATEGORY BY ID
+  getCategoryById: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const category = await CategoriesServices.findCategoryById(id);
+
+      if (!category) {
+        return new NotFoundError(404, "No category found!").send(res);
+      }
+
+      return new GetResponse(200, category).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
     }
   },
   // [POST] A CATEGORY
   addCategory: async (req, res) => {
     try {
-      const { title, description, thumbnail, options } = req.body;
+      const newCategory = await categoriesServices.addCategory(req.body);
 
-      const newOption = await new Option({
-        list: options,
-      });
+      if (!newCategory) {
+        return new NotFoundError(404, "Add category failed").send(res);
+      }
 
-      const newCategory = await new Category({
-        title,
-        description,
-        thumbnail,
-        options: newOption._id
-      });
-
-      newOption.save();
-      newCategory.save();
-
-      return res.status(200).json({
-        status: 200,
-        message: "Add new category succesfully",
+      return new CreatedResponse(201, newCategory).send(res, {
+        message: "Create category success!",
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   searchCategories: async (req, res) => {
-    const query = req.query;
-    const searchText = query.search;
+    const { search, page } = req.query;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = page ? Number(page) : 1;
 
-    const currentPage = query.page ? query.page : 1;
     try {
-      const totalItems = await Category.find({
-        title: { $regex: searchText, $options: "i" },
-      });
-      const products = await Category.find({
-        title: { $regex: searchText, $options: "i" },
-      })
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE);
+      const totalItems = await categoriesServices.searchTextItems(search);
 
-      return res.status(200).json({
-        status: 200,
-        payload: products,
-        pagination: {
+      if (!totalItems) {
+        return new NotFoundError(
+          404,
+          `No categoryies with title ${search}`
+        ).send(res);
+      }
+
+      const items = await categoriesServices.searchTextWithPage(
+        search,
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!items) {
+        return new NotFoundError(
+          404,
+          `No categories with title ${search}`
+        ).send(res);
+      }
+
+      return new GetResponse(200, items).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   uploadThumbnail: async (req, res) => {
     const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
-
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        thumbnail,
-      },
-    });
+    return new CreatedResponse(201, thumbnail).send(res);
   },
   // [PATCH] A CATEGORY
   updateCategory: async (req, res) => {
@@ -120,24 +143,16 @@ const CategoryController = {
 
     // update: post contains [optionId] -> find option and change
     try {
-      const category = await Category.findById({ _id: id });
-      const option = await Option.findById({ _id: optionId });
-      if (!category || !option) {
-        return res.status(404).json({
-          status: 404,
-          message: "Category not exit",
-        });
+      const category = await categoriesServices.updateCategory(id, req.body);
+
+      if (!category) {
+        return new NotFoundError(404, "Update category failed").send(res);
       }
 
-      await option.updateOne({ list: options, updatedAt: date });
-      await category.updateOne({ title, description, thumbnail, updatedAt: date });
+      return new CreatedResponse(201, "Updated category success!").send(res);
 
-      return res.status(200).json({
-        status: 200,
-        message: "Updated category succesfully",
-      });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError(500, error.stack).send(res);
     }
   },
   // [DELETE] A CATEGORY

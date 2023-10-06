@@ -1,0 +1,16 @@
+GET http://localhost:3001/api/v1/category/getAllCategories
+
+### Get category by ID
+GET http://localhost:3001/api/v1/category/id/649d9a30fd1f9aed9db239f4
+
+### Search category
+GET http://localhost:3001/api/v1/category/search?search=asdasd
+
+### Upload thumbail
+PATCH http://localhost:3001/api/v1/category/649d9a30fd1f9aed9db239f4
+content-type: application/json
+
+{
+    "title": "Architecture Art Lorem2",
+    "description": "Updated description"
+}

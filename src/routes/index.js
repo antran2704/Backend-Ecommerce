@@ -11,12 +11,12 @@ const HtmlRoutes = require("./HtmlRoutes/index");
 
 const routes = (app) => {
   app.use("/view", HtmlRoutes);
-  app.use("/api/category", CategoryRoutes);
-  app.use("/api/product", ProductRoutes);
-  app.use("/api/order", OrderRoutes);
-  app.use("/api/user", UserRoutes);
-  app.use("/api/option", OptionRoutes);
-  app.use("/api/delete", DeleteRoutes);
+  app.use("/api/v1/category", CategoryRoutes);
+  app.use("/api/v1/product", ProductRoutes);
+  app.use("/api/v1/order", OrderRoutes);
+  app.use("/api/v1/user", UserRoutes);
+  app.use("/api/v1/option", OptionRoutes);
+  app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));
   app.use("/public", express.static(path.resolve(__dirname, "../assets")));
 };

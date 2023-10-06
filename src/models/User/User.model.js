@@ -15,7 +15,7 @@ const UserModel = new Schema(
       type: String,
       default: null,
     },
-    checkedEmail: {
+    verify: {
       type: Boolean,
       default: false,
     },
@@ -23,9 +23,10 @@ const UserModel = new Schema(
       type: String,
       default: null,
     },
-    admin: {
-      type: Boolean,
-      default: false,
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "user",
     },
   },
   { timestamps: true }

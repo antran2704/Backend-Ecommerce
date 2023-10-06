@@ -10,8 +10,11 @@ router.get("/getAllCategories", CategoryController.getAllCategories);
 // [SEARCH] CATEGORIES
 router.get("/search", CategoryController.searchCategories);
 
+// [GET] A CATEGORIES BY ID
+router.get("/id/:id", CategoryController.getCategoryById);
+
 // [GET] A CATEGORIES
-router.get("/:slug", CategoryController.getACategory);
+router.get("/:slug", CategoryController.getCategory);
 
 // [POST] A CATEGORY
 router.post("/", CategoryController.addCategory);

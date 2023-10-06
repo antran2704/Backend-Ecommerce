@@ -18,16 +18,16 @@ const ProductModel = new Schema(
     type: [
       {
         title: String,
-        _id: String
-      }
+        _id: String,
+      },
     ],
     shortDescription: {
       type: String,
-      default: "",
+      default: null,
     },
     description: {
       type: String,
-      default: "",
+      default: null,
     },
     price: {
       type: Number,
@@ -72,14 +72,76 @@ const ProductModel = new Schema(
     },
     options: [
       {
-        title: String,
-        list: [
+        code: String,
+        name: String,
+        values: [
+          {
+            label: String,
+          },
+        ],
+      },
+    ],
+    specifications: [
+      {
+        name: String,
+        attributes: [
           {
             name: String,
-            status: Boolean
-          }
-        ]
-      }
+            value: String,
+          },
+        ],
+      },
+    ],
+    variants: [
+      {
+        title: {
+          type: String,
+          default: null,
+        },
+        barcode: {
+          type: String,
+          default: null,
+        },
+        available: {
+          type: Boolean,
+          default: true,
+        },
+        price: {
+          type: Number,
+          default: 0,
+          require: true,
+        },
+        promotionPrice: {
+          type: Number,
+          default: null,
+        },
+        sku: {
+          type: String,
+          default: null,
+          require: true,
+        },
+        option1: String,
+        option2: String,
+        option3: String,
+        options: [{ type: String }],
+        thumbnail_url: {
+          type: String,
+          default: null,
+        },
+        url: {
+          type: String,
+          default: null,
+        },
+        inventory_quantity: {
+          type: Number,
+          default: 0,
+          require: true,
+        },
+        sold: {
+          type: Number,
+          default: 0,
+        },
+      },
     ],
     slug: {
       type: String,

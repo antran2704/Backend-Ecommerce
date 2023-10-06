@@ -33,17 +33,8 @@ const handleSendMail = (mailContent) => {
   mailTransporter.sendMail(mailContent, function (err, data) {
     if (err) {
       console.log("Error in send email");
-      // res.json({
-      //   status: 500,
-      //   message: err,
-      // });
     } else {
       console.log("Email sent successfully");
-
-      // res.json({
-      //   status: 200,
-      //   message: "Email sent successfully",
-      // });
     }
   });
 };
