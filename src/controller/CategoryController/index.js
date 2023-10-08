@@ -1,24 +1,23 @@
 const {
   InternalServerError,
   NotFoundError,
+  BadResquestError,
 } = require("../../helpers/errorResponse");
 const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { getDateTime } = require("../../helpers/getDateTime");
-const { Category, Option } = require("../../models/index");
 const { CategoriesServices } = require("../../services/index");
 const categoriesServices = require("../../services/Categories/categories.services");
 
 const CategoryController = {
   // [GET] ALL CATEGORY
-  getAllCategories: async (req, res) => {
+  getCategories: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     try {
-      const totalItems = await CategoriesServices.getAllCategories();
+      const totalItems = await CategoriesServices.getCategories();
 
       if (!totalItems) {
         return new NotFoundError(404, "No category found!").send(res);
@@ -76,9 +75,9 @@ const CategoryController = {
     }
   },
   // [POST] A CATEGORY
-  addCategory: async (req, res) => {
+  createCategory: async (req, res) => {
     try {
-      const newCategory = await categoriesServices.addCategory(req.body);
+      const newCategory = await categoriesServices.createCategory(req.body);
 
       if (!newCategory) {
         return new NotFoundError(404, "Add category failed").send(res);
@@ -138,19 +137,15 @@ const CategoryController = {
   // [PATCH] A CATEGORY
   updateCategory: async (req, res) => {
     const { id } = req.params;
-    const { title, description, thumbnail, options, optionId } = req.body;
-    const date = getDateTime();
 
-    // update: post contains [optionId] -> find option and change
     try {
       const category = await categoriesServices.updateCategory(id, req.body);
 
       if (!category) {
-        return new NotFoundError(404, "Update category failed").send(res);
+        return new BadResquestError(404, "Update category failed").send(res);
       }
 
       return new CreatedResponse(201, "Updated category success!").send(res);
-
     } catch (error) {
       return new InternalServerError(500, error.stack).send(res);
     }
@@ -159,39 +154,17 @@ const CategoryController = {
   deleteCategory: async (req, res) => {
     const { id } = req.params;
     try {
-      const category = await Category.findById({ _id: id });
+      const category = await categoriesServices.deleteCategory(id);
+
       if (!category) {
-        return res.status(404).json({
-          status: 404,
-          message: "Category not exit",
-        });
+        return new NotFoundError(404, "Delete category failed").send(res);
       }
 
       await category.remove();
 
-      return res.status(200).json({
-        status: 200,
-        message: "Deleted category succesfully",
-      });
+      return new CreatedResponse(201, "Delete category success!").send(res);
     } catch (error) {
-      return res.status(500).json(error);
-    }
-  },
-  test: async (req, res) => {
-    const { name } = req.body;
-
-    try {
-      const category = await Category.findOne({
-        filters: { $elemMatch: { title: name } },
-      });
-
-      if (!category) {
-        res.status(404).json("Category not exit");
-        return;
-      }
-      res.status(200).json(category);
-    } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError(500, error.stack).send(res);
     }
   },
 };

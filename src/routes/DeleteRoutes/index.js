@@ -5,7 +5,6 @@ const fs = require("fs");
 
 router.post("/images", (req, res) => {
   const images = req.body.images;
-  console.log("delete", images);
   if (images.length > 0) {
     for (let i = 0; i < images.length; i++) {
       const path = images[i].filePath;

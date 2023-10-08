@@ -4,23 +4,26 @@ const multer = require("../../middlewares/Multer");
 
 const ProductController = require("../../controller/ProductController");
 
-// [GET] ALL PRODUCTS
-router.get("/getAllProducts", ProductController.getAllProduct);
+// [GET] ALL CATEGORIES
+router.get("/getProducts", ProductController.getProducts);
 
 // [GET] ALL PRODUCTS
 router.get("/getCategories", ProductController.getCategories);
 
 // [GET] ALL PRODUCTS
 router.get(
-  "/getAllProductsInCategory/:id",
-  ProductController.getAllProductInCategory
+  "/getProductsInCategory/:id",
+  ProductController.getProductsInCategory
 );
 
 // [SEARCH] A PRODUCT
 router.get("/search", ProductController.searchProduct);
 
+// [GET] A PRODUCT WITH ID
+router.get("/id/:id", ProductController.getProductById);
+
 // [GET] A PRODUCT
-router.get("/:slug", ProductController.getAProduct);
+router.get("/:slug", ProductController.getProduct);
 
 // UPLOAD THUMBNAIL
 router.post(
@@ -37,12 +40,12 @@ router.post(
 );
 
 // [POST] A PRODUCT
-router.post("/", ProductController.addProduct);
+router.post("/", ProductController.createProduct);
 
-// [PATCH] A PRODUCT
+// [PATCH] UPDATE PRODUCT
 router.patch("/:id", ProductController.updateProduct);
 
 // [DELETE] A PRODUCT
-router.delete("/:id", ProductController.deleteProduct);
+router.post("/:id", ProductController.deleteProduct);
 
 module.exports = router;

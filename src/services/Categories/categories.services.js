@@ -2,7 +2,7 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { Category } = require("../../models/index");
 
 class CategoriesServices {
-  async getAllCategories() {
+  async getCategories() {
     const categories = await Category.find({}).lean();
     return categories;
   }
@@ -27,7 +27,7 @@ class CategoriesServices {
     return category;
   }
 
-  async addCategory(payload) {
+  async createCategory(payload) {
     const newCategory = await Category.create({ ...payload });
     return newCategory;
   }
@@ -50,12 +50,23 @@ class CategoriesServices {
   }
 
   async updateCategory(id, payload) {
+    if(!id) {
+      return null;
+    }
+
     const date = getDateTime();
     const category = await Category.findByIdAndUpdate(
       { _id: id },
       { $set: { ...payload, updatedAt: date } }
     );
 
+    return category;
+  }
+
+  async deleteCategory(id) {
+    if (!id) return null;
+
+    const category = await Category.findByIdAndDelete({ _id: id });
     return category;
   }
 }

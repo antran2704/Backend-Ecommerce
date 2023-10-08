@@ -14,3 +14,6 @@ content-type: application/json
     "title": "Architecture Art Lorem2",
     "description": "Updated description"
 }
+
+### Delete category
+POST http://localhost:3001/api/v1/category/64eb50cb9dc609c724c8b2ea

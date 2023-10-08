@@ -1,4 +1,5 @@
 const errorMessage = {
+  400: "Bad request",
   401: "Unauthorized",
   403: "Forbidden",
   404: "Not found",
@@ -13,6 +14,12 @@ class ErrorResponse {
 
   send(res) {
     return res.status(this.status).json(this);
+  }
+}
+
+class BadResquestError extends ErrorResponse {
+  constructor(status = 400, message = errorMessage[400]) {
+    super(status, message);
   }
 }
 
@@ -41,6 +48,7 @@ class InternalServerError extends ErrorResponse {
 }
 
 module.exports = {
+  BadResquestError,
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,

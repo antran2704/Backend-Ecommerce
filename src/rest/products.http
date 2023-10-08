@@ -1,0 +1,57 @@
+GET http://localhost:3001/api/v1/product/getProducts
+
+### Get product by category_id
+GET http://localhost:3001/api/v1/product/getProductsInCategory/65203e8b731fb60dfc68f5ae
+
+### Get product by id
+GET http://localhost:3001/api/v1/product/id/64b3e67dcd9c65d631efb095
+
+### Get product by slug
+GET http://localhost:3001/api/v1/product/asdtest
+
+### Create product
+POST http://localhost:3001/api/v1/product
+content-type: application/json
+
+{
+    "category": "65203e8b731fb60dfc68f5ae",
+    "title": "product test6",
+    "shortDescription": "zxc",
+    "description": "as",
+    "thumbnail": "http://localhost:3001/uploads\\product\\1689511560274.png",
+    "options": [
+        {
+            "code": "color",
+            "name": "Màu sắc",
+            "values": [
+            {
+                "label": "Nâu"
+            }
+            ]
+        }
+    ],
+    "price": 2000
+}
+
+### Update product
+PATCH  http://localhost:3001/api/v1/product/652154c58b9bca17bcd2237e
+content-type: application/json
+
+{
+    "title": "product test6 updated"
+}
+
+### Search product
+GET http://localhost:3001/api/v1/product/search?search=product+test2
+
+### Upload thumbail
+PATCH http://localhost:3001/api/v1/product/649d9a30fd1f9aed9db239f4
+content-type: application/json
+
+{
+    "title": "Architecture Art Lorem2",
+    "description": "Updated description"
+}
+
+### Delete product
+POST http://localhost:3001/api/v1/product/64b3e67dcd9c65d631efb095

@@ -12,6 +12,7 @@ const CategoryModel = new Schema(
     parent_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: documentName,
+      default: null,
     },
     title: {
       type: String,

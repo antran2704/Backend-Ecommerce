@@ -5,7 +5,7 @@ const multer = require("../../middlewares/Multer");
 const CategoryController = require("../../controller/CategoryController");
 
 // [GET] ALL CATEGORIES
-router.get("/getAllCategories", CategoryController.getAllCategories);
+router.get("/getCategories", CategoryController.getCategories);
 
 // [SEARCH] CATEGORIES
 router.get("/search", CategoryController.searchCategories);
@@ -17,7 +17,7 @@ router.get("/id/:id", CategoryController.getCategoryById);
 router.get("/:slug", CategoryController.getCategory);
 
 // [POST] A CATEGORY
-router.post("/", CategoryController.addCategory);
+router.post("/", CategoryController.createCategory);
 
 // UPLOAD THUMBNAIL
 router.post(
@@ -30,6 +30,6 @@ router.post(
 router.patch("/:id", CategoryController.updateCategory);
 
 // [DELETE] A CATEGORY
-router.delete("/:id", CategoryController.deleteCategory);
+router.post("/:id", CategoryController.deleteCategory);
 
 module.exports = router;

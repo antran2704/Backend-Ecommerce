@@ -1,132 +1,159 @@
-const slug = require('slug')
+const slug = require("slug");
 const { Product } = require("../../models/index");
 const { Category } = require("../../models/index");
-const { getDateTime } = require('../../helpers/getDateTime');
+const { getDateTime } = require("../../helpers/getDateTime");
+const ProductServices = require("../../services/Product/product.services");
 
-const PAGE_SIZE = 16;
+const {
+  InternalServerError,
+  NotFoundError,
+  BadResquestError,
+} = require("../../helpers/errorResponse");
+const {
+  GetResponse,
+  CreatedResponse,
+} = require("../../helpers/successResponse");
 
 const ProductController = {
   // [GET] ALL PRODUCT
-  getAllProduct: async (req, res) => {
-    const currentPage = req.query.page ? req.query.page : 1;
+  getProducts: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     try {
-      const totalItems = await Product.find({});
-      const products = await Product.find({})
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE);
+      const totalItems = await ProductServices.getProducts();
 
-      return res.status(200).json({
-        status: 200,
-        payload: products,
-        pagination: {
+      if (!totalItems) {
+        return new NotFoundError(404, "No product found!").send(res);
+      }
+
+      const products = await ProductServices.getProductsWithPage(
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!products) {
+        return new NotFoundError(404, "No product found!").send(res);
+      }
+
+      return new GetResponse(200, products).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [GET] ALL PRODUCT FOLLOW CATEGORY
-  getAllProductInCategory: async (req, res) => {
+  getProductsInCategory: async (req, res) => {
     const { id } = req.params;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
-    let products = null;
-    let totalItems;
+    const lte = req.query.lte ? Number(req.query.lte) : null;
+    const gte = req.query.gte ? Number(req.query.gte) : null;
+    const keys = Object.keys(req.query).filter(
+      (query) => query !== "page" && query !== "lte" && query !== "gte"
+    );
 
     try {
-      if (req.query.gte || req.query.lte) {
-        const gte = Number(req.query.gte);
-        const lte = Number(req.query.lte);
+      if (keys.length > 0 || lte || gte) {
+        const values = Object.values(req.query).flat();
 
-        if (gte > lte) {
-          totalItems = await Product.find({
-            category: id,
-            ...req.query,
-          });
+        const totalItems = await ProductServices.getProductsFilter(
+          id,
+          keys,
+          values,
+          lte,
+          gte
+        );
 
-          products = await Product.find({
-            category: id,
-            ...req.query,
-          })
-            .limit(PAGE_SIZE)
-            .skip((currentPage - 1) * PAGE_SIZE);
-        } else {
-          totalItems = await Product.find({
-            category: id,
-            ...req.query,
-            price: {
-              $gte: gte,
-              $lte: lte,
-            },
-          });
-
-          products = await Product.find({
-            category: id,
-            ...req.query,
-          })
-            .limit(PAGE_SIZE)
-            .skip((currentPage - 1) * PAGE_SIZE);
+        if (!totalItems) {
+          return new NotFoundError(404, "Not found product!").send(res);
         }
-      } else {
-        totalItems = await Product.find({
-          category: id,
-          ...req.query,
-        });
 
-        products = await Product.find({
-          category: id,
-          ...req.query,
-        })
-          .limit(PAGE_SIZE)
-          .skip((currentPage - 1) * PAGE_SIZE);
+        const products = await ProductServices.getProductsFilterWithPage(
+          id,
+          keys,
+          values,
+          PAGE_SIZE,
+          currentPage,
+          lte,
+          gte
+        );
+
+        if (!products) {
+          return new NotFoundError(404, "Not found product!").send(res);
+        }
+
+        return new GetResponse(200, products).send(res, {
+          optionName: "pagination",
+          data: {
+            totalItems: totalItems.length,
+            currentPage,
+            pageSize: PAGE_SIZE,
+          },
+        });
       }
+
+      const totalItems = await ProductServices.getProductsInCategory(id);
+
+      if (!totalItems) {
+        return new NotFoundError(404, "Not found product!").send(res);
+      }
+
+      const products = await ProductServices.getProductsInCategoryWithPage(
+        id,
+        PAGE_SIZE,
+        currentPage
+      );
 
       if (!products) {
-        return res.status(404).json({
-          status: 404,
-          message: "No item in category",
-        });
+        return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      return res.status(200).json({
-        status: 200,
-        payload: products,
-        pagination: {
-          pageSize: PAGE_SIZE,
-          currentPage,
+      return new GetResponse(200, products).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [GET] A PRODUCT
-  getAProduct: async (req, res) => {
+  getProduct: async (req, res) => {
     const { slug } = req.params;
     try {
-      const product = await Product.findOne({ slug }).populate("category", {
-        title: 1,
-        slug: 1,
-        options: 1,
-      });
+      const product = await ProductServices.getProduct(slug);
 
       if (!product) {
-        return res.status(404).json({
-          status: 404,
-          message: "Product not exit",
-        });
+        return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      return res.status(200).json({
-        status: 200,
-        payload: product,
-      });
+      return new GetResponse(200, product).send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
+    }
+  },
+  getProductById: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const product = await ProductServices.getProductById(id);
+
+      if (!product) {
+        return new NotFoundError(404, "Not found product!").send(res);
+      }
+
+      return new GetResponse(200, product).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
     }
   },
   // [GET] CATEGORY
@@ -149,20 +176,19 @@ const ProductController = {
       return res.status(500).json(error);
     }
   },
-  // [POST] A PRODUCT
-  addProduct: async (req, res) => {
+  // [POST] CREATE PRODUCT
+  createProduct: async (req, res) => {
     const data = req.body;
-
     try {
-      const newProduct = await new Product(data);
-      newProduct.save();
+      const newProduct = await ProductServices.createProduct(data);
 
-      res.status(200).json({
-        status: 200,
-        message: "Add new product succesfully",
-      });
+      if (!newProduct) {
+        return new NotFoundError(404, "Create product failed!").send(res);
+      }
+
+      return new CreatedResponse(201, newProduct).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError(500, error.stack).send(res);
     }
   },
   uploadThumbnail: async (req, res) => {
@@ -176,12 +202,7 @@ const ProductController = {
     const path = req.file.path;
     const thumbnail = `${process.env.API_ENDPOINT}/${path}`;
 
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        thumbnail,
-      },
-    });
+    return new CreatedResponse(201, thumbnail).send(res);
   },
   uploadGallery: async (req, res) => {
     if (req.files.length === 0) {
@@ -192,72 +213,66 @@ const ProductController = {
     }
 
     const list = req.files;
-    console.log("list", list)
+    console.log("list", list);
     const gallery = list.map(
       (item) => `${process.env.API_ENDPOINT}/${item.path}`
     );
-    console.log("gallery", gallery)
+    console.log("gallery", gallery);
 
-    return res.status(200).json({
-      status: 200,
-      payload: {
-        gallery,
-      },
-    });
+    return new CreatedResponse(201, gallery).send(res);
   },
   // [PATCH] A PRODUCT
   updateProduct: async (req, res) => {
     const { id } = req.params;
     const data = req.body;
-    const newSlug =  slug(data.title);
-    const date = getDateTime();
-    
+
     try {
-      const product = await Product.findById({ _id: id });
+      const product = await ProductServices.updateProduct(id, data);
 
       if (!product) {
-        return res.status(404).json({
-          status: 404,
-          message: "Product not exit",
-        });
+        return new BadResquestError(400, "Updated product failed").send(res);
       }
-      await product.updateOne({...data, slug: newSlug, updatedAt: date});
 
-      return res.status(200).json({
-        status: 200,
-        message: "Updated product succesfully",
-      });
+      return new CreatedResponse(201, "Updated product success").send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [SEARCH PRODUCT]
   searchProduct: async (req, res) => {
-    const query = req.query;
-    const searchText = query.search;
+    const { search } = req.query;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = req.query.page ? Number(req.query.page) : 1;
 
-    const currentPage = query.page ? query.page : 1;
     try {
-      const totalItems = await Product.find({
-        title: { $regex: searchText, $options: "i" },
-      });
-      const products = await Product.find({
-        title: { $regex: searchText, $options: "i" },
-      })
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE);
+      const totalItems = await ProductServices.searchTextItems(search);
 
-      return res.status(200).json({
-        status: 200,
-        payload: products,
-        pagination: {
+      if (!totalItems) {
+        return new NotFoundError(
+          404,
+          `No product with title ${search}`
+        ).send(res);
+      }
+
+      const products = await ProductServices.searchTextWithPage(search, PAGE_SIZE, currentPage);
+
+      if (!products) {
+        return new NotFoundError(
+          404,
+          `No product with title ${search}`
+        ).send(res);
+      }
+
+      return new GetResponse(200, products).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [DELETE] A PRODUCT
@@ -265,19 +280,14 @@ const ProductController = {
     const { id } = req.params;
 
     try {
-      const product = await Product.findById({ _id: id });
+      const product = await ProductServices.deleteProduct(id);
       if (!product) {
-        return res.status(404).json("Product not exit");
+        return new BadResquestError(400, "Delete product failed").send(res);
       }
 
-      await product.remove();
-
-      return res.status(200).json({
-        status: 200,
-        message: "Deleted product succesfully",
-      });
+      return new CreatedResponse(201, "Deleted product succesfully").send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
 };
