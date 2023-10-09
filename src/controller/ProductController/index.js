@@ -1,8 +1,4 @@
-const slug = require("slug");
-const { Product } = require("../../models/index");
-const { Category } = require("../../models/index");
-const { getDateTime } = require("../../helpers/getDateTime");
-const ProductServices = require("../../services/Product/product.services");
+const {ProductServices} = require("../../services/index");
 
 const {
   InternalServerError,

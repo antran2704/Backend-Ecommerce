@@ -1,23 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const UserController = require("../../controller/UserController");
-const UserMiddleware = require("../../middlewares/UserMiddleware");
+const UserMiddleware = require("../../middlewares/Auth");
 
 // [GET] ALL USERS
-router.get("/getAllUsers", UserController.getAllUsers);
+router.get("/getUsers", UserController.getUsers);
 
 // [POST] SEND CONFIRM EMAIL
-router.post("/sendConfirmEmail", UserMiddleware.checkValidData, UserController.sendConfirmEmail);
+router.post(
+  "/sendConfirmEmail",
+  UserMiddleware.checkValiEmail,
+  UserMiddleware.checkValidPassword,
+  UserMiddleware.checkValidName,
+  UserController.sendConfirmEmail
+);
 
-// [POST] CONFIRM EMAIL AND ADD USER
-router.post("/confirmEmail", UserController.confirmEmail);
-
-// [POST] LOGIN 
-router.post("/login", UserController.login);
+// [POST] LOGIN
+router.post("/login", UserMiddleware.checkValiEmail, UserMiddleware.checkValidPassword, UserController.login);
 
 // [POST] REFRESH TOKEN
 router.post("/refreshToken", UserController.refreshToken);
 
-// [DELETE] USER
+// [POST] CONFIRM EMAIL AND ADD USER
+router.post("/", UserController.creatUser);
+
+// [GET] USER
+router.get("/:id", UserController.getUser);
 
 module.exports = router;

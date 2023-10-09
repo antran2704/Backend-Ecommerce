@@ -1,0 +1,37 @@
+### Get users
+GET  http://localhost:3001/api/v1/user/getUsers
+
+### Get user
+GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
+
+### Get user by email
+GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
+
+### Send confirm email
+POST  http://localhost:3001/api/v1/user/sendConfirmEmail
+content-type: application/json
+
+{
+    "name": "Antrandev",
+    "email": "phamtrangiaan27@gmail.com",
+    "password": "cunyeu1506"
+}
+
+### Create user
+POST  http://localhost:3001/api/v1/user
+content-type: application/json
+
+{
+    "name": "Antrandev",
+    "email": "phamtrangiaan27@gmail.com",
+    "password": "$2b$10$9oxdtpqbXq6gbsS1KdC03ur1iysNxSusEmvRj22O886hsmifMsQGe"
+}
+
+### login
+POST  http://localhost:3001/api/v1/user/login
+content-type: application/json
+
+{
+    "email": "phamtrangiaan27@gmail.com",
+    "password": "cunyeu1506"
+}
