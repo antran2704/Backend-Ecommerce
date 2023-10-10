@@ -1,8 +1,10 @@
 const { User } = require("../../models/index");
-const crypto = require('node:crypto');
+const { UserServices, KeyTokenServices } = require("../../services");
+
+const crypto = require("node:crypto");
 const handleSendMail = require("../../configs/mailServices");
 const { checkBcrypt, generateBcrypt } = require("../../helpers/bcrypt");
-const { generateToken } = require("../../helpers/jwt");
+const { generateToken, verifyToken } = require("../../helpers/jwt");
 
 const {
   InternalServerError,
@@ -14,9 +16,10 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { UserServices } = require("../../services");
 
 const { templateEmail } = require("./emailTemplate");
+const convertObjectToString = require("../../helpers/convertObjectString");
+const keyTokenServices = require("../../services/KeyToken/keyToken.services");
 
 const UserController = {
   // [GET] USERS
@@ -112,7 +115,6 @@ const UserController = {
   },
   login: async (req, res) => {
     const { email, password } = req.body;
-    // const secretKey = process.env.PRIVATE_JWT_ID;
 
     if (!email || !password) {
       return new BadResquestError(400, "Data login invalid").send(res);
@@ -125,74 +127,138 @@ const UserController = {
         email: 1,
         password: 1,
       });
+
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
 
       const paswordCompare = await checkBcrypt(password, user.password);
 
-      if(!paswordCompare) {
+      if (!paswordCompare) {
         return new UnauthorizedError().send(res);
       }
 
       const privateKey = crypto.randomUUID();
+      const publicKey = crypto.randomUUID();
 
-      console.log("privateKey:::", privateKey)
+      if (!privateKey || !publicKey) {
+        return new BadResquestError(400, "create private or public key failed");
+      }
 
-      // const isAuth = await checkBcrypt(password, user.password);
+      const accessToken = generateToken(
+        { id: convertObjectToString(user._id) },
+        publicKey,
+        process.env.ACCESS_TOKEN_LIFE
+      );
+      const refreshToken = generateToken(
+        { id: convertObjectToString(user._id) },
+        privateKey,
+        process.env.REFRESH_TOKEN_LIFE
+      );
 
-      // if (!isAuth) {
-      //   return res.status(403).status({
-      //     status: 403,
-      //     message: "Password is incorrect",
-      //   });
-      // }
+      if (!accessToken || !refreshToken) {
+        return new BadResquestError(
+          400,
+          "create private or public key failed"
+        ).send(res);
+      }
 
-      // const refreshToken = generateToken(
-      //   { id: user._id },
-      //   secretKey,
-      //   "365 days"
-      // );
-      // const token = generateToken({ id: user._id }, secretKey, "1h");
+      const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
+        _id: 1,
+        privateKey: 1,
+        refreshToken: 1,
+      });
 
-      // return res.status(200).json({
-      //   status: 200,
-      //   payload: {
-      //     name: user.name,
-      //     avatar: user.avatar,
-      //     email,
-      //     token,
-      //     refreshToken,
-      //   },
-      // });
+      if (keyTokenUser) {
+        const keyTokenUpdated = await KeyTokenServices.updateKeyToken(
+          user._id,
+          { privateKey, publicKey, refreshToken }
+        );
+        await keyTokenUpdated.updateOne({
+          $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
+        });
 
-      return new GetResponse(200, privateKey).send(res);
+        return new GetResponse(200, { accessToken, keyTokenUpdated }).send(res);
+      }
+
+      const keyToken = await KeyTokenServices.createKeyToken(
+        convertObjectToString(user._id),
+        privateKey,
+        publicKey,
+        refreshToken
+      );
+
+      if (!keyToken) {
+        return new BadResquestError(400, "Create key token failed").send(res);
+      }
+
+      return new GetResponse(200, { accessToken, publicKey }).send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   refreshToken: async (req, res) => {
-    const authorization = req.header("Authorization");
-    const token = authorization.split(" ")[1];
-    const secretKey = process.env.PRIVATE_JWT_ID;
+    const tokenHeader = req.header("Authorization");
+    const publicKeyHeader = req.header("public-key");
+    const accessToken = tokenHeader.split(" ")[1];
+    const publicKey = publicKeyHeader.split(" ")[1];
 
-    if (!token) {
-      return res.status(400).json({
-        status: 400,
-        message: "Token is invalid",
-      });
+    const decoded = verifyToken(accessToken, publicKey);
+    if (decoded.message) {
+      return new BadResquestError(400, decoded.message).send(res);
     }
+
     try {
-      const decoded = await verifyToken(token, secretKey);
-      const token = generateToken({ id: decoded.id }, secretKey, "1h");
-      res.status(200).json({
-        status: 200,
-        payload: {
-          token,
-        },
+      const user = await UserServices.getUser(decoded.id);
+
+      if (!user) {
+        return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
+        _id: 1,
+        privateKey: 1,
+        refreshToken: 1,
       });
+
+      if (!keyTokenUser) {
+        return new NotFoundError(404, "Not found key token user").send(res);
+      }
+
+      const checkRefreshTokenUsed = await keyTokenServices.checkTokenUsed(
+        user._id,
+        keyTokenUser.refreshToken
+      );
+
+      if (checkRefreshTokenUsed) {
+        await KeyTokenServices.deleteToken(user._id);
+        return new BadResquestError(400, "Refresh token used").send(res);
+      }
+
+      const refreshTokenDecoded = verifyToken(
+        keyTokenUser.refreshToken,
+        keyTokenUser.privateKey
+      );
+
+      if (refreshTokenDecoded.message) {
+        return new BadResquestError(400, decoded.message).send(res);
+      }
+
+      const newAccessToken = generateToken(
+        { id: convertObjectToString(user._id) },
+        publicKey,
+        process.env.ACCESS_TOKEN_LIFE
+      );
+
+      if (!newAccessToken) {
+        return new BadResquestError(400, "Create new access token failed").send(
+          res
+        );
+      }
+
+      return new GetResponse(200, { newAccessToken }).send(res);
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError(500, error.stack).send(res);
     }
   },
   deleteUser: async (req, res) => {

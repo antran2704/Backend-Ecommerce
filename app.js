@@ -25,7 +25,6 @@ app.set("views", "./src/views");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 // routes
 routes(app);
 

@@ -7,8 +7,7 @@ const errorMessage = {
 };
 
 class ErrorResponse {
-  constructor(status, message) {
-    this.status = status;
+  constructor(message) {
     this.message = message;
   }
 
@@ -19,31 +18,36 @@ class ErrorResponse {
 
 class BadResquestError extends ErrorResponse {
   constructor(status = 400, message = errorMessage[400]) {
-    super(status, message);
+    super(message);
+    this.status = status
   }
 }
 
 class UnauthorizedError extends ErrorResponse {
   constructor(status = 401, message = errorMessage[401]) {
-    super(status, message);
+    super(message);
+    this.status = status
   }
 }
 
 class ForbiddenError extends ErrorResponse {
   constructor(status = 403, message = errorMessage[403]) {
-    super(status, message);
+    super(message);
+    this.status = status
   }
 }
 
 class NotFoundError extends ErrorResponse {
   constructor(status = 404, message = errorMessage[404]) {
-    super(status, message);
+    super(message);
+    this.status = status
   }
 }
 
 class InternalServerError extends ErrorResponse {
   constructor(status = 500, message = errorMessage[500]) {
-    super(status, message);
+    super(message);
+    this.status = status
   }
 }
 

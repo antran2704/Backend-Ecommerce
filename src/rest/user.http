@@ -35,3 +35,9 @@ content-type: application/json
     "email": "phamtrangiaan27@gmail.com",
     "password": "cunyeu1506"
 }
+
+### refresh token
+POST  http://localhost:3001/api/v1/user/refreshToken
+Authorization: Bear eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjNmZTdkMzAxMmY3Yjg0MTgxYzY3YyIsImlhdCI6MTY5Njk0NDc1OCwiZXhwIjoxNjk3MDMxMTU4fQ.esLM3IYcAqY9wkChhafJ_d8ptJuu2FmUfzEontT1HYw
+public-key: Key 3fc05829-5ef8-4c24-b548-f910c35b6ffc
+content-type: application/json
