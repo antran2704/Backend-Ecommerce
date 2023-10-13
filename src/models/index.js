@@ -3,6 +3,7 @@ const User = require("./User/User.model");
 const Product = require("./Product/Product.model");
 const Order = require("./Order/Order.model");
 const Option = require("./Option/Option.model");
-const KeyToken = require("./KeyToken/KeyToken.model")
+const KeyToken = require("./KeyToken/KeyToken.model");
+const Cart = require("./Cart/Cart.model");
 
-module.exports = { Category, User, Product, Order, Option, KeyToken };
+module.exports = { Category, User, Product, Order, Option, KeyToken, Cart };

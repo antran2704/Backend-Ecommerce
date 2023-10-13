@@ -38,6 +38,22 @@ content-type: application/json
 
 ### refresh token
 POST  http://localhost:3001/api/v1/user/refreshToken
-Authorization: Bear eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjNmZTdkMzAxMmY3Yjg0MTgxYzY3YyIsImlhdCI6MTY5Njk0NDc1OCwiZXhwIjoxNjk3MDMxMTU4fQ.esLM3IYcAqY9wkChhafJ_d8ptJuu2FmUfzEontT1HYw
-public-key: Key 3fc05829-5ef8-4c24-b548-f910c35b6ffc
+Authorization: Bear eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjkzNDRiNjBlZWIyYWU4MWJhNzJiMCIsImlhdCI6MTY5NzE5OTI2MiwiZXhwIjoxNjk3MTk5MzIyfQ.4FOfg88Rfd1JVXutDB_3dPIZgWQGA590Viwv6NPYYSA
+public-key: Key 14b3daf6-4aa8-4cbc-9c03-735353cf20d3
 content-type: application/json
+
+### ban user
+POST  http://localhost:3001/api/v1/user/ban
+content-type: application/json
+
+{
+    "user_id": "6523fe7d3012f7b84181c67c"
+}
+
+### unban user
+POST  http://localhost:3001/api/v1/user/unban
+content-type: application/json
+
+{
+    "user_id": "6523fe7d3012f7b84181c67c"
+}

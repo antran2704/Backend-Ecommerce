@@ -1,5 +1,9 @@
 const { User } = require("../../models/index");
-const { UserServices, KeyTokenServices } = require("../../services");
+const {
+  UserServices,
+  KeyTokenServices,
+  CartServices,
+} = require("../../services");
 
 const crypto = require("node:crypto");
 const handleSendMail = require("../../configs/mailServices");
@@ -11,6 +15,7 @@ const {
   NotFoundError,
   BadResquestError,
   UnauthorizedError,
+  ForbiddenError,
 } = require("../../helpers/errorResponse");
 const {
   GetResponse,
@@ -108,6 +113,12 @@ const UserController = {
         return new BadResquestError(400, "Create user failed").send(res);
       }
 
+      const newCart = await CartServices.createCart(newUser._id);
+
+      if (!newCart) {
+        return new BadResquestError(400, "Create cart failed").send(res);
+      }
+
       return new CreatedResponse(201, newUser).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -126,10 +137,15 @@ const UserController = {
         name: 1,
         email: 1,
         password: 1,
+        banned: 1,
       });
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      if (user.banned) {
+        return new ForbiddenError(403, "User was banned").send(res);
       }
 
       const paswordCompare = await checkBcrypt(password, user.password);
@@ -259,6 +275,36 @@ const UserController = {
       return new GetResponse(200, { newAccessToken }).send(res);
     } catch (error) {
       return new InternalServerError(500, error.stack).send(res);
+    }
+  },
+  banUser: async (req, res) => {
+    const { user_id } = req.body;
+
+    try {
+      const banned = await UserServices.banUser(user_id);
+
+      if (!banned) {
+        return new BadResquestError(400, "Ban user failed").send(res);
+      }
+
+      return new CreatedResponse(201, "Ban user success").send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  unbanUser: async (req, res) => {
+    const { user_id } = req.body;
+
+    try {
+      const unban = await UserServices.unbanUser(user_id);
+
+      if (!unban) {
+        return new BadResquestError(400, "Unban user failed").send(res);
+      }
+
+      return new CreatedResponse(201, "Unban user success").send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
     }
   },
   deleteUser: async (req, res) => {

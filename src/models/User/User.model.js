@@ -28,6 +28,10 @@ const UserModel = new Schema(
       enum: ["admin", "user"],
       default: "user",
     },
+    banned: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

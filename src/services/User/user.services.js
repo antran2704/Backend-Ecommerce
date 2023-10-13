@@ -28,6 +28,22 @@ class UserServices {
 
     return user;
   }
+
+  async banUser(user_id) {
+    if(!user_id) return null;
+
+    const userBanned = await User.findOneAndUpdate({_id: user_id}, {$set: {banned: true}});
+
+    return userBanned;
+  }
+
+  async unbanUser(user_id) {
+    if(!user_id) return null;
+
+    const userBanned = await User.findOneAndUpdate({_id: user_id}, {$set: {banned: false}});
+
+    return userBanned;
+  }
 }
 
 module.exports = new UserServices();

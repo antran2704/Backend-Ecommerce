@@ -5,7 +5,6 @@ const errorMessage = {
   404: "Not found",
   500: "Error in server",
 };
-
 class ErrorResponse {
   constructor(message) {
     this.message = message;

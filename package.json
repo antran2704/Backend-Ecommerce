@@ -25,7 +25,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.1",
     "nodemailer-express-handlebars": "^6.1.0",
-    "slug": "^8.2.2"
+    "slug": "^8.2.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

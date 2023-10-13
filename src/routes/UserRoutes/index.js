@@ -21,6 +21,12 @@ router.post("/login", UserMiddleware.checkValiEmail, UserMiddleware.checkValidPa
 // [POST] REFRESH TOKEN
 router.post("/refreshToken", UserController.refreshToken);
 
+// [POST] BAN USER
+router.post("/ban", UserController.banUser);
+
+// [POST] UNBAN USER
+router.post("/unban", UserController.unbanUser);
+
 // [POST] CONFIRM EMAIL AND ADD USER
 router.post("/", UserController.creatUser);
 

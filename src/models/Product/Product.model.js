@@ -93,7 +93,7 @@ const ProductModel = new Schema(
         ],
       },
     ],
-    variants: [
+    variations: [
       {
         title: {
           type: String,
