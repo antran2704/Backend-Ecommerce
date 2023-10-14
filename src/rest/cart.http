@@ -6,8 +6,21 @@ content-type: application/json
 
 {
     "shop_id": "1",
-    "product_id": "2",
+    "product_id": "1",
     "variation": "normal",
-    "quantity": 69,
+    "quantity": 1,
     "price": 2000
 }
+
+### Delete item in cart
+POST http://localhost:3001/api/v1/cart/delete/6529344b60eeb2ae81ba72b0
+content-type: application/json
+
+{
+    "shop_id": "1",
+    "product_id": "1",
+    "variation": "normal"
+}
+
+### Delete all items in cart
+POST http://localhost:3001/api/v1/cart/deleteAll/6529344b60eeb2ae81ba72b0

@@ -9,14 +9,16 @@ class UserServices {
   async getUser(user_id, selectOptions) {
     if (!user_id) return null;
 
-    const user = await User.findById({ _id: user_id }).select({...selectOptions});
+    const user = await User.findById({ _id: user_id }).select({
+      ...selectOptions,
+    });
     return user;
   }
 
   async getUserByEmail(email, selectOptions) {
     if (!email) return null;
 
-    const user = await User.findOne({ email }).select({...selectOptions});
+    const user = await User.findOne({ email }).select({ ...selectOptions });
     return user;
   }
 
@@ -30,17 +32,23 @@ class UserServices {
   }
 
   async banUser(user_id) {
-    if(!user_id) return null;
+    if (!user_id) return null;
 
-    const userBanned = await User.findOneAndUpdate({_id: user_id}, {$set: {banned: true}});
+    const userBanned = await User.findOneAndUpdate(
+      { _id: user_id },
+      { $set: { banned: true } }
+    );
 
     return userBanned;
   }
 
   async unbanUser(user_id) {
-    if(!user_id) return null;
+    if (!user_id) return null;
 
-    const userBanned = await User.findOneAndUpdate({_id: user_id}, {$set: {banned: false}});
+    const userBanned = await User.findOneAndUpdate(
+      { _id: user_id },
+      { $set: { banned: false } }
+    );
 
     return userBanned;
   }

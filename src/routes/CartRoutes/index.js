@@ -2,6 +2,12 @@ const express = require("express");
 const router = express.Router();
 const CartController = require("../../controller/CartController");
 
+// [POST] DELETE ALL ITEMS IN CART
+router.post("/deleteAll/:user_id", CartController.deleteAllItemCart);
+
+// [POST] DELETE ITEM IN CART
+router.post("/delete/:user_id", CartController.deleteItemCart);
+
 // [POST] UPDATE PRODUCT CART
 router.post("/:user_id", CartController.updateCart);
 
