@@ -175,16 +175,17 @@ class ProductServices {
     return product;
   }
 
-  async getProductById(id) {
-    if (!id) {
-      return null;
-    }
+  async getProductById(id, select = {}) {
+    if (!id) return null;
+    console.log("id:::", id)
 
-    const product = await Product.findById({ _id: id }).populate("category", {
-      title: 1,
-      slug: 1,
-      options: 1,
-    });
+    const product = await Product.findById({ _id: id })
+      .populate("category", {
+        title: 1,
+        slug: 1,
+        options: 1,
+      })
+      .select({ ...select });
 
     return product;
   }

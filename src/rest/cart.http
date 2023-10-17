@@ -5,10 +5,10 @@ POST http://localhost:3001/api/v1/cart/6529344b60eeb2ae81ba72b0
 content-type: application/json
 
 {
-    "shop_id": "1",
-    "product_id": "1",
+    "inventory": 1,
+    "product_id": "652d3a71568c1e844f295b2c",
     "variation": "normal",
-    "quantity": 1,
+    "quantity": 11,
     "price": 2000
 }
 
@@ -17,7 +17,6 @@ POST http://localhost:3001/api/v1/cart/delete/6529344b60eeb2ae81ba72b0
 content-type: application/json
 
 {
-    "shop_id": "1",
     "product_id": "1",
     "variation": "normal"
 }

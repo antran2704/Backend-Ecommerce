@@ -5,5 +5,15 @@ const Order = require("./Order/Order.model");
 const Option = require("./Option/Option.model");
 const KeyToken = require("./KeyToken/KeyToken.model");
 const Cart = require("./Cart/Cart.model");
+const Inventory = require("./Inventory/Inventory.model");
 
-module.exports = { Category, User, Product, Order, Option, KeyToken, Cart };
+module.exports = {
+  Category,
+  User,
+  Product,
+  Order,
+  Option,
+  KeyToken,
+  Cart,
+  Inventory,
+};

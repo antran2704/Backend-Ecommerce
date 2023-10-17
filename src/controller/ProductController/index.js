@@ -1,4 +1,4 @@
-const {ProductServices} = require("../../services/index");
+const { ProductServices, InventoryServices } = require("../../services");
 
 const {
   InternalServerError,
@@ -17,8 +17,9 @@ const ProductController = {
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     try {
+      console.log("vo:::");
       const totalItems = await ProductServices.getProducts();
-
+      console.log("totalItems:::", totalItems);
       if (!totalItems) {
         return new NotFoundError(404, "No product found!").send(res);
       }
@@ -41,7 +42,7 @@ const ProductController = {
         },
       });
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [GET] ALL PRODUCT FOLLOW CATEGORY
@@ -182,6 +183,12 @@ const ProductController = {
         return new NotFoundError(404, "Create product failed!").send(res);
       }
 
+      const inventory = await InventoryServices.createInventory(newProduct._id);
+
+      if (!inventory) {
+        return new NotFoundError(400, "Create inventory failed!").send(res);
+      }
+
       return new CreatedResponse(201, newProduct).send(res);
     } catch (error) {
       return new InternalServerError(500, error.stack).send(res);
@@ -244,19 +251,21 @@ const ProductController = {
       const totalItems = await ProductServices.searchTextItems(search);
 
       if (!totalItems) {
-        return new NotFoundError(
-          404,
-          `No product with title ${search}`
-        ).send(res);
+        return new NotFoundError(404, `No product with title ${search}`).send(
+          res
+        );
       }
 
-      const products = await ProductServices.searchTextWithPage(search, PAGE_SIZE, currentPage);
+      const products = await ProductServices.searchTextWithPage(
+        search,
+        PAGE_SIZE,
+        currentPage
+      );
 
       if (!products) {
-        return new NotFoundError(
-          404,
-          `No product with title ${search}`
-        ).send(res);
+        return new NotFoundError(404, `No product with title ${search}`).send(
+          res
+        );
       }
 
       return new GetResponse(200, products).send(res, {

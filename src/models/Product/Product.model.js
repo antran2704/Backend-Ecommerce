@@ -47,7 +47,7 @@ const ProductModel = new Schema(
       type: Boolean,
       default: false,
     },
-    quantity: {
+    inventory: {
       type: Number,
       default: 0,
     },

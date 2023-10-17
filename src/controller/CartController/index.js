@@ -1,4 +1,5 @@
-const { CartServices, UserServices } = require("../../services");
+const { isValidObjectId } = require("mongoose");
+const { CartServices, UserServices, ProductServices } = require("../../services");
 const {
   InternalServerError,
   NotFoundError,
@@ -8,7 +9,6 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { isValidObjectId } = require("mongoose");
 
 const CartController = {
   getCart: async (req, res) => {
@@ -27,13 +27,14 @@ const CartController = {
 
       return new GetResponse(200, cart).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
 
   updateCart: async (req, res) => {
     const { user_id } = req.params;
     const data = req.body;
+    const {product_id, quantity} = data;
 
     if (!user_id || !data) {
       return new BadResquestError().send(res);
@@ -52,6 +53,20 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
+      if(!product_id || !isValidObjectId(product_id)) {
+        return new NotFoundError(400, "Object id invalid").send(res);
+      }
+
+      const product = await ProductServices.getProductById(data.product_id, {inventory: 1});
+
+      if (!product) {
+        return new NotFoundError(404, "Not found product").send(res);
+      };
+
+      if(quantity > product.inventory) {
+        return new BadResquestError(400, "Quantity order bigger than inventory").send(res);
+      }
+
       const updatedCart = await CartServices.updateItemsCart(user_id, data);
 
       if (!updatedCart) {
@@ -60,7 +75,7 @@ const CartController = {
 
       return new CreatedResponse(201, { data, user_id }).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
 

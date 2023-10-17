@@ -13,21 +13,28 @@ const CartModel = new Schema(
       enum: ["active", "pending", "failed", "completed"],
       default: "active",
     },
-    cart_products: {
-      type: Array,
-      default: [],
-    },
+    cart_products: [
+      {
+        product_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product",
+          require: true,
+        },
+        variant: String,
+        quantity: Number,
+        price: Number,
+        inventory: Number,
+      },
+    ],
     /*
         {
-            shop_id,
-            products: [
                 {
                     product_id,
                     variant
                     quantity,
-                    price
+                    price,
+                    iventory
                 }
-            ]
         }
         
         case 1: Nếu chưa tồn tại sản phẩm thì thêm mới vào

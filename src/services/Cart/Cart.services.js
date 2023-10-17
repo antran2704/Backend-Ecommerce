@@ -1,5 +1,6 @@
 const { Cart } = require("../../models");
 const convertObjectToString = require("../../helpers/convertObjectString");
+const { getDateTime } = require("../../helpers/getDateTime");
 
 class CartServices {
   async getCartByUserId(user_id) {
@@ -7,7 +8,7 @@ class CartServices {
 
     const cart = await Cart.findOne({
       cart_userId: convertObjectToString(user_id),
-    });
+    }).populate("cart_products.product_id", { inventory: 1 });
     return cart;
   }
 
@@ -29,15 +30,12 @@ class CartServices {
     return shopInCart;
   }
 
-  async checkProductInCart(user_id, shop_id, product_id, variation) {
-    if (!user_id || !shop_id || !product_id) return null;
+  async checkProductInCart(user_id, product_id, variation) {
+    if (!user_id || !product_id) return null;
 
     const productInCart = await Cart.findOne({
       cart_userId: convertObjectToString(user_id),
-      cart_products: { $elemMatch: { shop_id } },
-      "cart_products.products": {
-        $elemMatch: { $and: [{ product_id }, { variation }] },
-      },
+      cart_products: { $elemMatch: { $and: [{ product_id }, { variation }] } },
     });
 
     return productInCart;
@@ -45,17 +43,42 @@ class CartServices {
 
   async updateItemsCart(user_id, payload) {
     if (!user_id) return null;
-
-    const { shop_id, product_id, variation, quantity, price } = payload;
-
-    if (!shop_id || !product_id) return null;
+    const date = getDateTime();
+    const { product_id, variation, quantity, price, inventory } = payload;
 
     // check shop is exit
-    const shopInCart = await this.checkShopInCart(user_id, shop_id);
+    // const shopInCart = await this.checkShopInCart(user_id, shop_id);
 
     // case 1: chưa có shop và san pham tạo mới
-    if (!shopInCart) {
-      console.log("case 1::: chưa có shop và san pham tạo mới");
+    // if (!shopInCart) {
+    //   console.log("case 1::: chưa có shop và san pham tạo mới");
+    //   const updatedCart = await Cart.findOneAndUpdate(
+    //     {
+    //       cart_userId: convertObjectToString(user_id),
+    //     },
+    //     {
+    //       $push: {
+    //         cart_products: {
+    //           shop_id,
+    //           products: [{ product_id, variation, quantity, price }],
+    //         },
+    //       },
+    //     }
+    //   );
+
+    //   return updatedCart;
+    // }
+
+    // case 2: đã có shop và có sản phẩm với id
+    const productInCart = await this.checkProductInCart(
+      user_id,
+      product_id,
+      variation
+    );
+
+    // case 3: đã có shop và chưa có sản phẩm với id
+    if (!productInCart) {
+      console.log("case 3::: chưa có sản phẩm với id");
       const updatedCart = await Cart.findOneAndUpdate(
         {
           cart_userId: convertObjectToString(user_id),
@@ -63,61 +86,32 @@ class CartServices {
         {
           $push: {
             cart_products: {
-              shop_id,
-              products: [{ product_id, variation, quantity, price }],
-            },
-          },
-        }
-      );
-
-      return updatedCart;
-    }
-
-    // case 2: đã có shop và có sản phẩm với id
-    const productInCart = await this.checkProductInCart(
-      user_id,
-      shop_id,
-      product_id,
-      variation
-    );
-
-    // case 3: đã có shop và chưa có sản phẩm với id
-    if (!productInCart) {
-      console.log("case 3::: đã có shop và chưa có sản phẩm với id");
-      const updatedCart = await Cart.findOneAndUpdate(
-        {
-          cart_userId: convertObjectToString(user_id),
-        },
-        {
-          $push: {
-            "cart_products.$.products": {
               product_id,
               variation,
               quantity,
               price,
+              inventory,
             },
           },
+          $set: { updatedAt: date },
         }
       );
 
       return updatedCart;
     } else {
-      console.log("case 2::: đã có shop và có sản phẩm với id");
+      console.log("case 2::: có sản phẩm với id");
 
       const updatedCart = await Cart.findOneAndUpdate(
         {
           cart_userId: convertObjectToString(user_id),
         },
         {
-          $set: { "cart_products.$[i].products.$[j].quantity": quantity },
+          $set: { "cart_products.$[i].quantity": quantity, updatedAt: date },
         },
         {
           arrayFilters: [
             {
-              "i.shop_id": shop_id,
-            },
-            {
-              "j.product_id": product_id,
+              "i.product_id": product_id,
             },
           ],
         }
@@ -129,69 +123,41 @@ class CartServices {
   async deleteItemCart(user_id, payload) {
     if (!user_id) return null;
 
-    const { shop_id, product_id, variation } = payload;
+    const { product_id, variation } = payload;
 
-    if (!shop_id || !product_id) return null;
-
-    const shopInCart = await this.checkShopInCart(user_id, shop_id);
-
-    if (!shopInCart) return null;
+    if (!product_id) return null;
 
     const productInCart = await this.checkProductInCart(
       user_id,
-      shop_id,
       product_id,
       variation
     );
 
     if (!productInCart) return null;
 
-    const productsInShop = shopInCart.cart_products.find(
-      (shop) => shop.shop_id === shop_id
-    );
-
-    const countProduct = productsInShop.products.length;
-
-    if (countProduct <= 1) {
-      const updatedCart = await Cart.findOneAndUpdate(
-        {
-          cart_userId: convertObjectToString(user_id),
-        },
-        {
-          $pull: { cart_products: { shop_id } },
-        }
-      );
-
-      return updatedCart;
-    }
-
     const updatedCart = await Cart.findOneAndUpdate(
       {
         cart_userId: convertObjectToString(user_id),
       },
       {
-        $pull: { "cart_products.$[i].products": { product_id } },
-      },
-      {
-        arrayFilters: [
-          {
-            "i.shop_id": shop_id,
-          },
-        ],
+        $pull: { cart_products: { product_id } },
+        $set: { updatedAt: date },
       }
     );
+
     return updatedCart;
   }
 
   async deleteAllItemCart(user_id) {
     if (!user_id) return null;
+    const date = getDateTime();
 
     const updatedCart = await Cart.findOneAndUpdate(
       {
         cart_userId: convertObjectToString(user_id),
       },
       {
-        $set: { cart_products: [] },
+        $set: { cart_products: [], updatedAt: date },
       }
     );
     return updatedCart;
