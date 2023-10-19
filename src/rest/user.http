@@ -1,5 +1,8 @@
 ### Get users
 GET  http://localhost:3001/api/v1/user/getUsers
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5NzcxNjIyMiwiZXhwIjoxNjk3NzE2MjgyfQ.jXhsLOidqi6dykog6bOBry4ts_ZEGyvE-h62oGZHqs0
+public-key: Key 228c718f-ea0b-4916-9c5e-086a5f9b4bd6
+content-type: application/json
 
 ### Get user
 GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
@@ -24,7 +27,7 @@ content-type: application/json
 {
     "name": "Antrandev",
     "email": "phamtrangiaan27@gmail.com",
-    "password": "$2b$10$9oxdtpqbXq6gbsS1KdC03ur1iysNxSusEmvRj22O886hsmifMsQGe"
+    "password": "$2b$10$ghjllp97RPLb.9wZz1AM8uPbT7ll5owHrh5ZUbEiRUp/dYdRq5fsa"
 }
 
 ### login
@@ -38,9 +41,12 @@ content-type: application/json
 
 ### refresh token
 POST  http://localhost:3001/api/v1/user/refreshToken
-Authorization: Bear eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MjkzNDRiNjBlZWIyYWU4MWJhNzJiMCIsImlhdCI6MTY5NzE5OTI2MiwiZXhwIjoxNjk3MTk5MzIyfQ.4FOfg88Rfd1JVXutDB_3dPIZgWQGA590Viwv6NPYYSA
-public-key: Key 14b3daf6-4aa8-4cbc-9c03-735353cf20d3
 content-type: application/json
+
+ {
+    "id": "6531174454986d0cfa0cddbc",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5NzcxNjA0OCwiZXhwIjoxNzEzMjY4MDQ4fQ.Ck7woNk20GQ8dUJyaMC5TlEEJzJpIHcCEfJ7AkL8B2w"
+ }
 
 ### ban user
 POST  http://localhost:3001/api/v1/user/ban

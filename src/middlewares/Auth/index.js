@@ -1,9 +1,8 @@
-const {
-  BadResquestError,
-} = require("../../helpers/errorResponse");
+const { BadResquestError } = require("../../helpers/errorResponse");
+const { verifyToken } = require("../../helpers/jwt");
 
 const UserMiddleware = {
-  checkValiEmail: async (req, res, next) => {
+  checkValidEmail: async (req, res, next) => {
     const { email } = req.body;
     const validRegex =
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)/;
@@ -58,6 +57,21 @@ const UserMiddleware = {
       ).send(res);
     }
 
+    next();
+  },
+  Authentication: async (req, res, next) => {
+    const tokenHeader = req.header("Authorization");
+    const publicKeyHeader = req.header("public-key");
+    const accessToken = tokenHeader.split(" ")[1];
+    const publicKey = publicKeyHeader.split(" ")[1];
+
+    const decoded = verifyToken(accessToken, publicKey);
+    if (decoded.message) {
+      return new BadResquestError(400, decoded.message).send(res);
+    }
+
+    req.accessToken = accessToken;
+    req.publicKey = publicKey;
     next();
   },
 };

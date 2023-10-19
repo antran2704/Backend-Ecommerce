@@ -4,6 +4,7 @@ const UserServices = require("./User/user.services");
 const KeyTokenServices = require("./KeyToken/keyToken.services");
 const CartServices = require("./Cart/Cart.services");
 const InventoryServices = require("./Inventory/Inventory.services");
+const DiscountServices = require("./Discount/Discount.services");
 
 module.exports = {
   CategoriesServices,
@@ -12,4 +13,5 @@ module.exports = {
   KeyTokenServices,
   CartServices,
   InventoryServices,
+  DiscountServices,
 };

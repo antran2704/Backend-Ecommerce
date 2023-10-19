@@ -103,6 +103,12 @@ const UserController = {
     }
 
     try {
+      const user = await UserServices.getUserByEmail(email);
+
+      if (user) {
+        return new BadResquestError(400, "Email is used").send(res);
+      }
+
       const newUser = await UserServices.createUser({
         name,
         email,
@@ -208,42 +214,32 @@ const UserController = {
         return new BadResquestError(400, "Create key token failed").send(res);
       }
 
-      return new GetResponse(200, { accessToken, publicKey }).send(res);
+      return new GetResponse(200, {
+        accessToken,
+        publicKey,
+        refreshToken,
+      }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
   refreshToken: async (req, res) => {
-    const tokenHeader = req.header("Authorization");
-    const publicKeyHeader = req.header("public-key");
-    const accessToken = tokenHeader.split(" ")[1];
-    const publicKey = publicKeyHeader.split(" ")[1];
+    const { refreshToken, id } = req.body;
 
-    const decoded = verifyToken(accessToken, publicKey);
-    if (decoded.message) {
-      return new BadResquestError(400, decoded.message).send(res);
+    if (!refreshToken || !id) {
+      return new BadResquestError(400, "body data is required").send(res);
     }
 
     try {
-      const user = await UserServices.getUser(decoded.id);
+      const user = await UserServices.getUser(id);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
 
-      const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
-        _id: 1,
-        privateKey: 1,
-        refreshToken: 1,
-      });
-
-      if (!keyTokenUser) {
-        return new NotFoundError(404, "Not found key token user").send(res);
-      }
-
       const checkRefreshTokenUsed = await keyTokenServices.checkTokenUsed(
-        user._id,
-        keyTokenUser.refreshToken
+        id,
+        refreshToken
       );
 
       if (checkRefreshTokenUsed) {
@@ -251,18 +247,24 @@ const UserController = {
         return new BadResquestError(400, "Refresh token used").send(res);
       }
 
-      const refreshTokenDecoded = verifyToken(
-        keyTokenUser.refreshToken,
-        keyTokenUser.privateKey
-      );
+      const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
+        privateKey: 1,
+        publicKey: 1,
+      });
 
-      if (refreshTokenDecoded.message) {
+      if (!keyToken) {
+        return new NotFoundError(404, "Not found key token").send(res);
+      }
+
+      const decoded = verifyToken(refreshToken, keyToken.privateKey);
+
+      if (decoded.message) {
         return new BadResquestError(400, decoded.message).send(res);
       }
 
       const newAccessToken = generateToken(
         { id: convertObjectToString(user._id) },
-        publicKey,
+        keyToken.publicKey,
         process.env.ACCESS_TOKEN_LIFE
       );
 

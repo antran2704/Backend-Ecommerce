@@ -11,6 +11,9 @@ router.post("/delete/:user_id", CartController.deleteItemCart);
 // [POST] UPDATE PRODUCT CART
 router.post("/:user_id", CartController.updateCart);
 
+// [GET] DISCOUNT
+router.get("/discount", CartController.useDiscount);
+
 // [GET] CART BY USER ID
 router.get("/:user_id", CartController.getCart);
 

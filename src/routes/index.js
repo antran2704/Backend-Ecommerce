@@ -8,11 +8,13 @@ const UserRoutes = require("./UserRoutes/index");
 const OptionRoutes = require("./OptionRoutes/index");
 const DeleteRoutes = require("./DeleteRoutes/index");
 const CartRoutes = require("./CartRoutes/index");
+const DiscountRoutes = require("./DiscountRoutes/index");
 const HtmlRoutes = require("./HtmlRoutes/index");
 
 const routes = (app) => {
   app.use("/view", HtmlRoutes);
   app.use("/api/v1/cart", CartRoutes);
+  app.use("/api/v1/discount", DiscountRoutes);
   app.use("/api/v1/category", CategoryRoutes);
   app.use("/api/v1/product", ProductRoutes);
   app.use("/api/v1/order", OrderRoutes);

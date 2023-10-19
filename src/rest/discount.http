@@ -1,0 +1,31 @@
+### get discounts
+GET http://localhost:3001/api/v1/discount
+
+### get discount
+GET http://localhost:3001/api/v1/discount/code-123
+
+### Create discount
+POST http://localhost:3001/api/v1/discount
+content-type: application/json
+
+{
+    "discount_name": "discount test2",
+    "discount_code": "code-123",
+    "discount_applies": "all",
+    "discount_type": "percentage",
+    "discount_value": 10,
+    "discount_start_date": "2023-10-20T12:07:33.023Z",
+    "discount_end_date": "2023-10-21T12:07:33.023Z",
+    "discount_max_uses": 2,
+    "discount_per_user": 3,
+    "discount_min_value": 0
+}
+
+### Update discount
+PATCH  http://localhost:3001/api/v1/discount/code-123
+content-type: application/json
+
+{
+ "discount_max_uses": 2,
+    "discount_per_user": 3
+}

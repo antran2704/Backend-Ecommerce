@@ -32,6 +32,20 @@ class KeyTokenServices {
     return keyToken;
   }
 
+  async getRefeshToken(refreshToken, selectOptions) {
+    if (!refreshToken) return null;
+
+    const keyToken = await KeyToken.findOne({
+      refreshToken,
+    })
+      .select({ ...selectOptions })
+      .lean();
+
+    if (!keyToken) return null;
+
+    return keyToken;
+  }
+
   async updateKeyToken(user_id, payload) {
     if (!user_id) return null;
     const date = getDateTime();
@@ -59,7 +73,9 @@ class KeyTokenServices {
   async deleteToken(user_id) {
     if (!user_id) return null;
 
-    const tokenDeleted = await KeyToken.findOneAndDelete({user: convertObjectToString(user_id)});
+    const tokenDeleted = await KeyToken.findOneAndDelete({
+      user: convertObjectToString(user_id),
+    });
 
     return tokenDeleted;
   }

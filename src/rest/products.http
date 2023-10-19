@@ -43,7 +43,7 @@ content-type: application/json
 }
 
 ### Search product
-GET http://localhost:3001/api/v1/product/search?search=product+test2
+GET http://localhost:3001/api/v1/product/search?search=inventory
 
 ### Upload thumbail
 PATCH http://localhost:3001/api/v1/product/649d9a30fd1f9aed9db239f4

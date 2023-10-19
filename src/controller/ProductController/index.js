@@ -17,9 +17,7 @@ const ProductController = {
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     try {
-      console.log("vo:::");
       const totalItems = await ProductServices.getProducts();
-      console.log("totalItems:::", totalItems);
       if (!totalItems) {
         return new NotFoundError(404, "No product found!").send(res);
       }

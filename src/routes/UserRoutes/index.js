@@ -4,19 +4,19 @@ const UserController = require("../../controller/UserController");
 const UserMiddleware = require("../../middlewares/Auth");
 
 // [GET] ALL USERS
-router.get("/getUsers", UserController.getUsers);
+router.get("/getUsers", UserMiddleware.Authentication, UserController.getUsers);
 
 // [POST] SEND CONFIRM EMAIL
 router.post(
   "/sendConfirmEmail",
-  UserMiddleware.checkValiEmail,
+  UserMiddleware.checkValidEmail,
   UserMiddleware.checkValidPassword,
   UserMiddleware.checkValidName,
   UserController.sendConfirmEmail
 );
 
 // [POST] LOGIN
-router.post("/login", UserMiddleware.checkValiEmail, UserMiddleware.checkValidPassword, UserController.login);
+router.post("/login", UserMiddleware.checkValidEmail, UserMiddleware.checkValidPassword, UserController.login);
 
 // [POST] REFRESH TOKEN
 router.post("/refreshToken", UserController.refreshToken);

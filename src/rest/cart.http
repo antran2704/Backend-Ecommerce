@@ -1,5 +1,15 @@
 GET http://localhost:3001/api/v1/cart/6529344b60eeb2ae81ba72b0
 
+### Use discount
+GET http://localhost:3001/api/v1/cart/discount
+content-type: application/json
+
+{
+    "discount_code": "code-123",
+    "user_id": "6531174454986d0cfa0cddbc",
+    "total": 200000
+}
+
 ### Update cart item
 POST http://localhost:3001/api/v1/cart/6529344b60eeb2ae81ba72b0
 content-type: application/json
