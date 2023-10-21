@@ -3,66 +3,121 @@ const handleSendMail = require("../../configs/mailServices");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { Order } = require("../../models/index");
 
-const PAGE_SIZE = Number(process.env.PAGE_SIZE);
+const {
+  InternalServerError,
+  NotFoundError,
+  BadResquestError,
+} = require("../../helpers/errorResponse");
+const {
+  GetResponse,
+  CreatedResponse,
+} = require("../../helpers/successResponse");
+const { OrderServices } = require("../../services");
 
 const OrderController = {
-  // [GET] All ORDER
-  getAllOrders: async (req, res) => {
-    const query = req.query;
-    const currentPage = query.page ? Number(query.page) : 1;
+  // [GET] ORDERS
+  getOrders: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE);
+    const { page } = req.query;
+    const currentPage = page ? Number(page) : 1;
 
     try {
-      const totalItems = await Order.find({});
-      const orders = await Order.find({})
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE)
-        .sort({ createdAt: -1 });
+      const totalItems = await OrderServices.getOrders();
 
-      res.status(200).json({
-        status: 200,
-        payload: orders,
-        pagination: {
+      if (!totalItems) {
+        return new NotFoundError(404, "Not found order").send(res);
+      }
+
+      const orders = await OrderServices.getOrdersWithPage(
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!orders) {
+        return new NotFoundError(404, "No order found!").send(res);
+      }
+
+      return new GetResponse(200, orders).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
+    }
+  },
+  // [GET] ORDERS BY USER ID
+  getOrdersByUserId: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE);
+    const { page } = req.query;
+    const currentPage = page ? Number(page) : 1;
+
+    const { user_id } = req.params;
+    if (!user_id) {
+      return new BadResquestError().send(res);
+    }
+    try {
+      const totalItems = await OrderServices.getOrdersByUserId(user_id);
+
+      if (!totalItems) {
+        return new NotFoundError(404, "No order found!").send(res);
+      }
+
+      const orders = await OrderServices.getOrdersByUserIdWithPage(
+        user_id,
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!orders) {
+        return new NotFoundError(404, "Not found order").send(res);
+      }
+
+      return new GetResponse(200, orders).send(res, {
+        optionName: "pagination",
+        data: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError().send(res);
     }
   },
   // [GET] AN ORDER
-  getAnOrder: async (req, res) => {
-    const { id } = req.params;
+  getOrder: async (req, res) => {
+    const { order_id } = req.params;
     try {
-      const order = await Order.findById({ _id: id }).populate(
-        "items.product",
-        { _id: 1, title: 1 }
-      );
+      const order = await OrderServices.getOrder(order_id);
       if (!order) {
-        return res.status(404).json({
-          status: 404,
-          message: "Order not exit",
-        });
+        return new NotFoundError(404, "Not found order").send(res);
       }
-      res.status(200).json({
-        status: 200,
-        payload: order,
-      });
+
+      return new GetResponse(200, order).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [POST] AN ORDER
-  addOrder: async (req, res) => {
+  createOrder: async (req, res) => {
     const data = req.body;
+    if (!data) {
+      return new BadResquestError().send(res);
+    }
+
     try {
-      const newOrder = await new Order(data);
-      await newOrder.save();
+      const newOrder = await OrderServices.createOrder(data);
+      if (!newOrder) {
+        return new BadResquestError(400, "Create new order failed").send(res);
+      }
 
       const link = `${process.env.HOST_URL}/orders/${newOrder._id}`;
       let mailContent = {
-        to: "phamtrangiaan27@gmail.com",
+        to: data.email,
         subject: "Antran shop thông báo:",
         template: "email/newOrder",
         context: {
@@ -72,56 +127,55 @@ const OrderController = {
 
       handleSendMail(mailContent);
 
-      res.status(200).json({
-        status: 200,
+      return new CreatedResponse(201, {
         message: "Add new order succesfully",
-      });
+      }).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [PATCH] AN ORDER
-  changeOrder: async (req, res) => {
-    const { id } = req.params;
+  updateOrder: async (req, res) => {
+    const { order_id } = req.params;
+    if (!order_id) {
+      return new BadResquestError().send(res);
+    }
+
     const data = req.body;
-    const date = getDateTime();
     try {
-      const order = await Order.findById({ _id: id });
+      const order = await OrderServices.updateOrder(order_id, data);
       if (!order) {
-        return res.status(404).json({
-          status: 404,
-          message: "Order not exit",
-        });
+        return new NotFoundError(404, "Not found order").send(res);
       }
-      await order.updateOne({ ...data, updatedAt: date });
-      res.status(200).json({
-        status: 200,
-        message: "Updated order succesfully",
-      });
+
+      return new CreatedResponse(201, order).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
-  changeStatusOrder: async (req, res) => {
-    const { id } = req.params;
+  updateStatusOrder: async (req, res) => {
+    const { order_id } = req.params;
+    if (!order_id) {
+      return new BadResquestError().send(res);
+    }
+
     const data = req.body;
-    const date = getDateTime();
 
     if (!data.status || !Object.keys(typeStatus).includes(data.status)) {
-      return res.status(400).json({
-        status: 400,
-        message: "Invalid status",
-      });
+      return new BadResquestError(400, { message: "Invalid status" }).send(res);
     }
 
     try {
-      const order = await Order.findOne({ _id: id });
-      console.log(order)
+      const order = await OrderServices.getOrder(order_id);
       if (!order) {
-        return res.status(404).json({
-          status: 404,
-          message: "Order not exit",
-        });
+        return new NotFoundError(404, "Not found order").send(res);
+      }
+
+      const updated = await OrderServices.updateOrder(order_id, payload);
+      if (!updated) {
+        return new BadResquestError(400, {
+          message: "Updated order failed",
+        }).send(res);
       }
 
       let mailContent = {
@@ -129,90 +183,64 @@ const OrderController = {
         subject: "Antran shop thông báo:",
         template: templateEmail[data.status].template,
         context: {
-          orderId: id,
+          orderId: order_id,
           content: data.cancleContent,
         },
       };
 
-      await order.updateOne({ ...data, updatedAt: date });
       handleSendMail(mailContent);
 
-      res.status(200).json({
-        status: 200,
+      return new CreatedResponse(201, {
         message: "Updated order succesfully",
-      });
+      }).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   searchOrders: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE);
     const query = req.query;
-    const searchText = query.search;
-    const currentPage = query.page ? Number(query.page) : 1;
+    const { search, page } = query;
+    const currentPage = page ? Number(page) : 1;
     try {
-      const totalItems = await Order.find({
-        $or: [
-          {
-            name: { $regex: searchText, $options: "i" },
-          },
-          {
-            email: { $regex: searchText, $options: "i" },
-          },
-          {
-            phoneNumber: { $regex: searchText, $options: "i" },
-          },
-        ],
-      });
+      const totalItems = await OrderServices.searchOrders(search);
 
-      const orders = await Order.find({
-        $or: [
-          {
-            name: { $regex: searchText, $options: "i" },
-          },
-          {
-            email: { $regex: searchText, $options: "i" },
-          },
-          {
-            phoneNumber: { $regex: searchText, $options: "i" },
-          },
-        ],
-      })
-        .skip((currentPage - 1) * PAGE_SIZE)
-        .limit(PAGE_SIZE)
-        .sort({ createdAt: -1 });
+      const orders = await OrderServices.searchOrdersWithPage(
+        search,
+        PAGE_SIZE,
+        currentPage
+      );
 
-      return res.status(200).json({
-        status: 200,
-        payload: orders,
-        pagination: {
+      return new GetResponse(200, orders).send(res, {
+        optionName: "pagination",
+        data: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
         },
       });
     } catch (error) {
-      return res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   // [DELETE] AN ORDER
   deleteOrder: async (req, res) => {
-    const { id } = req.params;
+    const { order_id } = req.params;
+    if(!order_id) {
+      return new BadResquestError().send(res);
+    }
+
     try {
-      const order = await Order.findById({ _id: id });
+      const order = await OrderServices.deleteOrder(order_id);
       if (!order) {
-        res.status(404).json({
-          status: 404,
-          message: "Order not exit",
-        });
-        return;
+        return new NotFoundError(404, "Delete order failed").send(res);
       }
-      await order.remove();
-      res.status(200).json({
-        status: 200,
+    
+      return new CreatedResponse(201, {
         message: "Deleted order succesfully",
-      });
+      }).send(res);
     } catch (error) {
-      res.status(500).json(error);
+      return new InternalServerError().send(res);
     }
   },
   sendEmail: async (req, res) => {

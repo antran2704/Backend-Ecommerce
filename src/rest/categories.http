@@ -6,7 +6,18 @@ GET http://localhost:3001/api/v1/category/id/649d9a30fd1f9aed9db239f4
 ### Search category
 GET http://localhost:3001/api/v1/category/search?search=asdasd
 
-### Upload thumbail
+### Create category
+POST http://localhost:3001/api/v1/category
+content-type: application/json
+
+{
+    "title": "Category 2",
+    "description": "Category 2",
+    "parent_id": "6533c0bd6e2264a5e10388bd"
+}
+
+
+### Update category
 PATCH http://localhost:3001/api/v1/category/649d9a30fd1f9aed9db239f4
 content-type: application/json
 
@@ -16,4 +27,9 @@ content-type: application/json
 }
 
 ### Delete category
-POST http://localhost:3001/api/v1/category/64eb50cb9dc609c724c8b2ea
+POST http://localhost:3001/api/v1/category/6533c31320c8a77a413b761a
+content-type: application/json
+
+{
+    "parent_id": "6533c0bd6e2264a5e10388bd"
+}

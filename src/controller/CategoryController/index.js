@@ -8,7 +8,6 @@ const {
   CreatedResponse,
 } = require("../../helpers/successResponse");
 const { CategoriesServices } = require("../../services/index");
-const categoriesServices = require("../../services/Categories/categories.services");
 
 const CategoryController = {
   // [GET] ALL CATEGORY
@@ -77,10 +76,32 @@ const CategoryController = {
   // [POST] A CATEGORY
   createCategory: async (req, res) => {
     try {
-      const newCategory = await categoriesServices.createCategory(req.body);
+      const data = req.body;
+
+      if (!data) {
+        return new BadResquestError().send(res);
+      }
+
+      const { parent_id } = data;
+      const newCategory = await CategoriesServices.createCategory(req.body);
 
       if (!newCategory) {
         return new NotFoundError(404, "Add category failed").send(res);
+      }
+
+      if (parent_id) {
+        const parentCategory = await CategoriesServices.findCategoryById(
+          parent_id
+        );
+
+        if (!parentCategory) {
+          return new NotFoundError(404, "Parent category not found").send(res);
+        }
+
+        await CategoriesServices.insertChildrendCategory(
+          parent_id,
+          newCategory._id
+        );
       }
 
       return new CreatedResponse(201, newCategory).send(res, {
@@ -96,7 +117,7 @@ const CategoryController = {
     const currentPage = page ? Number(page) : 1;
 
     try {
-      const totalItems = await categoriesServices.searchTextItems(search);
+      const totalItems = await CategoriesServices.searchTextItems(search);
 
       if (!totalItems) {
         return new NotFoundError(
@@ -105,7 +126,7 @@ const CategoryController = {
         ).send(res);
       }
 
-      const items = await categoriesServices.searchTextWithPage(
+      const items = await CategoriesServices.searchTextWithPage(
         search,
         PAGE_SIZE,
         currentPage
@@ -139,7 +160,7 @@ const CategoryController = {
     const { id } = req.params;
 
     try {
-      const category = await categoriesServices.updateCategory(id, req.body);
+      const category = await CategoriesServices.updateCategory(id, req.body);
 
       if (!category) {
         return new BadResquestError(404, "Update category failed").send(res);
@@ -153,14 +174,23 @@ const CategoryController = {
   // [DELETE] A CATEGORY
   deleteCategory: async (req, res) => {
     const { id } = req.params;
+
+    if (!id) {
+      return new BadResquestError().send(res);
+    }
+
+    const { parent_id } = req.body;
+
     try {
-      const category = await categoriesServices.deleteCategory(id);
+      const category = await CategoriesServices.deleteCategory(id);
 
       if (!category) {
         return new NotFoundError(404, "Delete category failed").send(res);
       }
 
-      await category.remove();
+      if (parent_id) {
+        CategoriesServices.deleteChildrendCategory(parent_id, id);
+      }
 
       return new CreatedResponse(201, "Delete category success!").send(res);
     } catch (error) {

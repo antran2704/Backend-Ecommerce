@@ -135,6 +135,7 @@ class CartServices {
 
     if (!productInCart) return null;
 
+    const date = getDateTime();
     const updatedCart = await Cart.findOneAndUpdate(
       {
         cart_userId: convertObjectToString(user_id),

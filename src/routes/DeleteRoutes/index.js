@@ -3,7 +3,7 @@ const router = express.Router();
 
 const fs = require("fs");
 
-router.post("/images", (req, res) => {
+router.post("/images", async (req, res) => {
   const images = req.body.images;
   if (images.length > 0) {
     for (let i = 0; i < images.length; i++) {

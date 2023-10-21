@@ -1,0 +1,29 @@
+### Get orders
+GET http://localhost:3001/api/v1/order/getOrders
+
+### Get order
+GET http://localhost:3001/api/v1/order/650a5fc7cf7feba3b1e455de
+
+### Search order
+GET http://localhost:3001/api/v1/order/search?search=Antran+dev
+
+
+### Create order
+POST http://localhost:3001/api/v1/order
+content-type: application/json
+
+{
+    "email": "phamtrangiaan27@gmail.com",
+    "name": "Antran dev",
+    "address": "55 Nguyễn Kiệm, Phường 3, Quận Gò Vấp, TP.Hồ Chí Minh",
+    "phoneNumber": "0946003423",
+    "items": [
+        {
+            "product": "64b3e67dcd9c65d631efb095",
+            "price": 200,
+            "quantity": 3,
+            "link": "#"
+        }
+    ],
+    "total": 600
+}

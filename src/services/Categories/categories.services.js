@@ -32,6 +32,16 @@ class CategoriesServices {
     return newCategory;
   }
 
+  async insertChildrendCategory(parent_id, id) {
+    if (!parent_id || !id) return null;
+    const category = await Category.findOneAndUpdate(
+      { _id: parent_id },
+      { $push: { childrens: id } }
+    );
+
+    return category;
+  }
+
   async searchTextItems(text) {
     const totalItems = await Category.find({
       title: { $regex: text, $options: "i" },
@@ -50,7 +60,7 @@ class CategoriesServices {
   }
 
   async updateCategory(id, payload) {
-    if(!id) {
+    if (!id) {
       return null;
     }
 
@@ -67,6 +77,17 @@ class CategoriesServices {
     if (!id) return null;
 
     const category = await Category.findByIdAndDelete({ _id: id });
+
+    return category;
+  }
+
+  async deleteChildrendCategory(parent_id, id) {
+    if (!id || !parent_id) return null;
+    const category = await Category.findByIdAndUpdate(
+      { _id: parent_id },
+      { $pull: { childrens: id } }
+    );
+
     return category;
   }
 }

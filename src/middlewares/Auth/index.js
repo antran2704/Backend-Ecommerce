@@ -1,4 +1,7 @@
-const { BadResquestError } = require("../../helpers/errorResponse");
+const {
+  BadResquestError,
+  UnauthorizedError,
+} = require("../../helpers/errorResponse");
 const { verifyToken } = require("../../helpers/jwt");
 
 const UserMiddleware = {
@@ -62,6 +65,10 @@ const UserMiddleware = {
   Authentication: async (req, res, next) => {
     const tokenHeader = req.header("Authorization");
     const publicKeyHeader = req.header("public-key");
+    if (!tokenHeader || !publicKeyHeader) {
+      return new UnauthorizedError().send(res);
+    }
+
     const accessToken = tokenHeader.split(" ")[1];
     const publicKey = publicKeyHeader.split(" ")[1];
 

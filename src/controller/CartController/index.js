@@ -105,7 +105,7 @@ const CartController = {
         discount_active: 1,
         discount_max_uses: 1,
         discount_per_user: 1,
-        discount_user_used: 1
+        discount_user_used: 1,
       });
 
       if (!discount) {
@@ -121,7 +121,11 @@ const CartController = {
         discount.discount_end_date
       );
 
-      if (!vailidDiscount || !discount.discount_active || discount.discount_max_uses <= 0) {
+      if (
+        !vailidDiscount ||
+        !discount.discount_active ||
+        discount.discount_max_uses <= 0
+      ) {
         return new BadResquestError(
           400,
           "Discount invalid or discount expried"
@@ -211,7 +215,7 @@ const CartController = {
 
       return new CreatedResponse(201, "Delete item success").send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   deleteAllItemCart: async (req, res) => {

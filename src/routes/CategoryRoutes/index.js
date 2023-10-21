@@ -16,9 +16,6 @@ router.get("/id/:id", CategoryController.getCategoryById);
 // [GET] A CATEGORIES
 router.get("/:slug", CategoryController.getCategory);
 
-// [POST] A CATEGORY
-router.post("/", CategoryController.createCategory);
-
 // UPLOAD THUMBNAIL
 router.post(
   "/uploadThumbnail",
@@ -31,5 +28,8 @@ router.patch("/:id", CategoryController.updateCategory);
 
 // [DELETE] A CATEGORY
 router.post("/:id", CategoryController.deleteCategory);
+
+// [POST] A CATEGORY
+router.post("/", CategoryController.createCategory);
 
 module.exports = router;

@@ -7,6 +7,10 @@ const OrderModel = new Schema(
       type: Schema.Types.ObjectId,
       default: () => mongoose.Types.ObjectId(),
     },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
     name: {
       type: String,
       default: null,
@@ -49,9 +53,15 @@ const OrderModel = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "cancle", "success"],
+      enum: ["pending", "cancle", "success", "deliveri"],
       default: "pending",
     },
+    discount_codes: [
+      {
+        dicount_name: String,
+        discount_code: String,
+      },
+    ],
     cancleContent: {
       type: String,
       default: null,

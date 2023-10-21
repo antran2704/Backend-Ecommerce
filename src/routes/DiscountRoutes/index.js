@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const DiscountController = require("../../controller/DiscountController");
+const UserMiddleware = require("../../middlewares/Auth");
 
 // [PATCH] UPDATE DISCOUNT
+router.use(UserMiddleware.Authentication);
+
 router.patch("/:discount_code", DiscountController.updateDiscount);
 
 // [POST] CREATE DISCOUNT

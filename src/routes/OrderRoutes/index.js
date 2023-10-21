@@ -6,24 +6,27 @@ const OrderController = require("../../controller/OrderController");
 router.get("/search", OrderController.searchOrders);
 
 // [GET] ALL ODERS
-router.get("/getAllOrders", OrderController.getAllOrders);
+router.get("/getOrders", OrderController.getOrders);
 
 // [GET] AN ORDER
-router.get("/:id", OrderController.getAnOrder);
+router.get("/user/:user_id", OrderController.getOrdersByUserId);
+
+// [GET] AN ORDER
+router.get("/:order_id", OrderController.getOrder);
 
 // [POST] SEND EMAIL
 router.post("/sendEmail", OrderController.sendEmail);
 
-// [POST] AN ORDER
-router.post("/", OrderController.addOrder);
-
 // [PATCH] STATUS ORDER
-router.patch("/status/:id", OrderController.changeStatusOrder)
+router.patch("/status/:order_id", OrderController.updateStatusOrder)
 
 // [PATCH] AN ORDER
-router.patch("/:id", OrderController.changeOrder)
+router.patch("/:order_id", OrderController.updateOrder)
 
 // [DELETE] AN ORDER
-router.delete("/:id", OrderController.deleteOrder)
+router.delete("/:order_id", OrderController.deleteOrder)
+
+// [POST] AN ORDER
+router.post("/", OrderController.createOrder);
 
 module.exports = router;
