@@ -40,7 +40,7 @@ const CategoryModel = new Schema(
       slug: "title",
       unique: true,
     },
-    status: {
+    public: {
       type: Boolean,
       default: true,
     },
@@ -50,10 +50,6 @@ const CategoryModel = new Schema(
         url_path: String,
       },
     ],
-    // options: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "option",
-    // },
     childrens: [{ type: mongoose.Schema.Types.ObjectId, ref: documentName }],
   },
   { timestamps: true }

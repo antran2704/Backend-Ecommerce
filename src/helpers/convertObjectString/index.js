@@ -1,7 +1,7 @@
 const { Types } = require("mongoose");
 
 const convertObjectToString = (id) => {
-  return Types.ObjectId(id);
+  return id.toString();
 };
 
 module.exports = convertObjectToString;

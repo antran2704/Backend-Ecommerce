@@ -7,6 +7,9 @@ const CategoryController = require("../../controller/CategoryController");
 // [GET] ALL CATEGORIES
 router.get("/getCategories", CategoryController.getCategories);
 
+// [GET] PARENT CATEGORIES
+router.get("/parentCategories", CategoryController.getParentCategories);
+
 // [SEARCH] CATEGORIES
 router.get("/search", CategoryController.searchCategories);
 

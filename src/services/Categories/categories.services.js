@@ -1,3 +1,5 @@
+const { isValidObjectId } = require("mongoose");
+const convertObjectToString = require("../../helpers/convertObjectString");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { Category } = require("../../models/index");
 
@@ -16,6 +18,13 @@ class CategoriesServices {
     return categories;
   }
 
+  async getParentCategory(select) {
+    const categories = await Category.find({ parent_id: null }).select({
+      ...select,
+    });
+    return categories;
+  }
+
   async findCategory(slug) {
     const category = await Category.findOne({ slug }).lean();
 
@@ -23,7 +32,9 @@ class CategoriesServices {
   }
 
   async findCategoryById(id) {
-    const category = await Category.findById({ _id: id }).lean();
+    const category = await Category.findById({ _id: id })
+      .populate("parent_id", { _id: 1, title: 1 })
+      .lean();
     return category;
   }
 
@@ -64,11 +75,29 @@ class CategoriesServices {
       return null;
     }
 
+    if (id === payload.parent_id) {
+      return null;
+    }
+
+    if (!isValidObjectId(id) || !isValidObjectId(payload.parent_id)) {
+      return null;
+    }
+
     const date = getDateTime();
-    const category = await Category.findByIdAndUpdate(
-      { _id: id },
-      { $set: { ...payload, updatedAt: date } }
-    );
+
+    const category = await Category.findById({ _id: id });
+    const parent_id = convertObjectToString(category.parent_id);
+
+    if (payload.parent_id && parent_id !== payload.parent_id) {
+      this.deleteChildrendCategory(category.parent_id, id);
+      this.insertChildrendCategory(payload.parent_id, id);
+    }
+
+    await category.updateOne({
+      $set: { ...payload, updatedAt: date },
+      upsert: true,
+      new: true,
+    });
 
     return category;
   }

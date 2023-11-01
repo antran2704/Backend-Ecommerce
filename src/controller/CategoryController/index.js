@@ -43,6 +43,24 @@ const CategoryController = {
       return new InternalServerError().send(res);
     }
   },
+  getParentCategories: async (req, res) => {
+    try {
+      const categories = await CategoriesServices.getParentCategory({
+        _id: 1,
+        parent_id: 1,
+        title: 1,
+        childrens: 1,
+      });
+
+      if (!categories) {
+        return new NotFoundError(404, "No category found!").send(res);
+      }
+
+      return new GetResponse(200, categories).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
   // [GET] A CATEGORY
   getCategory: async (req, res) => {
     const { slug } = req.params;
@@ -180,7 +198,6 @@ const CategoryController = {
     }
 
     const { parent_id } = req.body;
-
     try {
       const category = await CategoriesServices.deleteCategory(id);
 
