@@ -44,12 +44,7 @@ const CategoryModel = new Schema(
       type: Boolean,
       default: true,
     },
-    breadcrumbs: [
-      {
-        label: String,
-        url_path: String,
-      },
-    ],
+    breadcrumbs: [{ type: mongoose.Schema.Types.ObjectId, ref: documentName }],
     childrens: [{ type: mongoose.Schema.Types.ObjectId, ref: documentName }],
   },
   { timestamps: true }

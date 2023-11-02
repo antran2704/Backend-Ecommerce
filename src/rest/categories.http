@@ -4,7 +4,7 @@ GET http://localhost:3001/api/v1/category/getCategories
 GET http://localhost:3001/api/v1/category/parentCategories
 
 ### Get category by ID
-GET http://localhost:3001/api/v1/category/id/653fbd8ccb306edb6b30ea1c
+GET http://localhost:3001/api/v1/category/id/6543a5b64ecb76b243b6f48b
 
 ### Search category
 GET http://localhost:3001/api/v1/category/search?search=asdasd

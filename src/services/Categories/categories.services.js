@@ -34,6 +34,7 @@ class CategoriesServices {
   async findCategoryById(id) {
     const category = await Category.findById({ _id: id })
       .populate("parent_id", { _id: 1, title: 1 })
+      .populate("breadcrumbs", { _id: 1, title: 1, slug: 1 })
       .lean();
     return category;
   }
@@ -95,6 +96,35 @@ class CategoriesServices {
 
     await category.updateOne({
       $set: { ...payload, updatedAt: date },
+      upsert: true,
+      new: true,
+    });
+
+    return category;
+  }
+
+  async updateParentInChildren(parent_id, new_parent_id) {
+    const date = getDateTime();
+    const categories = await Category.updateMany(
+      { parent_id },
+      {
+        $set: { parent_id: new_parent_id, updatedAt: date },
+        upsert: true,
+        new: true,
+      }
+    );
+
+    return categories;
+  }
+
+  async updateChildrenInParent(id, childrens) {
+    if (!id) return null;
+    const date = getDateTime();
+    const category = await Category.findById({ _id: id });
+
+    await category.updateOne({
+      $push: { childrens: { $each: childrens } },
+      $set: { updatedAt: date },
       upsert: true,
       new: true,
     });

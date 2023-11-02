@@ -30,7 +30,7 @@ router.post(
 router.patch("/:id", CategoryController.updateCategory);
 
 // [DELETE] A CATEGORY
-router.post("/:id", CategoryController.deleteCategory);
+router.delete("/:id", CategoryController.deleteCategory);
 
 // [POST] A CATEGORY
 router.post("/", CategoryController.createCategory);

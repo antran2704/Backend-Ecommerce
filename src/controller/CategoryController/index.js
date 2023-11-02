@@ -197,7 +197,6 @@ const CategoryController = {
       return new BadResquestError().send(res);
     }
 
-    const { parent_id } = req.body;
     try {
       const category = await CategoriesServices.deleteCategory(id);
 
@@ -205,8 +204,18 @@ const CategoryController = {
         return new NotFoundError(404, "Delete category failed").send(res);
       }
 
-      if (parent_id) {
-        CategoriesServices.deleteChildrendCategory(parent_id, id);
+      CategoriesServices.updateParentInChildren(
+        category._id,
+        category.parent_id
+      );
+
+      if (category.parent_id) {
+        CategoriesServices.updateChildrenInParent(
+          category.parent_id,
+          category.childrens
+        );
+
+        CategoriesServices.deleteChildrendCategory(category.parent_id, id);
       }
 
       return new CreatedResponse(201, "Delete category success!").send(res);
