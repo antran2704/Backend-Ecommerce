@@ -80,16 +80,19 @@ class CategoriesServices {
       return null;
     }
 
-    if (!isValidObjectId(id) || !isValidObjectId(payload.parent_id)) {
+    if (!isValidObjectId(id)) {
       return null;
     }
 
     const date = getDateTime();
 
     const category = await Category.findById({ _id: id });
-    const parent_id = convertObjectToString(category.parent_id);
 
-    if (payload.parent_id && parent_id !== payload.parent_id) {
+    const parent_id = isValidObjectId(category.parent_id)
+      ? convertObjectToString(category.parent_id)
+      : null;
+
+    if (parent_id !== payload.parent_id) {
       this.deleteChildrendCategory(category.parent_id, id);
       this.insertChildrendCategory(payload.parent_id, id);
     }

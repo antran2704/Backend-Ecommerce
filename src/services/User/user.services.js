@@ -1,3 +1,4 @@
+const { getDateTime } = require("../../helpers/getDateTime");
 const { User } = require("../../models/index");
 
 class UserServices {
@@ -27,6 +28,29 @@ class UserServices {
 
     const user = await User.create(payload);
     if (!user) return null;
+
+    return user;
+  }
+
+  async updateUser(user_id, payload) {
+    if (!user_id || !payload) return null;
+    const date = getDateTime();
+    const user = await User.findByIdAndUpdate(
+      { _id: user_id },
+      { $set: { ...payload, updatedAt: date }, upsert: true, new: true }
+    );
+
+    return user;
+  }
+
+  async changePassword(user_id, password) {
+    if (!user_id || !password) return null;
+
+    const date = getDateTime();
+    const user = await User.findByIdAndUpdate(
+      { _id: user_id },
+      { $set: { password, updatedAt: date }, upsert: true, new: true }
+    );
 
     return user;
   }

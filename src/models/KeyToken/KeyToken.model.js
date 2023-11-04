@@ -16,6 +16,10 @@ const KeyTokenModel = new Schema(
       type: String,
       require: true,
     },
+    changePasswordKey: {
+      type: String,
+      default: null
+    },
     refreshToken: {
       type: String,
       require: true,

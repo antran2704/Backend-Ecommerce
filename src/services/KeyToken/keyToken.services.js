@@ -59,6 +59,35 @@ class KeyTokenServices {
     return keyToken;
   }
 
+  async updateRefreshTokenUseds(user_id, refreshToken) {
+    if (!user_id || !refreshToken) return null;
+    const date = getDateTime();
+
+    const keyToken = await KeyToken.updateMany(
+      { user: user_id },
+      {
+        $addToSet: { refreshTokenUseds: refreshToken },
+        $set: { updatedAt: date },
+      }
+    );
+
+    if (!keyToken) return null;
+
+    return keyToken;
+  }
+
+  async checkChangePasswordKey(user_id, key) {
+    if (!user_id || !key) return null;
+
+    const keyTokenUser = await this.getKeyByUserId(user_id);
+
+    if(!keyTokenUser) return null;
+
+    if (keyTokenUser.changePasswordKey !== key) return null;
+
+    return keyTokenUser;
+  }
+
   async checkTokenUsed(user_id, token) {
     if (!user_id) return null;
 

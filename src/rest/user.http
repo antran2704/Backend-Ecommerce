@@ -11,13 +11,21 @@ GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
 GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
 
 ### Send confirm email
-POST  http://localhost:3001/api/v1/user/sendConfirmEmail
+POST  http://localhost:3001/api/v1/user/send/confirmEmail
 content-type: application/json
 
 {
     "name": "Antrandev",
     "email": "phamtrangiaan27@gmail.com",
     "password": "cunyeu1506"
+}
+
+### Send confirm change password
+POST  http://localhost:3001/api/v1/user/send/changePassword
+content-type: application/json
+
+{
+    "email": "phamtrangiaan27@gmail.com"
 }
 
 ### Create user
