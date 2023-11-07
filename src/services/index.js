@@ -6,6 +6,7 @@ const CartServices = require("./Cart/Cart.services");
 const InventoryServices = require("./Inventory/Inventory.services");
 const DiscountServices = require("./Discount/Discount.services");
 const OrderServices = require("./Order/Order.services");
+const VariantServices = require("./Variant/Variant.services");
 
 module.exports = {
   CategoriesServices,
@@ -15,5 +16,6 @@ module.exports = {
   CartServices,
   InventoryServices,
   DiscountServices,
-  OrderServices
+  OrderServices,
+  VariantServices
 };

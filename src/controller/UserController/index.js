@@ -389,14 +389,15 @@ const UserController = {
 
       const passwordHash = await generateBcrypt(password);
 
-      const update = await UserServices.changePassword(
-        decoded.id,
-        passwordHash
-      );
+      const user = await UserServices.changePassword(decoded.id, passwordHash);
 
-      if (!update) {
+      if (!user) {
         return new BadResquestError().send(res);
       }
+
+      keyTokenServices.updateKeyToken(user._id, {
+        changePasswordKey: null,
+      });
 
       return new CreatedResponse().send(res);
     } catch (error) {

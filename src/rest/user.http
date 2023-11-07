@@ -1,7 +1,7 @@
 ### Get users
 GET  http://localhost:3001/api/v1/user/getUsers
-Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5NzcxNjIyMiwiZXhwIjoxNjk3NzE2MjgyfQ.jXhsLOidqi6dykog6bOBry4ts_ZEGyvE-h62oGZHqs0
-public-key: Key 228c718f-ea0b-4916-9c5e-086a5f9b4bd6
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5OTE2NzY4NCwiZXhwIjoxNjk5MTY3NzQ0fQ.gl2KQEOEjToSSqWLvK4QVsz8tzoQmrovN5pRgk6Y5OM
+public-key: Key 56665beb-1966-4e59-865c-026e5b76bc20
 content-type: application/json
 
 ### Get user
@@ -53,7 +53,7 @@ content-type: application/json
 
  {
     "id": "6531174454986d0cfa0cddbc",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5NzcxNjA0OCwiZXhwIjoxNzEzMjY4MDQ4fQ.Ck7woNk20GQ8dUJyaMC5TlEEJzJpIHcCEfJ7AkL8B2w"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5OTE2NzU3MiwiZXhwIjoxNzE0NzE5NTcyfQ.KTmxwkQeJ0Zr063nyD6JKAXPOHeGa6DDNXV2sWVHDiw"
  }
 
 ### ban user

@@ -26,20 +26,6 @@ const CartModel = new Schema(
         inventory: Number,
       },
     ],
-    /*
-        {
-                {
-                    product_id,
-                    variant
-                    quantity,
-                    price,
-                    iventory
-                }
-        }
-        
-        case 1: Nếu chưa tồn tại sản phẩm thì thêm mới vào
-        case 2: nếu đã tồn tại thì thêm số lượng (variation giong nhau)
-    */
     cart_cout: {
       type: Number,
       default: 0,

@@ -151,26 +151,6 @@ const ProductController = {
       return new InternalServerError().send(res);
     }
   },
-  // [GET] CATEGORY
-  getCategories: async (req, res) => {
-    try {
-      const categories = await Category.find({}, { title: 1, options: 1 });
-
-      if (!categories) {
-        return res.status(404).json({
-          status: 404,
-          message: "Categories not exit",
-        });
-      }
-
-      return res.status(200).json({
-        status: 200,
-        payload: categories,
-      });
-    } catch (error) {
-      return res.status(500).json(error);
-    }
-  },
   // [POST] CREATE PRODUCT
   createProduct: async (req, res) => {
     const data = req.body;

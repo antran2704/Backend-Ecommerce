@@ -4,13 +4,10 @@ const multer = require("../../middlewares/Multer");
 
 const ProductController = require("../../controller/ProductController");
 
-// [GET] ALL CATEGORIES
+// [GET] ALL PRODUCTS
 router.get("/getProducts", ProductController.getProducts);
 
-// [GET] ALL PRODUCTS
-router.get("/getCategories", ProductController.getCategories);
-
-// [GET] ALL PRODUCTS
+// [GET] ALL PRODUCT
 router.get(
   "/getProductsInCategory/:id",
   ProductController.getProductsInCategory
