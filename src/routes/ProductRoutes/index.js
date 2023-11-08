@@ -4,12 +4,9 @@ const multer = require("../../middlewares/Multer");
 
 const ProductController = require("../../controller/ProductController");
 
-// [GET] ALL PRODUCTS
-router.get("/getProducts", ProductController.getProducts);
-
 // [GET] ALL PRODUCT
 router.get(
-  "/getProductsInCategory/:id",
+  "/category/:id",
   ProductController.getProductsInCategory
 );
 
@@ -36,13 +33,16 @@ router.post(
   ProductController.uploadGallery
 );
 
-// [POST] A PRODUCT
-router.post("/", ProductController.createProduct);
-
 // [PATCH] UPDATE PRODUCT
 router.patch("/:id", ProductController.updateProduct);
 
 // [DELETE] A PRODUCT
 router.post("/:id", ProductController.deleteProduct);
+
+// [GET] ALL PRODUCTS
+router.get("/", ProductController.getProducts);
+
+// [POST] A PRODUCT
+router.post("/", ProductController.createProduct);
 
 module.exports = router;

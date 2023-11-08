@@ -4,10 +4,10 @@ Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NT
 public-key: Key 228c718f-ea0b-4916-9c5e-086a5f9b4bd6
 
 ### get discount
-GET http://localhost:3001/api/v1/discount/code-123
+GET http://localhost:3001/api/v1/discounts/code-123
 
 ### Create discount
-POST http://localhost:3001/api/v1/discount
+POST http://localhost:3001/api/v1/discounts
 content-type: application/json
 
 {
@@ -24,7 +24,7 @@ content-type: application/json
 }
 
 ### Update discount
-PATCH  http://localhost:3001/api/v1/discount/code-123
+PATCH  http://localhost:3001/api/v1/discounts/code-123
 content-type: application/json
 
 {

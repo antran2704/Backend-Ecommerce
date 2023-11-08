@@ -5,9 +5,6 @@ const OrderController = require("../../controller/OrderController");
 // [GET] SEARCH ODERS
 router.get("/search", OrderController.searchOrders);
 
-// [GET] ALL ODERS
-router.get("/getOrders", OrderController.getOrders);
-
 // [GET] AN ORDER
 router.get("/user/:user_id", OrderController.getOrdersByUserId);
 
@@ -25,6 +22,9 @@ router.patch("/:order_id", OrderController.updateOrder)
 
 // [DELETE] AN ORDER
 router.delete("/:order_id", OrderController.deleteOrder)
+
+// [GET] ALL ODERS
+router.get("/", OrderController.getOrders);
 
 // [POST] AN ORDER
 router.post("/", OrderController.createOrder);

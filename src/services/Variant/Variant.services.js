@@ -28,6 +28,7 @@ class VariantServices {
     if (!id || !isValidObjectId(id)) return null;
 
     const variant = await Variant.findById({ _id: id }).lean();
+
     return variant;
   }
 
@@ -42,7 +43,11 @@ class VariantServices {
     const date = getDateTime();
     const variant = await Variant.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...payload, updatedAt: date }, upsert: true, new: true }
+      { $set: { ...payload, updatedAt: date } },
+      {
+        new: true,
+        upsert: true,
+      }
     );
 
     return variant;
@@ -62,8 +67,6 @@ class VariantServices {
       { _id: parent_id },
       {
         $set: { "variants.$[i]": payload, updatedAt: date },
-        upsert: true,
-        new: true,
       },
       {
         arrayFilters: [
@@ -71,6 +74,8 @@ class VariantServices {
             "i._id": children_id,
           },
         ],
+        new: true,
+        upsert: true,
       }
     );
 
@@ -80,13 +85,16 @@ class VariantServices {
   async addChildInVariant(id, payload) {
     if (!id || !isValidObjectId(id)) return null;
 
+    const date = getDateTime();
     const variant = await Variant.findByIdAndUpdate(
       { _id: id },
       {
         $push: { variants: payload },
         $set: { updatedAt: date },
-        upsert: true,
+      },
+      {
         new: true,
+        upsert: true,
       }
     );
 
@@ -102,13 +110,16 @@ class VariantServices {
     )
       return null;
 
-    const variant = await Variant.findByIdAndUpdate(
-      { _id: parent_id },
+    const date = getDateTime();
+    const variant = await Variant.findOneAndUpdate(
+      { _id: parent_id, variants: { $elemMatch: { _id: children_id } } },
       {
         $pull: { variants: { _id: children_id } },
         $set: { updatedAt: date },
-        upsert: true,
+      },
+      {
         new: true,
+        upsert: true,
       }
     );
 

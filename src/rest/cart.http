@@ -1,7 +1,7 @@
-GET http://localhost:3001/api/v1/cart/6531174454986d0cfa0cddbc
+GET http://localhost:3001/api/v1/carts/6531174454986d0cfa0cddbc
 
 ### Use discount
-GET http://localhost:3001/api/v1/cart/discount
+GET http://localhost:3001/api/v1/carts/discount
 content-type: application/json
 
 {
@@ -11,7 +11,7 @@ content-type: application/json
 }
 
 ### Update cart item
-POST http://localhost:3001/api/v1/cart/6531174454986d0cfa0cddbc
+POST http://localhost:3001/api/v1/carts/6531174454986d0cfa0cddbc
 content-type: application/json
 
 {
@@ -23,7 +23,7 @@ content-type: application/json
 }
 
 ### Delete item in cart
-POST http://localhost:3001/api/v1/cart/delete/6531174454986d0cfa0cddbc
+POST http://localhost:3001/api/v1/carts/item/6531174454986d0cfa0cddbc
 content-type: application/json
 
 {
@@ -32,4 +32,4 @@ content-type: application/json
 }
 
 ### Delete all items in cart
-POST http://localhost:3001/api/v1/cart/deleteAll/6529344b60eeb2ae81ba72b0
+POST http://localhost:3001/api/v1/carts/items/6529344b60eeb2ae81ba72b0

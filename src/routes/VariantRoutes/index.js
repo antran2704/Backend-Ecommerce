@@ -5,14 +5,14 @@ const VariantController = require("../../controller/VariantController");
 // [GET] VARIANT BY CODE
 router.get("/getByCode/:code", VariantController.getVariantByCode);
 
+// [PATCH] DELETE CHILD IN VARIANT
+router.patch("/child/delete", VariantController.deleteChildInVariant);
+
 // [POST] ADD CHILD IN VARIANT
 router.post("/child/:id", VariantController.addChildInVariant);
 
 // [PATCH] UPDATE CHILD IN VARIANT
 router.patch("/child/:id", VariantController.updateChildInVariant);
-
-// [PATCH] DELETE CHILD IN VARIANT
-router.patch("/delete/child/:id", VariantController.deleteChildInVariant);
 
 // [PATCH] UPDATE VARIANT
 router.patch("/:id", VariantController.updateVariant);

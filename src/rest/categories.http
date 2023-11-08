@@ -1,16 +1,16 @@
-GET http://localhost:3001/api/v1/category/getCategories
+GET http://localhost:3001/api/v1/categories
 
 ### Get parent categories
-GET http://localhost:3001/api/v1/category/parentCategories
+GET http://localhost:3001/api/v1/categories/parent
 
 ### Get category by ID
-GET http://localhost:3001/api/v1/category/id/6543a5b64ecb76b243b6f48b
+GET http://localhost:3001/api/v1/categories/id/65203e8b731fb60dfc68f5ae
 
 ### Search category
-GET http://localhost:3001/api/v1/category/search?search=asdasd
+GET http://localhost:3001/api/v1/categories/search?search=asdasd
 
 ### Create category
-POST http://localhost:3001/api/v1/category
+POST http://localhost:3001/api/v1/categories
 content-type: application/json
 
 {
@@ -22,7 +22,7 @@ content-type: application/json
 
 
 ### Update category
-PATCH http://localhost:3001/api/v1/category/653cf39bfadd38d2f7d75c64
+PATCH http://localhost:3001/api/v1/categories/653cf39bfadd38d2f7d75c64
 content-type: application/json
 
 {
@@ -30,7 +30,7 @@ content-type: application/json
 }
 
 ### Delete category
-POST http://localhost:3001/api/v1/category/6533c0bd6e2264a5e10388bd
+POST http://localhost:3001/api/v1/categories/6533c0bd6e2264a5e10388bd
 content-type: application/json
 
 {

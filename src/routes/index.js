@@ -14,13 +14,12 @@ const HtmlRoutes = require("./HtmlRoutes");
 
 const routes = (app) => {
   app.use("/view", HtmlRoutes);
-  app.use("/api/v1/cart", CartRoutes);
-  app.use("/api/v1/discount", DiscountRoutes);
+  app.use("/api/v1/carts", CartRoutes);
+  app.use("/api/v1/discounts", DiscountRoutes);
   app.use("/api/v1/categories", CategoryRoutes);
   app.use("/api/v1/products", ProductRoutes);
-  app.use("/api/v1/order", OrderRoutes);
-  app.use("/api/v1/user", UserRoutes);
-  app.use("/api/v1/option", OptionRoutes);
+  app.use("/api/v1/orders", OrderRoutes);
+  app.use("/api/v1/users", UserRoutes);
   app.use("/api/v1/variants", VariantRoutes);
   app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));
