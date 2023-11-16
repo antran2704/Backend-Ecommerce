@@ -1,5 +1,6 @@
 const CategoriesServices = require("./Categories/categories.services");
 const ProductServices = require("./Product/product.services");
+const ProductItemServices = require("./Product/product_item.services");
 const UserServices = require("./User/user.services");
 const KeyTokenServices = require("./KeyToken/keyToken.services");
 const CartServices = require("./Cart/Cart.services");
@@ -11,6 +12,7 @@ const VariantServices = require("./Variant/Variant.services");
 module.exports = {
   CategoriesServices,
   ProductServices,
+  ProductItemServices,
   UserServices,
   KeyTokenServices,
   CartServices,

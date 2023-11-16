@@ -24,9 +24,30 @@ content-type: application/json
             "code": "color",
             "name": "Màu sắc",
             "values": [
-            {
-                "label": "Nâu"
-            }
+                {
+                    "label": "Đỏ"
+                },
+                {
+                    "label": "Xanh"
+                },
+                {
+                    "label": "Vàng"
+                }
+            ]
+        },
+        {
+            "code": "size",
+            "name": "Kích thước",
+            "values": [
+                {
+                    "label": "S"
+                },
+                {
+                    "label": "M"
+                },
+                {
+                    "label": "L"
+                }
             ]
         }
     ],

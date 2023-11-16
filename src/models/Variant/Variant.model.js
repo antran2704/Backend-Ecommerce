@@ -7,24 +7,26 @@ mongoose.plugin(slug);
 
 const VariantModel = new Schema(
   {
-    code: {
-      type: String,
-      require: true,
-    },
     name: {
       type: String,
       require: true,
     },
+    code: {
+      type: String,
+      require: true,
+      // slug: "name",
+      // unique: true,
+    },
     variants: [
       {
         name: String,
-        status: {
+        public: {
           type: Boolean,
           default: true,
         },
       },
     ],
-    status: {
+    public: {
       type: Boolean,
       default: true,
     },

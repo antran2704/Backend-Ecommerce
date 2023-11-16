@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const VariantController = require("../../controller/VariantController");
 
+// [SEARCH] VARIANTS
+router.get("/search", VariantController.searchAttributes);
+
 // [GET] VARIANT BY CODE
 router.get("/getByCode/:code", VariantController.getVariantByCode);
 

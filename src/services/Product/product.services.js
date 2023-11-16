@@ -107,7 +107,6 @@ class ProductServices {
   ) {
     // case 3: filter voi option va gia
     if (keys.length > 0 && lte !== null && gte !== null) {
-      console.log("case co moi gia va options");
       const products = await Product.find({
         category: category_id,
         options: { $elemMatch: { code: { $in: keys } } },
@@ -122,7 +121,6 @@ class ProductServices {
 
     // case 4: filter moi gia
     if (lte !== null && gte !== null) {
-      console.log("case co 2 gia");
       const products = await Product.find({
         category: category_id,
         price: { $gte: gte, $lte: lte },
@@ -135,7 +133,6 @@ class ProductServices {
 
     // case 1: filter moi gia
     if (lte !== null || gte !== null) {
-      console.log("case co moi gia");
       const products = await Product.find({
         category: category_id,
         $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
@@ -148,7 +145,6 @@ class ProductServices {
 
     // case 2: filter ko co gia
     if (keys.length > 0) {
-      console.log("case co moi options");
       const products = await Product.find({
         category: category_id,
         options: { $elemMatch: { code: { $in: keys } } },
@@ -177,8 +173,7 @@ class ProductServices {
 
   async getProductById(id, select = {}) {
     if (!id) return null;
-    console.log("id:::", id)
-
+    
     const product = await Product.findById({ _id: id })
       .populate("category", {
         title: 1,

@@ -10,6 +10,7 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
+const { removeUndefindedObj } = require("../../helpers/NestedObjectParse");
 
 const VariantController = {
   getVariants: async (req, res) => {
@@ -81,6 +82,44 @@ const VariantController = {
       return new InternalServerError().send(res);
     }
   },
+  searchAttributes: async (req, res) => {
+    const { search, page } = req.query;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = page ? Number(page) : 1;
+
+    try {
+      const totalItems = await VariantServices.searchTextItems(search);
+
+      if (!totalItems) {
+        return new NotFoundError(404, `No variants with title ${search}`).send(
+          res
+        );
+      }
+
+      const items = await VariantServices.searchTextWithPage(
+        search,
+        PAGE_SIZE,
+        currentPage
+      );
+
+      if (!items) {
+        return new NotFoundError(404, `No variants with title ${search}`).send(
+          res
+        );
+      }
+
+      return new GetResponse(200, items).send(res, {
+        optionName: "pagination",
+        data: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
   createVariant: async (req, res) => {
     const payload = req.body;
 
@@ -88,8 +127,10 @@ const VariantController = {
       return new BadResquestError().send(res);
     }
 
+    const payloadParse = removeUndefindedObj(payload);
+
     try {
-      const newVariant = await VariantServices.createVariant(payload);
+      const newVariant = await VariantServices.createVariant(payloadParse);
 
       if (!newVariant) {
         return new BadResquestError(400, "Create variant failed").send(res);
@@ -130,8 +171,10 @@ const VariantController = {
       return new BadResquestError().send(res);
     }
 
+    const payloadParse = removeUndefindedObj(payload);
+
     try {
-      const variant = await VariantServices.updateVariant(id, payload);
+      const variant = await VariantServices.updateVariant(id, payloadParse);
       if (!variant) {
         return new BadResquestError(400, "Update variant failed");
       }
@@ -149,11 +192,13 @@ const VariantController = {
       return new BadResquestError().send(res);
     }
 
+    const payloadParse = removeUndefindedObj(payload);
+
     try {
       const variant = await VariantServices.updateChildInVariant(
         id,
         children_id,
-        payload
+        payloadParse
       );
 
       if (!variant) {

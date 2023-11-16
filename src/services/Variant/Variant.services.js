@@ -32,6 +32,23 @@ class VariantServices {
     return variant;
   }
 
+  async searchTextItems(text) {
+    const totalItems = await Variant.find({
+      name: { $regex: text, $options: "i" },
+    });
+    return totalItems;
+  }
+
+  async searchTextWithPage(text, pageSize, currentPage) {
+    const items = await Variant.find({
+      name: { $regex: text, $options: "i" },
+    })
+      .skip((currentPage - 1) * pageSize)
+      .limit(pageSize);
+
+    return items;
+  }
+
   async createVariant(payload) {
     const variant = await Variant.create(payload);
     return variant;
@@ -66,7 +83,7 @@ class VariantServices {
     const variant = await Variant.findOneAndUpdate(
       { _id: parent_id },
       {
-        $set: { "variants.$[i]": payload, updatedAt: date },
+        $set: { "variants.$[i]": {...payload}, updatedAt: date },
       },
       {
         arrayFilters: [

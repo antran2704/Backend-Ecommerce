@@ -3,9 +3,9 @@ const path = require("path");
 
 const CategoryRoutes = require("./CategoryRoutes");
 const ProductRoutes = require("./ProductRoutes");
+const ProductrItemRoutes = require("./ProductRoutes/product_item");
 const OrderRoutes = require("./OrderRoutes");
 const UserRoutes = require("./UserRoutes");
-const OptionRoutes = require("./OptionRoutes");
 const DeleteRoutes = require("./DeleteRoutes");
 const CartRoutes = require("./CartRoutes");
 const DiscountRoutes = require("./DiscountRoutes");
@@ -17,6 +17,7 @@ const routes = (app) => {
   app.use("/api/v1/carts", CartRoutes);
   app.use("/api/v1/discounts", DiscountRoutes);
   app.use("/api/v1/categories", CategoryRoutes);
+  app.use("/api/v1/variations", ProductrItemRoutes);
   app.use("/api/v1/products", ProductRoutes);
   app.use("/api/v1/orders", OrderRoutes);
   app.use("/api/v1/users", UserRoutes);

@@ -14,7 +14,7 @@ const ProductModel = new Schema(
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "category",
-      require: true
+      require: true,
     },
     type: [
       {
@@ -36,7 +36,7 @@ const ProductModel = new Schema(
     },
     promotionPrice: {
       type: Number,
-      default: null,
+      default: 0,
     },
     thumbnail: {
       type: String,
@@ -55,7 +55,7 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    status: {
+    public: {
       type: Boolean,
       default: false,
     },
@@ -68,7 +68,8 @@ const ProductModel = new Schema(
       default: 0,
     },
     brand: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "brand",
       default: null,
     },
     options: [
@@ -93,57 +94,10 @@ const ProductModel = new Schema(
         ],
       },
     ],
-    variations: [
-      {
-        title: {
-          type: String,
-          default: null,
-        },
-        barcode: {
-          type: String,
-          default: null,
-        },
-        available: {
-          type: Boolean,
-          default: true,
-        },
-        price: {
-          type: Number,
-          default: 0,
-          require: true,
-        },
-        promotionPrice: {
-          type: Number,
-          default: null,
-        },
-        sku: {
-          type: String,
-          default: null,
-          require: true,
-        },
-        option1: String,
-        option2: String,
-        option3: String,
-        options: [{ type: String }],
-        thumbnail_url: {
-          type: String,
-          default: null,
-        },
-        url: {
-          type: String,
-          default: null,
-        },
-        inventory_quantity: {
-          type: Number,
-          default: 0,
-          require: true,
-        },
-        sold: {
-          type: Number,
-          default: 0,
-        },
-      },
-    ],
+    variations: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "product_item",
+    }],
     slug: {
       type: String,
       slug: "title",
