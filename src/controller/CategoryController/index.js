@@ -3,6 +3,7 @@ const {
   NotFoundError,
   BadResquestError,
 } = require("../../helpers/errorResponse");
+const getSelect = require("../../helpers/getSelect");
 const {
   GetResponse,
   CreatedResponse,
@@ -10,7 +11,7 @@ const {
 const { CategoriesServices } = require("../../services/index");
 
 const CategoryController = {
-  // [GET] ALL CATEGORY
+  // [GET] ALL CATEGORY WITH PAGE
   getCategories: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
@@ -39,6 +40,21 @@ const CategoryController = {
           pageSize: PAGE_SIZE,
         },
       });
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  // [GET] ALL CATEGORY
+  getCategoriesAll: async (req, res) => {
+    const select = getSelect(req.query);
+    try {
+      const categories = await CategoriesServices.getCategories(select);
+
+      if (!categories) {
+        return new NotFoundError(404, "No category found!").send(res);
+      }
+
+      return new GetResponse(200, categories).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

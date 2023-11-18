@@ -4,8 +4,8 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { Category } = require("../../models/index");
 
 class CategoriesServices {
-  async getCategories() {
-    const categories = await Category.find({}).lean();
+  async getCategories(select) {
+    const categories = await Category.find({}).lean().select({...select});
     return categories;
   }
 

@@ -4,6 +4,9 @@ const router = express.Router();
 const multer = require("../../middlewares/Multer");
 const CategoryController = require("../../controller/CategoryController");
 
+// [GET] ALL CATEGORIES
+router.get("/all", CategoryController.getCategoriesAll);
+
 // [GET] PARENT CATEGORIES
 router.get("/parent", CategoryController.getParentCategories);
 
@@ -29,7 +32,7 @@ router.patch("/:id", CategoryController.updateCategory);
 // [DELETE] A CATEGORY
 router.delete("/:id", CategoryController.deleteCategory);
 
-// [GET] ALL CATEGORIES
+// [GET] ALL CATEGORIES WITH PAGE
 router.get("/", CategoryController.getCategories);
 
 // [POST] A CATEGORY

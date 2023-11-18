@@ -8,10 +8,16 @@ class ProductServices {
     return items;
   }
 
-  async getProductsWithPage(pageSize, currentPage) {
+  async getProductsWithPage(pageSize, currentPage, select = {}) {
     const products = await Product.find({})
       .skip((currentPage - 1) * pageSize)
-      .limit(pageSize);
+      .limit(pageSize)
+      .populate("category", {
+        _id: 1,
+        title: 1,
+        slug: 1,
+      })
+      .select({ ...select });
 
     return products;
   }
@@ -38,6 +44,7 @@ class ProductServices {
 
   async getProductsFilter(
     category_id,
+    search = "",
     keys = null,
     values = null,
     lte = null,
@@ -53,6 +60,7 @@ class ProductServices {
       console.log("case co moi gia va options");
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
         price: { $gte: gte, $lte: lte },
@@ -67,6 +75,7 @@ class ProductServices {
       console.log("case co 2 gia");
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         price: { $gte: gte, $lte: lte },
       });
       return products;
@@ -77,6 +86,7 @@ class ProductServices {
       console.log("case co moi gia");
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
       });
 
@@ -88,6 +98,7 @@ class ProductServices {
       console.log("case co moi options");
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
       });
@@ -98,6 +109,7 @@ class ProductServices {
 
   async getProductsFilterWithPage(
     category_id,
+    search = "",
     keys = null,
     values = null,
     pageSize,
@@ -109,6 +121,7 @@ class ProductServices {
     if (keys.length > 0 && lte !== null && gte !== null) {
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
         price: { $gte: gte, $lte: lte },
@@ -123,6 +136,7 @@ class ProductServices {
     if (lte !== null && gte !== null) {
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         price: { $gte: gte, $lte: lte },
       })
         .skip((currentPage - 1) * pageSize)
@@ -135,6 +149,7 @@ class ProductServices {
     if (lte !== null || gte !== null) {
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
       })
         .skip((currentPage - 1) * pageSize)
@@ -147,6 +162,7 @@ class ProductServices {
     if (keys.length > 0) {
       const products = await Product.find({
         category: category_id,
+        title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
       })
@@ -173,7 +189,7 @@ class ProductServices {
 
   async getProductById(id, select = {}) {
     if (!id) return null;
-    
+
     const product = await Product.findById({ _id: id })
       .populate("category", {
         title: 1,
@@ -204,21 +220,44 @@ class ProductServices {
     return product;
   }
 
-  async searchTextItems(text) {
-    const totalItems = await Product.find({
+  async searchTextItems(text, category = "") {
+    let totalItems;
+
+    if (category.length > 0) {
+      totalItems = await Product.find({
+        category,
+        title: { $regex: text, $options: "i" },
+      });
+
+      return totalItems;
+    }
+
+    totalItems = await Product.find({
       title: { $regex: text, $options: "i" },
     });
     return totalItems;
   }
 
-  async searchTextWithPage(text, pageSize, currentPage) {
-    const items = await Product.find({
+  async searchTextWithPage(text, category = "", pageSize, currentPage) {
+    let products;
+
+    if (category.length > 0) {
+      products = await Product.find({
+        category,
+        title: { $regex: text, $options: "i" },
+      })
+        .skip((currentPage - 1) * pageSize)
+        .limit(pageSize);
+
+      return products;
+    }
+
+    products = await Product.find({
       title: { $regex: text, $options: "i" },
     })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize);
-
-    return items;
+    return products;
   }
 
   async deleteProduct(id) {

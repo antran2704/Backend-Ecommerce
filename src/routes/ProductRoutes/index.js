@@ -37,7 +37,7 @@ router.post(
 router.patch("/:id", ProductController.updateProduct);
 
 // [DELETE] A PRODUCT
-router.post("/:id", ProductController.deleteProduct);
+router.delete("/:id", ProductController.deleteProduct);
 
 // [GET] ALL PRODUCTS
 router.get("/", ProductController.getProducts);

@@ -9,12 +9,14 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
+const getSelect = require("../../helpers/getSelect");
 
 const ProductController = {
   // [GET] ALL PRODUCT
   getProducts: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
+    const select = getSelect(req.query);
 
     try {
       const totalItems = await ProductServices.getProducts();
@@ -24,7 +26,8 @@ const ProductController = {
 
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
-        currentPage
+        currentPage,
+        select
       );
 
       if (!products) {
@@ -50,6 +53,7 @@ const ProductController = {
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const lte = req.query.lte ? Number(req.query.lte) : null;
     const gte = req.query.gte ? Number(req.query.gte) : null;
+    const { search } = req.query;
     const keys = Object.keys(req.query).filter(
       (query) => query !== "page" && query !== "lte" && query !== "gte"
     );
@@ -60,6 +64,7 @@ const ProductController = {
 
         const totalItems = await ProductServices.getProductsFilter(
           id,
+          search,
           keys,
           values,
           lte,
@@ -72,6 +77,7 @@ const ProductController = {
 
         const products = await ProductServices.getProductsFilterWithPage(
           id,
+          search,
           keys,
           values,
           PAGE_SIZE,
@@ -221,12 +227,15 @@ const ProductController = {
   },
   // [SEARCH PRODUCT]
   searchProduct: async (req, res) => {
-    const { search } = req.query;
+    const { search, category, page } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
-    const currentPage = req.query.page ? Number(req.query.page) : 1;
+    const currentPage = page ? Number(page) : 1;
 
     try {
-      const totalItems = await ProductServices.searchTextItems(search);
+      const totalItems = await ProductServices.searchTextItems(
+        search,
+        category
+      );
 
       if (!totalItems) {
         return new NotFoundError(404, `No product with title ${search}`).send(
@@ -236,6 +245,7 @@ const ProductController = {
 
       const products = await ProductServices.searchTextWithPage(
         search,
+        category,
         PAGE_SIZE,
         currentPage
       );
@@ -255,7 +265,7 @@ const ProductController = {
         },
       });
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [DELETE] A PRODUCT
