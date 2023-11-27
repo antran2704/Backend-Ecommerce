@@ -1,46 +1,46 @@
-const { Variant } = require("../../models");
+const { Attribute } = require("../../models");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { isValidObjectId } = require("mongoose");
 
-class VariantServices {
-  async getVariants() {
-    const variants = await Variant.find({}).lean();
-    return variants;
+class AttributeServices {
+  async getAttributes(query = {}) {
+    const attributes = await Attribute.find({...query}).lean();
+    return attributes;
   }
 
-  async getVariantsWithPage(pageSize, currentPage) {
-    const variants = await Variant.find({})
+  async getAttributesWithPage(pageSize, currentPage, query = {}) {
+    const attributes = await Attribute.find({...query})
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .lean();
 
-    return variants;
+    return attributes;
   }
 
-  async getVariantByCode(code) {
+  async getAttributeByCode(code) {
     if (!code) return null;
 
-    const variant = await Variant.findOne({ code }).lean();
-    return variant;
+    const attribute = await Attribute.findOne({ code }).lean();
+    return attribute;
   }
 
-  async getVariantById(id) {
+  async getAttributeById(id) {
     if (!id || !isValidObjectId(id)) return null;
 
-    const variant = await Variant.findById({ _id: id }).lean();
+    const attribute = await Attribute.findById({ _id: id }).lean();
 
-    return variant;
+    return attribute;
   }
 
   async searchTextItems(text) {
-    const totalItems = await Variant.find({
+    const totalItems = await Attribute.find({
       name: { $regex: text, $options: "i" },
     });
     return totalItems;
   }
 
   async searchTextWithPage(text, pageSize, currentPage) {
-    const items = await Variant.find({
+    const items = await Attribute.find({
       name: { $regex: text, $options: "i" },
     })
       .skip((currentPage - 1) * pageSize)
@@ -49,16 +49,16 @@ class VariantServices {
     return items;
   }
 
-  async createVariant(payload) {
-    const variant = await Variant.create(payload);
-    return variant;
+  async createAttribute(payload) {
+    const attribute = await Attribute.create(payload);
+    return attribute;
   }
 
-  async updateVariant(id, payload) {
+  async updateAttribute(id, payload) {
     if (!id || !isValidObjectId(id) || !payload) return null;
 
     const date = getDateTime();
-    const variant = await Variant.findByIdAndUpdate(
+    const attribute = await Attribute.findByIdAndUpdate(
       { _id: id },
       { $set: { ...payload, updatedAt: date } },
       {
@@ -67,10 +67,10 @@ class VariantServices {
       }
     );
 
-    return variant;
+    return attribute;
   }
 
-  async updateChildInVariant(parent_id, children_id, payload) {
+  async updateChildInAttribute(parent_id, children_id, payload) {
     if (
       !parent_id ||
       !children_id ||
@@ -80,7 +80,7 @@ class VariantServices {
       return null;
 
     const date = getDateTime();
-    const variant = await Variant.findOneAndUpdate(
+    const attribute = await Attribute.findOneAndUpdate(
       { _id: parent_id },
       {
         $set: { "variants.$[i]": {...payload}, updatedAt: date },
@@ -96,14 +96,14 @@ class VariantServices {
       }
     );
 
-    return variant;
+    return attribute;
   }
 
-  async addChildInVariant(id, payload) {
+  async addChildInAttribute(id, payload) {
     if (!id || !isValidObjectId(id)) return null;
 
     const date = getDateTime();
-    const variant = await Variant.findByIdAndUpdate(
+    const attribute = await Attribute.findByIdAndUpdate(
       { _id: id },
       {
         $push: { variants: payload },
@@ -115,10 +115,10 @@ class VariantServices {
       }
     );
 
-    return variant;
+    return attribute;
   }
 
-  async deleteChildInVariant(parent_id, children_id) {
+  async deleteChildInAttribute(parent_id, children_id) {
     if (
       !parent_id ||
       !children_id ||
@@ -128,7 +128,7 @@ class VariantServices {
       return null;
 
     const date = getDateTime();
-    const variant = await Variant.findOneAndUpdate(
+    const attribute = await Attribute.findOneAndUpdate(
       { _id: parent_id, variants: { $elemMatch: { _id: children_id } } },
       {
         $pull: { variants: { _id: children_id } },
@@ -140,15 +140,15 @@ class VariantServices {
       }
     );
 
-    return variant;
+    return attribute;
   }
 
-  async deleteVariant(id) {
+  async deleteAttribute(id) {
     if (!id || !isValidObjectId(id)) return null;
 
-    const variant = await Variant.findByIdAndRemove({ _id: id });
-    return variant;
+    const attribute = await Attribute.findByIdAndRemove({ _id: id });
+    return attribute;
   }
 }
 
-module.exports = new VariantServices();
+module.exports = new AttributeServices();

@@ -5,7 +5,7 @@ const slug = require("mongoose-slug-generator");
 // add slug
 mongoose.plugin(slug);
 
-const VariantModel = new Schema(
+const AttributeModel = new Schema(
   {
     name: {
       type: String,
@@ -34,6 +34,6 @@ const VariantModel = new Schema(
   { timestamps: true }
 );
 // create user + create cart
-const Variant = mongoose.model("variant", VariantModel);
+const Attribute = mongoose.model("variant", AttributeModel);
 
-module.exports = Variant;
+module.exports = Attribute;

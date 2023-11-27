@@ -1,4 +1,4 @@
-const { VariantServices } = require("../../services");
+const { AttributeServices } = require("../../services");
 
 const {
   InternalServerError,
@@ -12,28 +12,28 @@ const {
 } = require("../../helpers/successResponse");
 const { removeUndefindedObj } = require("../../helpers/NestedObjectParse");
 
-const VariantController = {
-  getVariants: async (req, res) => {
+const AttributeController = {
+  getAttributes: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     try {
-      const totalItems = await VariantServices.getVariants();
+      const totalItems = await AttributeServices.getAttributes();
 
       if (!totalItems) {
-        return new NotFoundError(404, "No variants found!").send(res);
+        return new NotFoundError(404, "No attributes found!").send(res);
       }
 
-      const variants = await VariantServices.getVariantsWithPage(
+      const attributes = await AttributeServices.getAttributesWithPage(
         PAGE_SIZE,
         currentPage
       );
 
-      if (!variants) {
-        return new NotFoundError(404, "No category found!").send(res);
+      if (!attributes) {
+        return new NotFoundError(404, "No attribute found!").send(res);
       }
 
-      return new GetResponse(200, variants).send(res, {
+      return new GetResponse(200, attributes).send(res, {
         optionName: "pagination",
         data: {
           totalItems: totalItems.length,
@@ -45,7 +45,21 @@ const VariantController = {
       return new InternalServerError().send(res);
     }
   },
-  getVariantById: async (req, res) => {
+  getAttributesAvailable: async (req, res) => {
+    const query = {public: true}
+    try {
+      const attributes = await AttributeServices.getAttributes(query);
+
+      if (!attributes) {
+        return new NotFoundError(404, "No attributes found!").send(res);
+      }
+
+      return new GetResponse(200, attributes).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  getAttributeById: async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
@@ -53,17 +67,17 @@ const VariantController = {
     }
 
     try {
-      const variant = await VariantServices.getVariantById(id);
-      if (!variant) {
-        return new NotFoundError(404, "Not found variant").send(res);
+      const attribute = await AttributeServices.getAttributeById(id);
+      if (!attribute) {
+        return new NotFoundError(404, "Not found attribute").send(res);
       }
 
-      return new GetResponse(200, variant).send(res);
+      return new GetResponse(200, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
-  getVariantByCode: async (req, res) => {
+  getAttributeByCode: async (req, res) => {
     const { code } = req.params;
 
     if (!code) {
@@ -71,13 +85,13 @@ const VariantController = {
     }
 
     try {
-      const variant = await VariantServices.getVariantByCode(code);
+      const attribute = await AttributeServices.getAttributeByCode(code);
 
-      if (!variant) {
-        return new NotFoundError(404, "Not found variant");
+      if (!attribute) {
+        return new NotFoundError(404, "Not found attribute");
       }
 
-      return new GetResponse(200, variant).send(res);
+      return new GetResponse(200, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -88,22 +102,22 @@ const VariantController = {
     const currentPage = page ? Number(page) : 1;
 
     try {
-      const totalItems = await VariantServices.searchTextItems(search);
+      const totalItems = await AttributeServices.searchTextItems(search);
 
       if (!totalItems) {
-        return new NotFoundError(404, `No variants with title ${search}`).send(
+        return new NotFoundError(404, `No attributes with title ${search}`).send(
           res
         );
       }
 
-      const items = await VariantServices.searchTextWithPage(
+      const items = await AttributeServices.searchTextWithPage(
         search,
         PAGE_SIZE,
         currentPage
       );
 
       if (!items) {
-        return new NotFoundError(404, `No variants with title ${search}`).send(
+        return new NotFoundError(404, `No attributes with title ${search}`).send(
           res
         );
       }
@@ -120,7 +134,7 @@ const VariantController = {
       return new InternalServerError().send(res);
     }
   },
-  createVariant: async (req, res) => {
+  createAttribute: async (req, res) => {
     const payload = req.body;
 
     if (!payload) {
@@ -130,18 +144,18 @@ const VariantController = {
     const payloadParse = removeUndefindedObj(payload);
 
     try {
-      const newVariant = await VariantServices.createVariant(payloadParse);
+      const newAttribute = await AttributeServices.createAttribute(payloadParse);
 
-      if (!newVariant) {
-        return new BadResquestError(400, "Create variant failed").send(res);
+      if (!newAttribute) {
+        return new BadResquestError(400, "Create attribute failed").send(res);
       }
 
-      return new CreatedResponse(201, newVariant).send(res);
+      return new CreatedResponse(201, newAttribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
-  addChildInVariant: async (req, res) => {
+  addChildInAttribute: async (req, res) => {
     const { id } = req.params;
     const payload = req.body;
 
@@ -150,20 +164,20 @@ const VariantController = {
     }
 
     try {
-      const variant = await VariantServices.addChildInVariant(id, payload);
+      const attribute = await AttributeServices.addChildInAttribute(id, payload);
 
-      if (!variant) {
-        return new BadResquestError(400, "Add value in variant failed").send(
+      if (!attribute) {
+        return new BadResquestError(400, "Add value in attribute failed").send(
           res
         );
       }
 
-      return new CreatedResponse(201, variant).send(res);
+      return new CreatedResponse(201, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
-  updateVariant: async (req, res) => {
+  updateAttribute: async (req, res) => {
     const { id } = req.params;
     const payload = req.body;
 
@@ -174,17 +188,17 @@ const VariantController = {
     const payloadParse = removeUndefindedObj(payload);
 
     try {
-      const variant = await VariantServices.updateVariant(id, payloadParse);
-      if (!variant) {
-        return new BadResquestError(400, "Update variant failed");
+      const attribute = await AttributeServices.updateAttribute(id, payloadParse);
+      if (!attribute) {
+        return new BadResquestError(400, "Update attribute failed");
       }
 
-      return new CreatedResponse(201, variant).send(res);
+      return new CreatedResponse(201, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
-  updateChildInVariant: async (req, res) => {
+  updateChildInAttibute: async (req, res) => {
     const { id } = req.params;
     const { children_id, ...payload } = req.body;
 
@@ -195,22 +209,22 @@ const VariantController = {
     const payloadParse = removeUndefindedObj(payload);
 
     try {
-      const variant = await VariantServices.updateChildInVariant(
+      const attribute = await AttributeServices.updateChildInAttribute(
         id,
         children_id,
         payloadParse
       );
 
-      if (!variant) {
-        return new BadResquestError(400, "Update variant failed").send(res);
+      if (!attribute) {
+        return new BadResquestError(400, "Update attribute failed").send(res);
       }
 
-      return new CreatedResponse(201, variant).send(res);
+      return new CreatedResponse(201, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
-  deleteVariant: async (req, res) => {
+  deleteAttribute: async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
@@ -218,9 +232,9 @@ const VariantController = {
     }
 
     try {
-      const variant = await VariantServices.deleteVariant(id);
-      if (!variant) {
-        return new BadResquestError(400, "Delete variant failed");
+      const attribute = await AttributeServices.deleteAttribute(id);
+      if (!attribute) {
+        return new BadResquestError(400, "Delete attribute failed");
       }
 
       return new CreatedResponse(201, variant).send(res);
@@ -228,7 +242,7 @@ const VariantController = {
       return new InternalServerError().send(res);
     }
   },
-  deleteChildInVariant: async (req, res) => {
+  deleteChildInAttribute: async (req, res) => {
     const { parent_id, children_id } = req.body;
 
     if (!parent_id || !children_id) {
@@ -236,22 +250,22 @@ const VariantController = {
     }
 
     try {
-      const variant = await VariantServices.deleteChildInVariant(
+      const attribute = await AttributeServices.deleteChildInAttribute(
         parent_id,
         children_id
       );
 
-      if (!variant) {
-        return new BadResquestError(400, "Delete value in variant failed").send(
+      if (!attribute) {
+        return new BadResquestError(400, "Delete value in attribute failed").send(
           res
         );
       }
 
-      return new CreatedResponse(201, variant).send(res);
+      return new CreatedResponse(201, attribute).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }
   },
 };
 
-module.exports = VariantController;
+module.exports = AttributeController;

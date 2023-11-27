@@ -19,17 +19,17 @@ router.get("/id/:id", ProductController.getProductById);
 // [GET] A PRODUCT
 router.get("/:slug", ProductController.getProduct);
 
-// UPLOAD THUMBNAIL
+// UPLOAD Image
 router.post(
-  "/uploadThumbnail",
-  multer.upload("./uploads/product").single("thumbnail"),
+  "/uploadImage",
+  multer.upload("./uploads/product").single("image"),
   ProductController.uploadThumbnail
 );
 
 // UPLOAD GALLERY
 router.post(
-  "/uploadGallery",
-  multer.upload("./uploads/product").array("gallery", 6),
+  "/uploadImages",
+  multer.upload("./uploads/product").array("images", 6),
   ProductController.uploadGallery
 );
 

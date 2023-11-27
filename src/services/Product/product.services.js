@@ -181,7 +181,6 @@ class ProductServices {
     const product = await Product.find({ slug }).populate("category", {
       title: 1,
       slug: 1,
-      options: 1,
     });
 
     return product;
@@ -194,7 +193,10 @@ class ProductServices {
       .populate("category", {
         title: 1,
         slug: 1,
-        options: 1,
+      })
+      .populate("categories", {
+        title: 1,
+        slug: 1,
       })
       .select({ ...select });
 
@@ -246,6 +248,11 @@ class ProductServices {
         category,
         title: { $regex: text, $options: "i" },
       })
+        .populate("category", {
+          _id: 1,
+          title: 1,
+          slug: 1,
+        })
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize);
 
@@ -255,6 +262,11 @@ class ProductServices {
     products = await Product.find({
       title: { $regex: text, $options: "i" },
     })
+      .populate("category", {
+        _id: 1,
+        title: 1,
+        slug: 1,
+      })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize);
     return products;

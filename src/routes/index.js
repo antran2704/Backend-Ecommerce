@@ -9,7 +9,7 @@ const UserRoutes = require("./UserRoutes");
 const DeleteRoutes = require("./DeleteRoutes");
 const CartRoutes = require("./CartRoutes");
 const DiscountRoutes = require("./DiscountRoutes");
-const VariantRoutes = require("./VariantRoutes");
+const AttributeRoutes = require("./AttributeRoutes");
 const HtmlRoutes = require("./HtmlRoutes");
 
 const routes = (app) => {
@@ -21,7 +21,7 @@ const routes = (app) => {
   app.use("/api/v1/products", ProductRoutes);
   app.use("/api/v1/orders", OrderRoutes);
   app.use("/api/v1/users", UserRoutes);
-  app.use("/api/v1/variants", VariantRoutes);
+  app.use("/api/v1/attributes", AttributeRoutes);
   app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));
   app.use("/public", express.static(path.resolve(__dirname, "../assets")));

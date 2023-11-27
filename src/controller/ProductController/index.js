@@ -145,8 +145,15 @@ const ProductController = {
   },
   getProductById: async (req, res) => {
     const { id } = req.params;
+
+    if(!id) {
+      return new BadResquestError().send(res);
+    }
+
+    const select = getSelect(req.query);
+
     try {
-      const product = await ProductServices.getProductById(id);
+      const product = await ProductServices.getProductById(id, select);
 
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
@@ -164,13 +171,13 @@ const ProductController = {
       const newProduct = await ProductServices.createProduct(data);
 
       if (!newProduct) {
-        return new NotFoundError(404, "Create product failed!").send(res);
+        return new BadResquestError(400, "Create product failed!").send(res);
       }
 
       const inventory = await InventoryServices.createInventory(newProduct._id);
 
       if (!inventory) {
-        return new NotFoundError(400, "Create inventory failed!").send(res);
+        return new BadResquestError(400, "Create inventory failed!").send(res);
       }
 
       return new CreatedResponse(201, newProduct).send(res);
@@ -200,12 +207,9 @@ const ProductController = {
     }
 
     const list = req.files;
-    console.log("list", list);
     const gallery = list.map(
       (item) => `${process.env.API_ENDPOINT}/${item.path}`
     );
-    console.log("gallery", gallery);
-
     return new CreatedResponse(201, gallery).send(res);
   },
   // [PATCH] A PRODUCT
