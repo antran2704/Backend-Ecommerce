@@ -50,16 +50,15 @@ const DiscountModel = new Schema(
       type: Number,
       default: 0,
     },
-    discount_user_used: {
-      type: Array,
-      default: [],
-      /*
-        {
-            id: user_id,
-            count: 0
-        }
-      */
-    },
+    discount_user_used: [
+      {
+        user_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user"
+        },
+        count: Number
+      }
+    ],
     discount_per_user: {
       type: Number,
       default: 0,
@@ -73,7 +72,7 @@ const DiscountModel = new Schema(
       type: Boolean,
       default: true,
     },
-    discount_publish: {
+    discount_public: {
       type: Boolean,
       default: true,
     },

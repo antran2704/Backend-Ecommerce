@@ -35,7 +35,6 @@ const CartController = {
       return new InternalServerError().send(res);
     }
   },
-
   updateCart: async (req, res) => {
     const { user_id } = req.params;
     const data = req.body;

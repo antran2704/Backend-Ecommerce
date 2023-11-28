@@ -4,9 +4,11 @@ const DiscountController = require("../../controller/DiscountController");
 const UserMiddleware = require("../../middlewares/Auth");
 
 // [PATCH] UPDATE DISCOUNT
-router.use(UserMiddleware.Authentication);
+// router.use(UserMiddleware.Authentication);
 
-router.patch("/:discount_code", DiscountController.updateDiscount);
+router.get("/search", DiscountController.searchDiscounts)
+
+router.patch("/:id", DiscountController.updateDiscount);
 
 // [POST] CREATE DISCOUNT
 router.post("/", DiscountController.createDiscount);

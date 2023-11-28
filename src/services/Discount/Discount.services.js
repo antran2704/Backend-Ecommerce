@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { Discount } = require("../../models");
 
@@ -7,12 +8,31 @@ class DiscountServices {
   // case 3: kiem tra ap dung cho tat ca san pham || 1 vai san pham
   // case 4: kiem tra discount code da ton tai hay chua
 
-  async getDiscounts() {
+  async getDiscountsAvailable() {
     const discount = await Discount.find({
       discount_active: true,
-      discount_publish: true,
-    }).lean();
+    })
+      .sort({ createdAt: -1 })
+      .lean();
     return discount;
+  }
+
+  async getDiscounts(select = {}) {
+    const discounts = await Discount.find({ ...select })
+      .sort({ createdAt: -1 })
+      .lean();
+    return discounts;
+  }
+
+  async getDiscountsWithPage(pageSize, currentPage, select = {}) {
+    const discounts = await Discount.find({})
+      .skip((currentPage - 1) * pageSize)
+      .limit(pageSize)
+      .select({ ...select })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return discounts;
   }
 
   async getDiscountByCode(discount_code, select) {
@@ -25,20 +45,139 @@ class DiscountServices {
   }
 
   async createDiscount(payload) {
-    const { discount_code, discount_start_date, discount_end_date } = payload;
-
-    console.log("payload:::", payload);
-
-    if (!discount_code || !discount_start_date || !discount_end_date) {
-      return null;
-    }
-
     const newDiscount = await Discount.create({ ...payload });
     return newDiscount;
   }
 
+  async searchDiscounts(text = "", start_date, end_date) {
+    if (start_date && end_date) {
+      const totalItems = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_start_date: { $gte: new Date(start_date) },
+        discount_end_date: { $lte: new Date(end_date) },
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return totalItems;
+    }
+
+    if (end_date) {
+      const totalItems = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_end_date: { $lte: new Date(end_date) },
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return totalItems;
+    }
+
+    if (start_date) {
+      const totalItems = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_start_date: { $gte: new Date(start_date) },
+      })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return totalItems;
+    }
+
+    const totalItems = await Discount.find({
+      $or: [
+        { discount_name: { $regex: text, $options: "i" } },
+        { discount_code: { $regex: text, $options: "i" } },
+      ],
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return totalItems;
+  }
+
+  async searchDiscountsWithPage(
+    text = "",
+    start_date,
+    end_date,
+    pageSize,
+    currentPage
+  ) {
+    if (start_date && end_date) {
+      const totalItems = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_start_date: { $gte: new Date(start_date) },
+        discount_end_date: { $lte: new Date(end_date) },
+      })
+        .skip((currentPage - 1) * pageSize)
+        .limit(pageSize)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return totalItems;
+    }
+
+    if (end_date) {
+      const totalItems = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_end_date: { $lte: new Date(end_date) },
+      })
+        .skip((currentPage - 1) * pageSize)
+        .limit(pageSize)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return totalItems;
+    }
+
+    if (start_date) {
+      const discounts = await Discount.find({
+        $or: [
+          { discount_name: { $regex: text, $options: "i" } },
+          { discount_code: { $regex: text, $options: "i" } },
+        ],
+        discount_start_date: { $gte: new Date(start_date) },
+      })
+        .skip((currentPage - 1) * pageSize)
+        .limit(pageSize)
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return discounts;
+    }
+
+    const discounts = await Discount.find({
+      $or: [
+        { discount_name: { $regex: text, $options: "i" } },
+        { discount_code: { $regex: text, $options: "i" } },
+      ],
+    })
+      .skip((currentPage - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return discounts;
+  }
+
   validDateDiscount(start_date, end_date) {
     if (
+      new Date() > new Date(start_date) ||
       new Date() > new Date(end_date) ||
       new Date(start_date) > new Date(end_date)
     ) {
@@ -48,13 +187,14 @@ class DiscountServices {
     return true;
   }
 
-  async updateDiscount(discount_code, payload) {
-    if (!discount_code) return null;
+  async updateDiscount(id, payload) {
+    if (!id || !isValidObjectId(id)) return null;
 
     const date = getDateTime();
     const updated = await Discount.findOneAndUpdate(
-      { discount_code },
-      { $set: { ...payload, updatedAt: date } }
+      { _id: id },
+      { $set: { ...payload, updatedAt: date } },
+      { upsert: true, new: true }
     );
     return updated;
   }
@@ -80,7 +220,7 @@ class DiscountServices {
         $push: {
           discount_user_used: { user_id, count: 1 },
         },
-        $inc: { discount_max_uses: -1, discount_used_count: 1 }
+        $inc: { discount_max_uses: -1, discount_used_count: 1 },
       }
     );
     return updated;
@@ -91,7 +231,13 @@ class DiscountServices {
 
     const updated = await Discount.findOneAndUpdate(
       { discount_code },
-      { $inc: { "discount_user_used.$[i].count": 1, discount_max_uses: -1, discount_used_count: 1 } },
+      {
+        $inc: {
+          "discount_user_used.$[i].count": 1,
+          discount_max_uses: -1,
+          discount_used_count: 1,
+        },
+      },
       {
         arrayFilters: [
           {

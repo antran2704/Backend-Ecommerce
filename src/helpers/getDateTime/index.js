@@ -4,4 +4,8 @@ const getDateTime = () => {
   return date;
 };
 
-module.exports = { getDateTime };
+const isValidDate = (date) => {
+  return !isNaN(new Date(date));
+}
+
+module.exports = { getDateTime, isValidDate };
