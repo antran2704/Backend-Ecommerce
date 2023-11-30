@@ -3,11 +3,6 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { Discount } = require("../../models");
 
 class DiscountServices {
-  // case 1: ngay bat dau phai nho hon ngay ket thuc || ngay ket thuc nho hon ngay hien tai
-  // case 2: kiem tra type discount (percent || fixed amout)
-  // case 3: kiem tra ap dung cho tat ca san pham || 1 vai san pham
-  // case 4: kiem tra discount code da ton tai hay chua
-
   async getDiscountsAvailable() {
     const discount = await Discount.find({
       discount_active: true,
@@ -18,7 +13,8 @@ class DiscountServices {
   }
 
   async getDiscounts(select = {}) {
-    const discounts = await Discount.find({ ...select })
+    const discounts = await Discount.find({})
+      .select({ ...select })
       .sort({ createdAt: -1 })
       .lean();
     return discounts;
@@ -33,6 +29,15 @@ class DiscountServices {
       .lean();
 
     return discounts;
+  }
+
+  async getDiscountById(id, select) {
+    if (!id || !isValidObjectId(id)) return null;
+
+    const discount = await Discount.findById({ _id: id })
+      .select({ ...select })
+      .lean();
+    return discount;
   }
 
   async getDiscountByCode(discount_code, select) {
@@ -248,6 +253,13 @@ class DiscountServices {
       }
     );
     return updated;
+  }
+
+  async deleteDiscount(id) {
+    if (!id || !isValidObjectId(id)) return null;
+
+    const discount = await Discount.findByIdAndDelete({ _id: id });
+    return discount;
   }
 }
 

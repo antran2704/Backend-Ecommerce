@@ -1,5 +1,5 @@
 ### get discounts
-GET http://localhost:3001/api/v1/discounts
+GET http://localhost:3001/api/v1/discounts?discount_name=1&discount_public=1&discount_type=1&discount_thumbnail=1&discount_code=1&discount_value=1&discount_active=1&discount_start_date=1&discount_end_date=1
 Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5Nzg5MjEyOSwiZXhwIjoxNjk3ODkyMTg5fQ.bZbDeaF_c-MeHqEhiKZBtY92fwZGZfHllJ6s6J-SxZo
 public-key: Key 228c718f-ea0b-4916-9c5e-086a5f9b4bd6
 

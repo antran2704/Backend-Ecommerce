@@ -10,6 +10,7 @@ const {
 } = require("../../helpers/successResponse");
 const getSelect = require("../../helpers/getSelect");
 const { isValidDate } = require("../../helpers/getDateTime");
+const convertObjectToString = require("../../helpers/convertObjectString");
 
 const DISCOUT_TYPE = ["fixed_amount", "percentage"];
 const DISCOUNT_APPLIES = ["all", "specific"];
@@ -66,6 +67,24 @@ const DiscountController = {
       return new InternalServerError(error.stack).send(res);
     }
   },
+  getDiscountById: async (req, res) => {
+    const { discount_id } = req.params;
+
+    if (!discount_id) {
+      return new BadResquestError(400, "Invalid discount id").send(res);
+    }
+
+    try {
+      const discount = await DiscountServices.getDiscountById(discount_id);
+      if (!discount) {
+        return new NotFoundError(404, "Discount not found").send(res);
+      }
+
+      return new GetResponse(200, discount).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
   createDiscount: async (req, res) => {
     const payload = req.body;
     const {
@@ -108,7 +127,6 @@ const DiscountController = {
       if (discount) {
         return new BadResquestError(400, "Discount is exited").send(res);
       }
-
       const newDiscount = await DiscountServices.createDiscount(payload);
 
       if (!newDiscount) {
@@ -207,16 +225,40 @@ const DiscountController = {
           discount_code
         );
 
-        if (discount) {
+        if (id !== convertObjectToString(discount._id)) {
           return new BadResquestError(400, "Discount is exited").send(res);
         }
       }
+
       const discount = await DiscountServices.updateDiscount(id, payload);
 
       if (!discount) {
         return new BadResquestError(400, "Updated discount failed").send(res);
       }
       return new CreatedResponse(201, discount).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  uploadThumbnail: async (req, res) => {
+    const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
+    return new CreatedResponse(201, thumbnail).send(res);
+  },
+  deleteDiscount: async (req, res) => {
+    const { discount_id } = req.params;
+
+    if (!discount_id) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      const discount = await DiscountServices.deleteDiscount(discount_id);
+
+      if (!discount) {
+        return new BadResquestError().send(res);
+      }
+
+      return new CreatedResponse(201, "Delete success discount").send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

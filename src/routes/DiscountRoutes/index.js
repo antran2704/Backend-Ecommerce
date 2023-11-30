@@ -2,16 +2,29 @@ const express = require("express");
 const router = express.Router();
 const DiscountController = require("../../controller/DiscountController");
 const UserMiddleware = require("../../middlewares/Auth");
+const multer = require("../../middlewares/Multer");
 
 // [PATCH] UPDATE DISCOUNT
 // router.use(UserMiddleware.Authentication);
 
-router.get("/search", DiscountController.searchDiscounts)
+router.get("/search", DiscountController.searchDiscounts);
 
 router.patch("/:id", DiscountController.updateDiscount);
 
+router.delete("/:discount_id", DiscountController.deleteDiscount);
+
+// UPLOAD THUMBNAIL
+router.post(
+  "/uploadThumbnail",
+  multer.upload("./uploads/discount").single("thumbnail"),
+  DiscountController.uploadThumbnail
+);
+
 // [POST] CREATE DISCOUNT
 router.post("/", DiscountController.createDiscount);
+
+// [GET] GET DISCOUNT BY CODE ID
+router.get("/id/:discount_id", DiscountController.getDiscountById);
 
 // [GET] GET DISCOUNT BY CODE ID
 router.get("/:discount_code", DiscountController.getDiscount);

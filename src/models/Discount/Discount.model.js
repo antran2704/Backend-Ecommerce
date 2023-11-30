@@ -54,10 +54,10 @@ const DiscountModel = new Schema(
       {
         user_id: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "user"
+          ref: "user",
         },
-        count: Number
-      }
+        count: Number,
+      },
     ],
     discount_per_user: {
       type: Number,
@@ -75,6 +75,10 @@ const DiscountModel = new Schema(
     discount_public: {
       type: Boolean,
       default: true,
+    },
+    discount_thumbnail: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
