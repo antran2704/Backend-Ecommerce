@@ -7,33 +7,49 @@ const OrderModel = new Schema(
       type: Schema.Types.ObjectId,
       default: () => mongoose.Types.ObjectId(),
     },
+    user_infor: {
+      name: {
+        type: String,
+        default: null,
+      },
+      address: {
+        type: String,
+        default: null,
+      },
+      email: {
+        type: String,
+        default: null,
+      },
+      phoneNumber: {
+        type: String,
+        default: null,
+      },
+    },
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "user",
     },
-    name: {
-      type: String,
-      default: null,
-    },
-    address: {
-      type: String,
-      default: null,
-    },
-    email: {
-      type: String,
-      default: null,
-    },
-    phoneNumber: {
-      type: String,
-      default: null,
-    },
     items: [
       {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
+        _id: {
+          type: Schema.Types.ObjectId,
+          ref: "product_item",
+        },
+        product_id: {
+          type: Schema.Types.ObjectId,
           ref: "product",
         },
+        name: String,
+        options: [{ type: String }],
         price: {
+          type: Number,
+          default: 0,
+        },
+        thumbnail: {
+          type: String,
+          default: null,
+        },
+        promotion_price: {
           type: Number,
           default: 0,
         },
@@ -47,13 +63,21 @@ const OrderModel = new Schema(
         },
       },
     ],
+    shipping_cost: {
+      type: Number,
+      default: 0,
+    },
+    sub_total: {
+      type: Number,
+      default: 0,
+    },
     total: {
       type: Number,
       default: 0,
     },
     status: {
       type: String,
-      enum: ["pending", "cancle", "success", "deliveri"],
+      enum: ["pending", "cancle", "success", "delivered"],
       default: "pending",
     },
     discount_codes: [
@@ -62,6 +86,10 @@ const OrderModel = new Schema(
         discount_code: String,
       },
     ],
+    payment_method: {
+      type: String,
+      require: true,
+    },
     cancleContent: {
       type: String,
       default: null,

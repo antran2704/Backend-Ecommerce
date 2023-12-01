@@ -17,11 +17,12 @@ router.patch("/:id", ProductItemController.updateProductItem);
 // [DELETE] A PRODUCT ITEM
 router.delete("/:id", ProductItemController.deleteProductItem);
 
-// [POST] CREATE PRODUCT ITEM
-router.post("/create", ProductItemController.createProductItems);
 
 // [GET] A PRODUCT ITEM WITH ID
 router.get("/item/:id", ProductItemController.getProductItem);
+
+// [POST] CREATE PRODUCT ITEM
+router.post("/", ProductItemController.createProductItems);
 
 // [GET] ALL PRODUCT ITEMS
 router.get("/:product_id", ProductItemController.getProductItems);

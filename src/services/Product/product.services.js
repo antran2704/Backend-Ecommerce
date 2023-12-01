@@ -198,6 +198,7 @@ class ProductServices {
         title: 1,
         slug: 1,
       })
+      .populate("variations")
       .select({ ...select });
 
     return product;

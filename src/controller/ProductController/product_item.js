@@ -10,6 +10,7 @@ const {
   CreatedResponse,
 } = require("../../helpers/successResponse");
 const { removeUndefindedObj } = require("../../helpers/NestedObjectParse");
+const { isValidObjectId } = require("mongoose");
 
 const ProductItemController = {
   getProductItems: async (req, res) => {
@@ -80,7 +81,21 @@ const ProductItemController = {
       let items = [];
       for (let i = 0; i < payloads.length; i++) {
         const payloadParse = removeUndefindedObj(payloads[i]);
-        const item = await ProductItemServices.createProductItem(payloadParse);
+        let item = null;
+
+        const { _id, ...rest } = payloadParse;
+
+        if (isValidObjectId(_id)) {
+          const variation = await ProductItemServices.getProductItemById(_id);
+
+          if (variation) {
+            item = await ProductItemServices.updateProductItem(_id, rest);
+          } else {
+            item = await ProductItemServices.createProductItem(rest);
+          }
+        } else {
+          item = await ProductItemServices.createProductItem(rest);
+        }
 
         if (item) {
           items.push(item);

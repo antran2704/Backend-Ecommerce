@@ -41,7 +41,7 @@ class OrderServices {
 
     const order = await Order.findById({ _id: order_id })
       .select({ ...select })
-      .populate("items.product", { _id: 1, title: 1 })
+      // .populate("items.product", { _id: 1, title: 1 })
       .lean();
     return order;
   }

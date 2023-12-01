@@ -54,8 +54,8 @@ class DiscountServices {
     return newDiscount;
   }
 
-  async searchDiscounts(text = "", start_date, end_date) {
-    if (start_date && end_date) {
+  async searchDiscounts(text = "", start_date = "", end_date = "") {
+    if (start_date.length > 0 && end_date.length > 0) {
       const totalItems = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },
@@ -70,7 +70,7 @@ class DiscountServices {
       return totalItems;
     }
 
-    if (end_date) {
+    if (end_date.length > 0) {
       const totalItems = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },
@@ -84,7 +84,7 @@ class DiscountServices {
       return totalItems;
     }
 
-    if (start_date) {
+    if (start_date.length > 0) {
       const totalItems = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },
@@ -112,12 +112,12 @@ class DiscountServices {
 
   async searchDiscountsWithPage(
     text = "",
-    start_date,
-    end_date,
+    start_date = "",
+    end_date = "",
     pageSize,
     currentPage
   ) {
-    if (start_date && end_date) {
+    if (start_date.length > 0 && end_date.length > 0) {
       const totalItems = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },
@@ -134,7 +134,7 @@ class DiscountServices {
       return totalItems;
     }
 
-    if (end_date) {
+    if (end_date.length > 0) {
       const totalItems = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },
@@ -150,7 +150,7 @@ class DiscountServices {
       return totalItems;
     }
 
-    if (start_date) {
+    if (start_date.length > 0) {
       const discounts = await Discount.find({
         $or: [
           { discount_name: { $regex: text, $options: "i" } },

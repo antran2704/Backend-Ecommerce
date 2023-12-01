@@ -91,6 +91,7 @@ const OrderController = {
   // [GET] AN ORDER
   getOrder: async (req, res) => {
     const { order_id } = req.params;
+    
     try {
       const order = await OrderServices.getOrder(order_id);
       if (!order) {
@@ -117,7 +118,7 @@ const OrderController = {
 
       const link = `${process.env.HOST_URL}/orders/${newOrder._id}`;
       let mailContent = {
-        to: data.email,
+        to: data.user_infor.email,
         subject: "Antran shop thông báo:",
         template: "email/newOrder",
         context: {
@@ -127,9 +128,7 @@ const OrderController = {
 
       handleSendMail(mailContent);
 
-      return new CreatedResponse(201, {
-        message: "Add new order succesfully",
-      }).send(res);
+      return new CreatedResponse(201, newOrder).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

@@ -49,7 +49,7 @@ const ProductItemModel = new Schema(
       default: null,
     },
     options: [{ type: String }],
-    thumbnail_url: {
+    thumbnail: {
       type: String,
       default: null,
     },
@@ -57,7 +57,7 @@ const ProductItemModel = new Schema(
       type: String,
       default: null,
     },
-    inventory_quantity: {
+    inventory: {
       type: Number,
       default: 0,
       require: true,
