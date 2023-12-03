@@ -1,7 +1,5 @@
 const { typeStatus, templateEmail } = require("./status");
 const handleSendMail = require("../../configs/mailServices");
-const { getDateTime } = require("../../helpers/getDateTime");
-const { Order } = require("../../models/index");
 
 const {
   InternalServerError,
@@ -13,6 +11,7 @@ const {
   CreatedResponse,
 } = require("../../helpers/successResponse");
 const { OrderServices } = require("../../services");
+const getSelect = require("../../helpers/getSelect");
 
 const OrderController = {
   // [GET] ORDERS
@@ -91,7 +90,7 @@ const OrderController = {
   // [GET] AN ORDER
   getOrder: async (req, res) => {
     const { order_id } = req.params;
-    
+
     try {
       const order = await OrderServices.getOrder(order_id);
       if (!order) {
@@ -118,7 +117,7 @@ const OrderController = {
 
       const link = `${process.env.HOST_URL}/orders/${newOrder._id}`;
       let mailContent = {
-        to: data.user_infor.email,
+        to: "phamtrangiaan27@gmail.com",
         subject: "Antran shop thông báo:",
         template: "email/newOrder",
         context: {
@@ -170,7 +169,7 @@ const OrderController = {
         return new NotFoundError(404, "Not found order").send(res);
       }
 
-      const updated = await OrderServices.updateOrder(order_id, payload);
+      const updated = await OrderServices.updateOrder(order_id, data);
       if (!updated) {
         return new BadResquestError(400, {
           message: "Updated order failed",
@@ -178,11 +177,11 @@ const OrderController = {
       }
 
       let mailContent = {
-        to: order.email,
+        to: order.user_infor.email,
         subject: "Antran shop thông báo:",
         template: templateEmail[data.status].template,
         context: {
-          orderId: order_id,
+          orderId: order.order_id,
           content: data.cancleContent,
         },
       };
@@ -193,19 +192,19 @@ const OrderController = {
         message: "Updated order succesfully",
       }).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   searchOrders: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE);
     const query = req.query;
-    const { search, page } = query;
+    const { page, ...restQuery } = query;
     const currentPage = page ? Number(page) : 1;
     try {
-      const totalItems = await OrderServices.searchOrders(search);
+      const totalItems = await OrderServices.searchOrders(restQuery);
 
       const orders = await OrderServices.searchOrdersWithPage(
-        search,
+        restQuery,
         PAGE_SIZE,
         currentPage
       );
@@ -219,13 +218,13 @@ const OrderController = {
         },
       });
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [DELETE] AN ORDER
   deleteOrder: async (req, res) => {
     const { order_id } = req.params;
-    if(!order_id) {
+    if (!order_id) {
       return new BadResquestError().send(res);
     }
 
@@ -234,7 +233,7 @@ const OrderController = {
       if (!order) {
         return new NotFoundError(404, "Delete order failed").send(res);
       }
-    
+
       return new CreatedResponse(201, {
         message: "Deleted order succesfully",
       }).send(res);

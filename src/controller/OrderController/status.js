@@ -1,6 +1,7 @@
 const typeStatus = {
   pending: "pending",
-  success: "success",
+  processing: "processing",
+  delivered: "delivered",
   cancle: "cancle",
 };
 
@@ -8,8 +9,11 @@ const templateEmail = {
   pending: {
     template: "email/pending",
   },
-  success: {
-    template: "email/success",
+  delivered: {
+    template: "email/delivered",
+  },
+  processing: {
+    template: "email/processing",
   },
   cancle: {
     template: "email/cancle",

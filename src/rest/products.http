@@ -4,7 +4,7 @@ GET http://localhost:3001/api/v1/products
 GET http://localhost:3001/api/v1/products/category/654446d696123fda4c00d7ff?color=Red
 
 ### Get product by id
-GET http://localhost:3001/api/v1/products/id/65214a05ca2dfd71e775cd83
+GET http://localhost:3001/api/v1/products/id/655df956a5123e38b7383964
 
 ### Get product by slug
 GET http://localhost:3001/api/v1/products/asdtest

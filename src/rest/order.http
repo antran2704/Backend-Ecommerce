@@ -5,7 +5,7 @@ GET http://localhost:3001/api/v1/orders
 GET http://localhost:3001/api/v1/orders/650a5fc7cf7feba3b1e455de
 
 ### Search order
-GET http://localhost:3001/api/v1/order/search?search=Antran+dev
+GET http://localhost:3001/api/v1/orders/search?start_date=2023-12-01
 
 
 ### Create order
@@ -13,9 +13,10 @@ POST http://localhost:3001/api/v1/orders
 content-type: application/json
 
 {
+    "order_id": "67840686-4f77-48a6-824f-90abbb02a2eb",
     "user_infor": {
-        "email": "phamtrangiaan27@gmail.com",
-        "name": "Antran dev",
+        "email": "luuquynhanh@gmail.com",
+        "name": "Luu quynh anh",
         "address": "55 Nguyễn Kiệm, Phường 3, Quận Gò Vấp, TP.Hồ Chí Minh",
         "phoneNumber": "0946003423"
     },
@@ -26,6 +27,28 @@ content-type: application/json
             "name": "Apple iPhone 15 Pro",
             "thumbnail": "http://localhost:3001/uploads/product/1700833232193Screenshot 2023-10-19 161718.png",
             "options": ["Red", "XL"],
+            "promotion_price": 0,
+            "price": 200,
+            "quantity": 3,
+            "link": "#"
+        },
+         {
+            "_id": "6569df1dfd94347d9e7c7410",
+            "product_id": "655d5020c53cf61a9718fa50",
+            "name": "Apple iPhone 15 Pro",
+            "thumbnail": "http://localhost:3001/uploads/product/1700833232193Screenshot 2023-10-19 161718.png",
+            "options": ["Red", "S"],
+            "promotion_price": 0,
+            "price": 200,
+            "quantity": 3,
+            "link": "#"
+        },
+        {
+            "_id": "6569df1dfd94347d9e7c7410",
+            "product_id": "655d5020c53cf61a9718fa50",
+            "name": "Apple iPhone 15 Pro",
+            "thumbnail": "http://localhost:3001/uploads/product/1700833232193Screenshot 2023-10-19 161718.png",
+            "options": ["Red", "M"],
             "promotion_price": 0,
             "price": 200,
             "quantity": 3,

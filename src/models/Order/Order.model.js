@@ -7,6 +7,10 @@ const OrderModel = new Schema(
       type: Schema.Types.ObjectId,
       default: () => mongoose.Types.ObjectId(),
     },
+    order_id: {
+      type: String,
+      require: true,
+    },
     user_infor: {
       name: {
         type: String,
@@ -77,7 +81,7 @@ const OrderModel = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "cancle", "success", "delivered"],
+      enum: ["pending", "cancle", "processing", "delivered"],
       default: "pending",
     },
     discount_codes: [

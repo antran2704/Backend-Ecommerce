@@ -1,4 +1,5 @@
 const { getDateTime } = require("../../helpers/getDateTime");
+const handleQueryParse = require("../../helpers/queryParse");
 const { Order } = require("../../models");
 
 class OrderServices {
@@ -64,37 +65,119 @@ class OrderServices {
     return updated;
   }
 
-  async searchOrders(searchText) {
-    const totalItems = await Order.find({
-      $or: [
-        {
-          name: { $regex: searchText, $options: "i" },
-        },
-        {
-          email: { $regex: searchText, $options: "i" },
-        },
-        {
-          phoneNumber: { $regex: searchText, $options: "i" },
-        },
-      ],
-    });
+  async searchOrders(queryParam) {
+    const queryParse = handleQueryParse(queryParam);
+    const { start_date, end_date } = queryParse;
+    const query = {};
+
+    if (start_date && end_date) {
+      query["date"] = {
+        $and: [
+          { createdAt: { $gte: new Date(start_date) } },
+          { createdAt: { $lte: new Date(end_date) } },
+        ],
+      };
+    } else if (start_date) {
+      query["date"] = {
+        createdAt: { $gte: new Date(start_date) },
+      };
+    } else if (end_date) {
+      query["date"] = { createdAt: { $lte: new Date(end_date) } };
+    }
+
+    for (const key of Object.keys(queryParam)) {
+      if (key === "search" && queryParam[key].length > 0) {
+        const option = {
+          $or: [
+            { order_id: { $regex: queryParam[key], $options: "i" } },
+            {
+              "user_infor.name": { $regex: queryParam[key], $options: "i" },
+            },
+            {
+              "user_infor.email": { $regex: queryParam[key], $options: "i" },
+            },
+            {
+              "user_infor.phoneNumber": {
+                $regex: queryParam[key],
+                $options: "i",
+              },
+            },
+          ],
+        };
+
+        query[key] = option;
+      }
+
+      if (key === "status" && queryParam[key].length > 0) {
+        query[key] = queryParam[key];
+      }
+
+      if (key === "payment_method" && queryParam[key].length > 0) {
+        query[key] = queryParam[key];
+      }
+    }
+
+    const { search, date, ...rest } = query;
+
+    const totalItems = await Order.find({ ...search, ...rest, ...date });
     return totalItems;
   }
 
-  async searchOrdersWithPage(searchText, pageSize, currentPage) {
-    const items = await Order.find({
-      $or: [
-        {
-          name: { $regex: searchText, $options: "i" },
-        },
-        {
-          email: { $regex: searchText, $options: "i" },
-        },
-        {
-          phoneNumber: { $regex: searchText, $options: "i" },
-        },
-      ],
-    })
+  async searchOrdersWithPage(queryParam, pageSize, currentPage) {
+    const queryParse = handleQueryParse(queryParam);
+    const { start_date, end_date } = queryParse;
+    const query = {};
+
+    if (start_date && end_date) {
+      query["date"] = {
+        $and: [
+          { createdAt: { $gte: new Date(start_date) } },
+          { createdAt: { $lte: new Date(end_date) } },
+        ],
+      };
+    } else if (start_date) {
+      query["date"] = {
+        createdAt: { $gte: new Date(start_date) },
+      };
+    } else if (end_date) {
+      query["date"] = { createdAt: { $lte: new Date(end_date) } };
+    }
+
+    for (const key of Object.keys(queryParam)) {
+      if (key === "search" && queryParam[key].length > 0) {
+        const option = {
+          $or: [
+            { order_id: { $regex: queryParam[key], $options: "i" } },
+            {
+              "user_infor.name": { $regex: queryParam[key], $options: "i" },
+            },
+            {
+              "user_infor.email": { $regex: queryParam[key], $options: "i" },
+            },
+            {
+              "user_infor.phoneNumber": {
+                $regex: queryParam[key],
+                $options: "i",
+              },
+            },
+          ],
+        };
+
+        query[key] = option;
+      }
+
+      if (key === "status" && queryParam[key].length > 0) {
+        query[key] = queryParam[key];
+      }
+
+      if (key === "payment_method" && queryParam[key].length > 0) {
+        query[key] = queryParam[key];
+      }
+    }
+
+    const { search, date, ...rest } = query;
+
+    const items = await Order.find({ ...search, ...rest, ...date })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .sort({ createdAt: -1 });
@@ -102,9 +185,9 @@ class OrderServices {
   }
 
   async deleteOrder(order_id) {
-    if(!order_id) return null;
+    if (!order_id) return null;
 
-    const order = await Order.findByIdAndRemove({_id: order_id});
+    const order = await Order.findByIdAndRemove({ _id: order_id });
     return order;
   }
 }
