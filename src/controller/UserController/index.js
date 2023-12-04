@@ -3,6 +3,7 @@ const {
   UserServices,
   KeyTokenServices,
   CartServices,
+  ApiKeyServices,
 } = require("../../services");
 
 const crypto = require("node:crypto");
@@ -121,8 +122,19 @@ const UserController = {
 
       const newCart = await CartServices.createCart(newUser._id);
 
+      const key = crypto.randomUUID();
+      const newApiKey = await ApiKeyServices.createApiKey(
+        newUser._id,
+        key,
+        "0000"
+      );
+
       if (!newCart) {
         return new BadResquestError(400, "Create cart failed").send(res);
+      }
+
+      if (!newApiKey) {
+        return new BadResquestError(400, "Create api key failed").send(res);
       }
 
       return new CreatedResponse(201, newUser).send(res);
@@ -200,7 +212,7 @@ const UserController = {
           $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
         });
 
-        return new GetResponse(200, { accessToken, keyTokenUpdated }).send(res);
+        return new GetResponse(200, { accessToken, publicKey }).send(res);
       }
 
       const keyToken = await KeyTokenServices.createKeyToken(

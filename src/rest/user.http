@@ -29,7 +29,7 @@ content-type: application/json
 }
 
 ### Create user
-POST  http://localhost:3001/api/v1/user
+POST  http://localhost:3001/api/v1/users
 content-type: application/json
 
 {
@@ -39,7 +39,7 @@ content-type: application/json
 }
 
 ### login
-POST  http://localhost:3001/api/v1/user/login
+POST  http://localhost:3001/api/v1/users/login
 content-type: application/json
 
 {

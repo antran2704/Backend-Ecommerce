@@ -1,8 +1,16 @@
 const {
   BadResquestError,
   UnauthorizedError,
+  ForbiddenError,
 } = require("../../helpers/errorResponse");
 const { verifyToken } = require("../../helpers/jwt");
+const { KeyTokenServices, ApiKeyServices } = require("../../services");
+
+const HEADER = {
+  API_KEY: "x-api-key",
+  AUTHORIZATION: "Authorization",
+  PUBLIC_KEY: "public-key",
+};
 
 const UserMiddleware = {
   checkValidEmail: async (req, res, next) => {
@@ -62,9 +70,9 @@ const UserMiddleware = {
 
     next();
   },
-  Authentication: async (req, res, next) => {
-    const tokenHeader = req.header("Authorization");
-    const publicKeyHeader = req.header("public-key");
+  authentication: async (req, res, next) => {
+    const tokenHeader = req.header(HEADER.AUTHORIZATION);
+    const publicKeyHeader = req.header(HEADER.PUBLIC_KEY);
     if (!tokenHeader || !publicKeyHeader) {
       return new UnauthorizedError().send(res);
     }
@@ -77,9 +85,42 @@ const UserMiddleware = {
       return new BadResquestError(400, decoded.message).send(res);
     }
 
+    const keyToken = await KeyTokenServices.getKeyByUserId(decoded.id);
+
+    if (!keyToken) {
+      return new UnauthorizedError().send(res);
+    }
+
     req.accessToken = accessToken;
     req.publicKey = publicKey;
+    req.keyToken = keyToken;
+
     next();
+  },
+  authorization: (permission) => {
+    return async (req, res, next) => {
+      const keyToken = req.keyToken;
+      const apiKeyHeader = req.header(HEADER.API_KEY);
+
+      if (!apiKeyHeader) {
+        return new ForbiddenError().send(res);
+      }
+
+      const key = apiKeyHeader.split(" ")[1];
+      const apikey = await ApiKeyServices.getApiKey(key);
+
+      if (!apikey || apikey.user_id.toString() !== keyToken.user.toString()) {
+        return new ForbiddenError().send(res);
+      }
+
+      if (!apikey.permissions.includes(permission)) {
+        return new ForbiddenError().send(res);
+      }
+
+      req.apiKey = apikey;
+
+      next();
+    };
   },
 };
 

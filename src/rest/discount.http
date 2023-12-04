@@ -1,10 +1,14 @@
 ### get discounts
-GET http://localhost:3001/api/v1/discounts?discount_name=1&discount_public=1&discount_type=1&discount_thumbnail=1&discount_code=1&discount_value=1&discount_active=1&discount_start_date=1&discount_end_date=1
-Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5Nzg5MjEyOSwiZXhwIjoxNjk3ODkyMTg5fQ.bZbDeaF_c-MeHqEhiKZBtY92fwZGZfHllJ6s6J-SxZo
-public-key: Key 228c718f-ea0b-4916-9c5e-086a5f9b4bd6
+GET http://localhost:3001/api/v1/discounts
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTY5ODIzMiwiZXhwIjoxNzAxNzg0NjMyfQ.Ld7cWCG6XLOy-aJ-w0BNcVhwvahwzxuregKy_bOEBRw
+public-key: Key 2a871df0-81cb-482d-9e47-a82346402a1f
+x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
 
 ### get discount
-GET http://localhost:3001/api/v1/discounts/code-123
+GET http://localhost:3001/api/v1/discounts/SUMMER-1234
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTY5ODIzMiwiZXhwIjoxNzAxNzg0NjMyfQ.Ld7cWCG6XLOy-aJ-w0BNcVhwvahwzxuregKy_bOEBRw
+public-key: Key 2a871df0-81cb-482d-9e47-a82346402a1f
+x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
 
 ### search discount
 GET http://localhost:3001/api/v1/discounts/search?search=code-test

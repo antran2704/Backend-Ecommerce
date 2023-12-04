@@ -4,7 +4,7 @@ const UserController = require("../../controller/UserController");
 const UserMiddleware = require("../../middlewares/Auth");
 
 // [GET] ALL USERS
-router.get("/getUsers", UserMiddleware.Authentication, UserController.getUsers);
+router.get("/getUsers", UserMiddleware.authentication, UserController.getUsers);
 
 // [POST] SEND CONFIRM EMAIL
 router.post(

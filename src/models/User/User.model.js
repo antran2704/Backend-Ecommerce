@@ -23,11 +23,11 @@ const UserModel = new Schema(
       type: String,
       default: null,
     },
-    role: {
-      type: String,
-      enum: ["admin", "user"],
-      default: "user",
-    },
+    // role: {
+    //   type: String,
+    //   enum: ["admin", "user"],
+    //   default: "user",
+    // },
     banned: {
       type: Boolean,
       default: false,
