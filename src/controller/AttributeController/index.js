@@ -46,7 +46,7 @@ const AttributeController = {
     }
   },
   getAttributesAvailable: async (req, res) => {
-    const query = {public: true}
+    const query = { public: true };
     try {
       const attributes = await AttributeServices.getAttributes(query);
 
@@ -105,9 +105,10 @@ const AttributeController = {
       const totalItems = await AttributeServices.searchTextItems(search);
 
       if (!totalItems) {
-        return new NotFoundError(404, `No attributes with title ${search}`).send(
-          res
-        );
+        return new NotFoundError(
+          404,
+          `No attributes with title ${search}`
+        ).send(res);
       }
 
       const items = await AttributeServices.searchTextWithPage(
@@ -117,9 +118,10 @@ const AttributeController = {
       );
 
       if (!items) {
-        return new NotFoundError(404, `No attributes with title ${search}`).send(
-          res
-        );
+        return new NotFoundError(
+          404,
+          `No attributes with title ${search}`
+        ).send(res);
       }
 
       return new GetResponse(200, items).send(res, {
@@ -144,7 +146,9 @@ const AttributeController = {
     const payloadParse = removeUndefindedObj(payload);
 
     try {
-      const newAttribute = await AttributeServices.createAttribute(payloadParse);
+      const newAttribute = await AttributeServices.createAttribute(
+        payloadParse
+      );
 
       if (!newAttribute) {
         return new BadResquestError(400, "Create attribute failed").send(res);
@@ -164,7 +168,10 @@ const AttributeController = {
     }
 
     try {
-      const attribute = await AttributeServices.addChildInAttribute(id, payload);
+      const attribute = await AttributeServices.addChildInAttribute(
+        id,
+        payload
+      );
 
       if (!attribute) {
         return new BadResquestError(400, "Add value in attribute failed").send(
@@ -188,7 +195,10 @@ const AttributeController = {
     const payloadParse = removeUndefindedObj(payload);
 
     try {
-      const attribute = await AttributeServices.updateAttribute(id, payloadParse);
+      const attribute = await AttributeServices.updateAttribute(
+        id,
+        payloadParse
+      );
       if (!attribute) {
         return new BadResquestError(400, "Update attribute failed");
       }
@@ -226,18 +236,18 @@ const AttributeController = {
   },
   deleteAttribute: async (req, res) => {
     const { id } = req.params;
-
     if (!id) {
       return new BadResquestError().send(res);
     }
 
     try {
       const attribute = await AttributeServices.deleteAttribute(id);
+
       if (!attribute) {
-        return new BadResquestError(400, "Delete attribute failed");
+        return new BadResquestError(400, "Delete attribute failed").send(res);
       }
 
-      return new CreatedResponse(201, variant).send(res);
+      return new CreatedResponse(201, attribute).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -256,9 +266,10 @@ const AttributeController = {
       );
 
       if (!attribute) {
-        return new BadResquestError(400, "Delete value in attribute failed").send(
-          res
-        );
+        return new BadResquestError(
+          400,
+          "Delete value in attribute failed"
+        ).send(res);
       }
 
       return new CreatedResponse(201, attribute).send(res);

@@ -16,10 +16,10 @@ class UserServices {
     return user;
   }
 
-  async getUserByEmail(email, selectOptions) {
+  async getUserByEmail(email, select) {
     if (!email) return null;
 
-    const user = await User.findOne({ email }).select({ ...selectOptions });
+    const user = await User.findOne({ email }).select({ ...select });
     return user;
   }
 

@@ -26,14 +26,13 @@ router.patch("/:id", AttributeController.updateAttribute);
 // [DELETE] DELETE ATTRIBUTE
 router.delete("/:id", AttributeController.deleteAttribute);
 
-// [POST] CREATE ATTRIBUTE
-router.post("/", AttributeController.createAttribute);
-
 // [GET] ATTRIBUTE BY ID
 router.get("/:id", AttributeController.getAttributeById);
 
+// [POST] CREATE ATTRIBUTE
+router.post("/", AttributeController.createAttribute);
+
 // [GET] ATTRIBUTE
 router.get("/", AttributeController.getAttributes);
-
 
 module.exports = router;

@@ -20,13 +20,21 @@ const CartModel = new Schema(
           ref: "product",
           require: true,
         },
-        variant: String,
+        variation_id: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product_item",
+          require: true,
+        },
+        options: { type: String, default: null },
         quantity: Number,
         price: Number,
-        inventory: Number,
       },
     ],
-    cart_cout: {
+    cart_count: {
+      type: Number,
+      default: 0,
+    },
+    cart_total: {
       type: Number,
       default: 0,
     },

@@ -10,10 +10,11 @@ class ProductItemServices {
     return variations;
   }
 
-  async getProductItemsWithPage(id, pageSize, currentPage) {
+  async getProductItemsWithPage(id, pageSize, currentPage, select = {}) {
     if (!id || !isValidObjectId(id)) return null;
 
     const variations = ProductItem.find({ product_id: id })
+      .select({ ...select })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .lean();
@@ -21,14 +22,12 @@ class ProductItemServices {
     return variations;
   }
 
-  async getProductItemById(id) {
-    if (
-      !id ||
-      !isValidObjectId(id)
-    )
-      return null;
+  async getProductItemById(id, select = {}) {
+    if (!id || !isValidObjectId(id)) return null;
 
-    const variation = ProductItem.findOne({ _id: id }).lean();
+    const variation = ProductItem.findOne({ _id: id })
+      .select({ ...select })
+      .lean();
     return variation;
   }
 

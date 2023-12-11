@@ -6,6 +6,9 @@ const { engine } = require("express-handlebars");
 const { default: helmet } = require("helmet");
 const compression = require("compression");
 
+// middleware
+env.config();
+
 const routes = require("./src/routes");
 const configHbs = require("./src/configs/handlerbar");
 const db = require("./src/db/index");
@@ -13,8 +16,6 @@ const db = require("./src/db/index");
 // database
 db.connect();
 
-// middleware
-env.config();
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(compression());

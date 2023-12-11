@@ -1,10 +1,11 @@
 const { KeyToken } = require("../../models");
 const convertObjectToString = require("../../helpers/convertObjectString");
 const { getDateTime } = require("../../helpers/getDateTime");
+const { isValidObjectId } = require("mongoose");
 
 class KeyTokenServices {
   async createKeyToken(user_id, privateKey, publicKey, refreshToken) {
-    if (!user_id || !privateKey || !publicKey || !refreshToken) {
+    if (!user_id || !isValidObjectId(user_id) || !privateKey || !publicKey || !refreshToken) {
       return null;
     }
 

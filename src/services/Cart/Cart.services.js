@@ -8,7 +8,17 @@ class CartServices {
 
     const cart = await Cart.findOne({
       cart_userId: convertObjectToString(user_id),
-    }).populate("cart_products.product_id", { inventory: 1 });
+    })
+      .populate("cart_products.product_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      })
+      .populate("cart_products.variation_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      });
     return cart;
   }
 
@@ -30,21 +40,51 @@ class CartServices {
     return shopInCart;
   }
 
-  async checkProductInCart(user_id, product_id, variation) {
+  getTotalPrice(items) {
+    const total = items.reduce((total, item) => {
+      return (total += item.quantity * item.price);
+    }, 0);
+
+    return total;
+  }
+
+  async checkProductInCart(user_id, product_id, variation_id) {
     if (!user_id || !product_id) return null;
 
     const productInCart = await Cart.findOne({
       cart_userId: convertObjectToString(user_id),
-      cart_products: { $elemMatch: { $and: [{ product_id }, { variation }] } },
+      cart_products: {
+        $elemMatch: { $and: [{ product_id }, { variation_id }] },
+      },
     });
 
     return productInCart;
   }
 
+  async updateCart(user_id, payload) {
+    if (!user_id) return null;
+    
+    const date = getDateTime();
+    const updatedCart = await Cart.findOneAndUpdate(
+      {
+        cart_userId: convertObjectToString(user_id),
+      },
+      {
+        $set: { ...payload, updatedAt: date },
+      },
+      {
+        new: true,
+        upsert: true,
+      }
+    );
+
+    return updatedCart;
+  }
+
   async updateItemsCart(user_id, payload) {
     if (!user_id) return null;
     const date = getDateTime();
-    const { product_id, variation, quantity, price, inventory } = payload;
+    const { product_id, variation_id, quantity, price, options } = payload;
 
     // check shop is exit
     // const shopInCart = await this.checkShopInCart(user_id, shop_id);
@@ -73,7 +113,7 @@ class CartServices {
     const productInCart = await this.checkProductInCart(
       user_id,
       product_id,
-      variation
+      variation_id
     );
 
     // case 3: đã có shop và chưa có sản phẩm với id
@@ -87,14 +127,15 @@ class CartServices {
           $push: {
             cart_products: {
               product_id,
-              variation,
+              variation_id,
               quantity,
               price,
-              inventory,
+              options,
             },
           },
           $set: { updatedAt: date },
-        }
+        },
+        { new: true, upsert: true }
       );
 
       return updatedCart;
@@ -111,9 +152,14 @@ class CartServices {
         {
           arrayFilters: [
             {
-              "i.product_id": product_id,
+              $and: [
+                { "i.product_id": product_id },
+                { "i.variation_id": variation_id },
+              ],
             },
           ],
+          new: true,
+          upsert: true,
         }
       );
       return updatedCart;
@@ -123,14 +169,14 @@ class CartServices {
   async deleteItemCart(user_id, payload) {
     if (!user_id) return null;
 
-    const { product_id, variation } = payload;
+    const { product_id, variation_id } = payload;
 
     if (!product_id) return null;
 
     const productInCart = await this.checkProductInCart(
       user_id,
       product_id,
-      variation
+      variation_id
     );
 
     if (!productInCart) return null;
@@ -141,8 +187,12 @@ class CartServices {
         cart_userId: convertObjectToString(user_id),
       },
       {
-        $pull: { cart_products: { product_id } },
+        $pull: { cart_products: { product_id, variation_id } },
         $set: { updatedAt: date },
+      },
+      {
+        new: true,
+        upsert: true,
       }
     );
 
@@ -158,7 +208,16 @@ class CartServices {
         cart_userId: convertObjectToString(user_id),
       },
       {
-        $set: { cart_products: [], updatedAt: date },
+        $set: {
+          cart_products: [],
+          cart_count: 0,
+          cart_total: 0,
+          updatedAt: date,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
       }
     );
     return updatedCart;

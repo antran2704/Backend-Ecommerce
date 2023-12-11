@@ -1,13 +1,13 @@
 ### get discounts
 GET http://localhost:3001/api/v1/discounts
-Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTY5ODIzMiwiZXhwIjoxNzAxNzg0NjMyfQ.Ld7cWCG6XLOy-aJ-w0BNcVhwvahwzxuregKy_bOEBRw
-public-key: Key 2a871df0-81cb-482d-9e47-a82346402a1f
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTgzMTg0MiwiZXhwIjoxNzAxOTE4MjQyfQ.1zPomG3qoCN4Fl94UPgVp1K4zd85No6_E59S-o7ZWc8
+public-key: Key fa44e80a-3e74-4b8b-8c55-620e011e3576
 x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
 
 ### get discount
 GET http://localhost:3001/api/v1/discounts/SUMMER-1234
-Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTY5ODIzMiwiZXhwIjoxNzAxNzg0NjMyfQ.Ld7cWCG6XLOy-aJ-w0BNcVhwvahwzxuregKy_bOEBRw
-public-key: Key 2a871df0-81cb-482d-9e47-a82346402a1f
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTgzMTg0MiwiZXhwIjoxNzAxOTE4MjQyfQ.1zPomG3qoCN4Fl94UPgVp1K4zd85No6_E59S-o7ZWc8
+public-key: Key fa44e80a-3e74-4b8b-8c55-620e011e3576
 x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
 
 ### search discount

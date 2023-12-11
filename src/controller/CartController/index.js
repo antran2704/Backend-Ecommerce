@@ -4,6 +4,7 @@ const {
   UserServices,
   ProductServices,
   DiscountServices,
+  ProductItemServices,
 } = require("../../services");
 const {
   InternalServerError,
@@ -38,7 +39,7 @@ const CartController = {
   updateCart: async (req, res) => {
     const { user_id } = req.params;
     const data = req.body;
-    const { product_id, quantity } = data;
+    const { product_id, variation_id, quantity } = data;
 
     if (!user_id || !data) {
       return new BadResquestError().send(res);
@@ -63,13 +64,41 @@ const CartController = {
 
       const product = await ProductServices.getProductById(data.product_id, {
         inventory: 1,
+        price: 1,
+        promotion_price: 1,
       });
 
       if (!product) {
         return new NotFoundError(404, "Not found product").send(res);
       }
 
-      if (quantity > product.inventory) {
+      data.price =
+        product.promotion_price > 0 ? product.promotion_price : product.price;
+
+      if (variation_id && isValidObjectId(variation_id)) {
+        const variationProduct = await ProductItemServices.getProductItemById(
+          variation_id,
+          { inventory: 1, price: 1, promotion_price: 1 }
+        );
+
+        if (!variationProduct) {
+          return new NotFoundError(404, "Not found variation product").send(
+            res
+          );
+        }
+
+        if (quantity > variationProduct.inventory) {
+          return new BadResquestError(
+            400,
+            "Quantity order bigger than inventory type variation"
+          ).send(res);
+        }
+
+        data.price =
+          variationProduct.promotion_price > 0
+            ? variationProduct.promotion_price
+            : variationProduct.price;
+      } else if (quantity > product.inventory) {
         return new BadResquestError(
           400,
           "Quantity order bigger than inventory"
@@ -82,9 +111,21 @@ const CartController = {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
-      return new CreatedResponse(201, { data, user_id }).send(res);
+      const totalItems = updatedCart.cart_products.length;
+      const totalPrice = CartServices.getTotalPrice(updatedCart.cart_products);
+
+      const updated = await CartServices.updateCart(user_id, {
+        cart_count: totalItems,
+        cart_total: totalPrice,
+      });
+
+      if (!updated) {
+        return new BadResquestError(400, "Updated cart failed").send(res);
+      }
+
+      return new CreatedResponse(201, updated).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   useDiscount: async (req, res) => {
@@ -212,7 +253,19 @@ const CartController = {
         );
       }
 
-      return new CreatedResponse(201, "Delete item success").send(res);
+      const totalItems = updatedCart.cart_products.length;
+      const totalPrice = CartServices.getTotalPrice(updatedCart.cart_products);
+
+      const updated = await CartServices.updateCart(user_id, {
+        cart_count: totalItems,
+        cart_total: totalPrice,
+      });
+
+      if (!updated) {
+        return new BadResquestError(400, "Updated cart failed").send(res);
+      }
+
+      return new CreatedResponse(201, updated).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }
@@ -252,7 +305,7 @@ const CartController = {
         ).send(res);
       }
 
-      return new CreatedResponse(201, "Delete all items success").send(res);
+      return new CreatedResponse(201, updatedCart).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

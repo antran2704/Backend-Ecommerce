@@ -19,15 +19,10 @@ const UserModel = new Schema(
       type: Boolean,
       default: false,
     },
-    avatar: {
+    avartar: {
       type: String,
       default: null,
     },
-    // role: {
-    //   type: String,
-    //   enum: ["admin", "user"],
-    //   default: "user",
-    // },
     banned: {
       type: Boolean,
       default: false,

@@ -1,4 +1,4 @@
-GET http://localhost:3001/api/v1/carts/6531174454986d0cfa0cddbc
+GET http://localhost:3001/api/v1/carts/656dda8c80d2bc76a5a4f07f
 
 ### Use discount
 GET http://localhost:3001/api/v1/carts/discount
@@ -11,14 +11,13 @@ content-type: application/json
 }
 
 ### Update cart item
-POST http://localhost:3001/api/v1/carts/6531174454986d0cfa0cddbc
+POST http://localhost:3001/api/v1/carts/update/656dda8c80d2bc76a5a4f07f
 content-type: application/json
 
 {
-    "inventory": 1,
-    "product_id": "652d3a71568c1e844f295b2c",
-    "variation": "normal",
-    "quantity": 1,
+    "product_id": "655d5020c53cf61a9718fa50",
+    "variation_id": "6569df1dfd94347d9e7c740a",
+    "quantity": 2,
     "price": 2000
 }
 

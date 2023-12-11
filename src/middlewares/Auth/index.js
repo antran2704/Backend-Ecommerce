@@ -91,6 +91,7 @@ const UserMiddleware = {
       return new UnauthorizedError().send(res);
     }
 
+    req.user_id = keyToken.user;
     req.accessToken = accessToken;
     req.publicKey = publicKey;
     req.keyToken = keyToken;

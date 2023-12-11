@@ -26,6 +26,8 @@ const {
 const { templateEmail } = require("./emailTemplate");
 const convertObjectToString = require("../../helpers/convertObjectString");
 const keyTokenServices = require("../../services/KeyToken/keyToken.services");
+const getSelect = require("../../helpers/getSelect");
+const { isValidObjectId } = require("mongoose");
 
 const UserController = {
   // [GET] USERS
@@ -43,13 +45,18 @@ const UserController = {
     }
   },
   getUser: async (req, res) => {
-    const { id } = req.params;
-    if (!id) {
+    const id = req.user_id;
+
+    if (!id || !isValidObjectId(id)) {
       return new BadResquestError(400, "Id is invalid").send(res);
     }
 
     try {
-      const users = await UserServices.getUser(id);
+      const users = await UserServices.getUser(id, {
+        name: 1,
+        email: 1,
+        avartar: 1,
+      });
 
       if (!users) {
         return new NotFoundError(404, "Not found user").send(res);
@@ -126,7 +133,7 @@ const UserController = {
       const newApiKey = await ApiKeyServices.createApiKey(
         newUser._id,
         key,
-        "0000"
+        "1111"
       );
 
       if (!newCart) {
@@ -149,14 +156,11 @@ const UserController = {
       return new BadResquestError(400, "Data login invalid").send(res);
     }
 
+    const query = req.query;
+    const select = getSelect(query);
+
     try {
-      const user = await UserServices.getUserByEmail(email, {
-        _id: 1,
-        name: 1,
-        email: 1,
-        password: 1,
-        banned: 1,
-      });
+      const user = await UserServices.getUserByEmail(email, select);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
@@ -197,6 +201,14 @@ const UserController = {
         ).send(res);
       }
 
+      const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
+        key: 1,
+      });
+
+      if (!apiKey) {
+        return new NotFoundError(404, "Not found api key");
+      }
+
       const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
         _id: 1,
         privateKey: 1,
@@ -206,17 +218,22 @@ const UserController = {
       if (keyTokenUser) {
         const keyTokenUpdated = await KeyTokenServices.updateKeyToken(
           user._id,
-          { privateKey, publicKey, refreshToken }
+          { privateKey, publicKey, refreshToken, apiKey }
         );
         await keyTokenUpdated.updateOne({
           $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
         });
 
-        return new GetResponse(200, { accessToken, publicKey }).send(res);
+        return new GetResponse(200, {
+          accessToken,
+          publicKey,
+          refreshToken,
+          apiKey: apiKey.key,
+        }).send(res);
       }
 
       const keyToken = await KeyTokenServices.createKeyToken(
-        convertObjectToString(user._id),
+        user._id,
         privateKey,
         publicKey,
         refreshToken
@@ -230,6 +247,7 @@ const UserController = {
         accessToken,
         publicKey,
         refreshToken,
+        apiKey: apiKey.key,
       }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -256,36 +274,37 @@ const UserController = {
     }
   },
   refreshToken: async (req, res) => {
-    const { refreshToken, id } = req.body;
+    const { refreshToken } = req.body;
 
-    if (!refreshToken || !id) {
+    if (!refreshToken) {
       return new BadResquestError(400, "body data is required").send(res);
     }
 
     try {
-      const user = await UserServices.getUser(id);
-
-      if (!user) {
-        return new NotFoundError(404, "Not found user").send(res);
-      }
-
-      const checkRefreshTokenUsed = await keyTokenServices.checkTokenUsed(
-        id,
-        refreshToken
-      );
-
-      if (checkRefreshTokenUsed) {
-        await KeyTokenServices.deleteToken(user._id);
-        return new BadResquestError(400, "Refresh token used").send(res);
-      }
-
       const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
+        user: 1,
         privateKey: 1,
         publicKey: 1,
       });
 
       if (!keyToken) {
         return new NotFoundError(404, "Not found key token").send(res);
+      }
+
+      const user = await UserServices.getUser(keyToken.user);
+
+      if (!user) {
+        return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      const checkRefreshTokenUsed = await keyTokenServices.checkTokenUsed(
+        keyToken.user,
+        refreshToken
+      );
+
+      if (checkRefreshTokenUsed) {
+        await KeyTokenServices.deleteToken(keyToken.user);
+        return new BadResquestError(400, "Refresh token used").send(res);
       }
 
       const decoded = verifyToken(refreshToken, keyToken.privateKey);

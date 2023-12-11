@@ -5,10 +5,10 @@ public-key: Key 56665beb-1966-4e59-865c-026e5b76bc20
 content-type: application/json
 
 ### Get user
-GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
+GET  http://localhost:3001/api/v1/users
+Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTg2Mzc0MSwiZXhwIjoxNzAxOTUwMTQxfQ.dgqqAfhp7cdrJ8ipi4RDRC_VUxHUReqEP-B_YNVe8T0
+public-key: Key 316c1e2d-62ec-4e0c-91a8-4f08021c115b
 
-### Get user by email
-GET  http://localhost:3001/api/v1/user/6523fe7d3012f7b84181c67c
 
 ### Send confirm email
 POST  http://localhost:3001/api/v1/user/send/confirmEmail
@@ -33,9 +33,9 @@ POST  http://localhost:3001/api/v1/users
 content-type: application/json
 
 {
-    "name": "Antrandev",
-    "email": "phamtrangiaan27@gmail.com",
-    "password": "$2b$10$ghjllp97RPLb.9wZz1AM8uPbT7ll5owHrh5ZUbEiRUp/dYdRq5fsa"
+    "name": "Mie",
+    "email": "mynguyen25203@gmail.com",
+    "password": "$2a$10$CKCvjes3I1kz5N2S8Aqk3eW8mt7IK7x2gZV.nk.XAIkOv9Rht6eX6"
 }
 
 ### login
@@ -48,12 +48,19 @@ content-type: application/json
 }
 
 ### refresh token
-POST  http://localhost:3001/api/v1/user/refreshToken
+POST  http://localhost:3001/api/v1/users/refreshToken
 content-type: application/json
 
  {
-    "id": "6531174454986d0cfa0cddbc",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MzExNzQ0NTQ5ODZkMGNmYTBjZGRiYyIsImlhdCI6MTY5OTE2NzU3MiwiZXhwIjoxNzE0NzE5NTcyfQ.KTmxwkQeJ0Zr063nyD6JKAXPOHeGa6DDNXV2sWVHDiw"
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTg2NjU4MiwiZXhwIjoxNzE3NDE4NTgyfQ.q0mKk7t8eZDzULeK5ub-41pLI7HrikquKfJCjumgywM"
+ }
+
+### Update user
+PATCH http://localhost:3001/api/v1/users/656dda8c80d2bc76a5a4f07f
+content-type: application/json
+
+ {
+    "avartar": "https://avatars.githubusercontent.com/u/91408302?v=4"
  }
 
 ### ban user

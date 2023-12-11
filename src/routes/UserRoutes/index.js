@@ -52,6 +52,6 @@ router.post("/", UserController.creatUser);
 router.patch("/:id", UserController.updateUser);
 
 // [GET] USER
-router.get("/:id", UserController.getUser);
+router.get("/", UserMiddleware.authentication, UserController.getUser);
 
 module.exports = router;

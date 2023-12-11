@@ -16,17 +16,17 @@ class ApiKeyServices {
     return newApiKey;
   }
 
-  async getApiKey(key) {
+  async getApiKey(key, select = {}) {
     if (!key) return null;
 
-    const apiKey = await ApiKey.findOne({ key }).lean();
+    const apiKey = await ApiKey.findOne({ key }).select({...select}).lean();
     return apiKey;
   }
 
-  async getApiKeyByUserId(user_id) {
+  async getApiKeyByUserId(user_id, select = {}) {
     if (!user_id || !isValidObjectId(user_id)) return null;
 
-    const apiKey = await ApiKey.findOne({ user_id }).lean();
+    const apiKey = await ApiKey.findOne({ user_id }).select({...select}).lean();
     return apiKey;
   }
 

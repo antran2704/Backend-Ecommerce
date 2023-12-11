@@ -40,7 +40,7 @@ const ProductModel = new Schema(
       type: Number,
       default: 0,
     },
-    promotionPrice: {
+    promotion_price: {
       type: Number,
       default: 0,
     },
@@ -64,6 +64,14 @@ const ProductModel = new Schema(
     public: {
       type: Boolean,
       default: false,
+    },
+    barcode: {
+      type: String,
+      default: null,
+    },
+    sku: {
+      type: String,
+      default: null,
     },
     viewer: {
       type: Number,

@@ -4,7 +4,7 @@ const path = require("path");
 const upload = (destination) => {
   const checkFileType = function (file, cb) {
     //Allowed file extensions
-    const fileTypes = /jpeg|jpg|png|gif|svg/;
+    const fileTypes = /jpeg|jpg|png|webp|gif|svg/;
 
     //check extension names
     const extName = fileTypes.test(
