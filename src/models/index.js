@@ -1,5 +1,6 @@
 const Category = require("./Category/Category.model");
-const User = require("./User/User.model");
+const User = require("./User/User.model"); 
+const Admin = require("./Admin/Admin.model"); 
 const Product = require("./Product/Product.model");
 const ProductItem = require("./Product/Product_item.model");
 const Order = require("./Order/Order.model");
@@ -14,6 +15,7 @@ const Attribute = require("./Attribute/Attribute.model");
 module.exports = {
   Category,
   User,
+  Admin,
   Product,
   ProductItem,
   Order,

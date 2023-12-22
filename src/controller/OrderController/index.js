@@ -11,7 +11,6 @@ const {
   CreatedResponse,
 } = require("../../helpers/successResponse");
 const { OrderServices } = require("../../services");
-const getSelect = require("../../helpers/getSelect");
 
 const OrderController = {
   // [GET] ORDERS

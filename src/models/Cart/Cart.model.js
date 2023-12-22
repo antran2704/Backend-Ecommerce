@@ -28,7 +28,7 @@ const CartModel = new Schema(
         options: { type: String, default: null },
         quantity: Number,
         price: Number,
-      },
+      }
     ],
     cart_count: {
       type: Number,

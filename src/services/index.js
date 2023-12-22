@@ -2,6 +2,7 @@ const CategoriesServices = require("./Categories/categories.services");
 const ProductServices = require("./Product/product.services");
 const ProductItemServices = require("./Product/product_item.services");
 const UserServices = require("./User/user.services");
+const AdminServices = require("./Admin/Admin.services");
 const KeyTokenServices = require("./KeyToken/keyToken.services");
 const ApiKeyServices = require("./ApiKey/ApiKey.services");
 const CartServices = require("./Cart/Cart.services");
@@ -15,6 +16,7 @@ module.exports = {
   ProductServices,
   ProductItemServices,
   UserServices,
+  AdminServices,
   KeyTokenServices,
   ApiKeyServices,
   CartServices,

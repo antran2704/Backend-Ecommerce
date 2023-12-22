@@ -84,12 +84,12 @@ const OrderModel = new Schema(
       enum: ["pending", "cancle", "processing", "delivered"],
       default: "pending",
     },
-    discount_codes: [
-      {
-        dicount_name: String,
-        discount_code: String,
-      },
-    ],
+    discount_codes: {
+      dicount_name: String,
+      discount_code: String,
+      discount_value: Number,
+      discount_min_value: Number,
+    },
     payment_method: {
       type: String,
       require: true,

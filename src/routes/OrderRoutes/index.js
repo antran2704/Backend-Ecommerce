@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const OrderController = require("../../controller/OrderController");
+const DiscountMiddleware = require("../../middlewares/Discount");
 
 // [GET] SEARCH ODERS
 router.get("/search", OrderController.searchOrders);
@@ -27,6 +28,6 @@ router.delete("/:order_id", OrderController.deleteOrder)
 router.get("/", OrderController.getOrders);
 
 // [POST] AN ORDER
-router.post("/", OrderController.createOrder);
+router.post("/", DiscountMiddleware.checkDiscount, OrderController.createOrder);
 
 module.exports = router;

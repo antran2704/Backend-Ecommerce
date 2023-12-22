@@ -6,6 +6,7 @@ const ProductRoutes = require("./ProductRoutes");
 const ProductrItemRoutes = require("./ProductRoutes/product_item");
 const OrderRoutes = require("./OrderRoutes");
 const UserRoutes = require("./UserRoutes");
+const AdminRoutes = require("./AdminRoutes");
 const DeleteRoutes = require("./DeleteRoutes");
 const CartRoutes = require("./CartRoutes");
 const DiscountRoutes = require("./DiscountRoutes");
@@ -21,6 +22,7 @@ const routes = (app) => {
   app.use("/api/v1/products", ProductRoutes);
   app.use("/api/v1/orders", OrderRoutes);
   app.use("/api/v1/users", UserRoutes);
+  app.use("/api/v1/admin", AdminRoutes);
   app.use("/api/v1/attributes", AttributeRoutes);
   app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));

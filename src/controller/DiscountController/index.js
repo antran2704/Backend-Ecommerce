@@ -138,6 +138,29 @@ const DiscountController = {
       return new InternalServerError(error.stack).send(res);
     }
   },
+  useDiscount: async (req, res) => {
+    // get discount from middleware
+    const { discount } = req;
+    const { discount_code, total } = req.body;
+
+    try {
+      let total_discount = 0;
+
+      if (discount.discount_type === "percentage") {
+        total_discount = total - (total * discount.discount_value) / 100;
+      } else {
+        total_discount = total - discount.discount_value;
+      }
+
+      return new GetResponse(200, {
+        discount_code,
+        total,
+        total_discount,
+      }).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
   searchDiscounts: async (req, res) => {
     const { search, start_date, end_date, page } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;

@@ -5,7 +5,7 @@ public-key: Key fa44e80a-3e74-4b8b-8c55-620e011e3576
 x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
 
 ### get discount
-GET http://localhost:3001/api/v1/discounts/SUMMER-1234
+GET http://localhost:3001/api/v1/discounts/ASDASd
 Authorization: Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NmRkYThjODBkMmJjNzZhNWE0ZjA3ZiIsImlhdCI6MTcwMTgzMTg0MiwiZXhwIjoxNzAxOTE4MjQyfQ.1zPomG3qoCN4Fl94UPgVp1K4zd85No6_E59S-o7ZWc8
 public-key: Key fa44e80a-3e74-4b8b-8c55-620e011e3576
 x-api-key: Key 1e818a62-4000-4af1-b978-26b89c374462
@@ -37,4 +37,14 @@ content-type: application/json
 {
  "discount_start_date": "2023-9-28",
  "discount_end_date": "2023-12-28"
+}
+
+### Use discount
+POST http://localhost:3001/api/v1/discounts/use
+content-type: application/json
+
+{
+    "discount_code": "SUMMER-1234",
+    "user_id": "656dda8c80d2bc76a5a4f07f",
+    "total": 179000
 }

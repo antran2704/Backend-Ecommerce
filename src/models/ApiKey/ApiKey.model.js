@@ -15,7 +15,7 @@ const ApiKeyModel = new Schema(
     permissions: {
       type: [String],
       enum: ["0000", "1111", "2222"],
-      default: "0000",
+      default: "1111",
     },
     status: {
       type: Boolean,

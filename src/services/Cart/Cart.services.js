@@ -63,7 +63,7 @@ class CartServices {
 
   async updateCart(user_id, payload) {
     if (!user_id) return null;
-    
+
     const date = getDateTime();
     const updatedCart = await Cart.findOneAndUpdate(
       {
@@ -76,7 +76,17 @@ class CartServices {
         new: true,
         upsert: true,
       }
-    );
+    )
+      .populate("cart_products.product_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      })
+      .populate("cart_products.variation_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      });
 
     return updatedCart;
   }
@@ -136,7 +146,17 @@ class CartServices {
           $set: { updatedAt: date },
         },
         { new: true, upsert: true }
-      );
+      )
+        .populate("cart_products.product_id", {
+          inventory: 1,
+          title: 1,
+          thumbnail: 1,
+        })
+        .populate("cart_products.variation_id", {
+          inventory: 1,
+          title: 1,
+          thumbnail: 1,
+        });
 
       return updatedCart;
     } else {
@@ -161,7 +181,17 @@ class CartServices {
           new: true,
           upsert: true,
         }
-      );
+      )
+        .populate("cart_products.product_id", {
+          inventory: 1,
+          title: 1,
+          thumbnail: 1,
+        })
+        .populate("cart_products.variation_id", {
+          inventory: 1,
+          title: 1,
+          thumbnail: 1,
+        });
       return updatedCart;
     }
   }
@@ -194,7 +224,17 @@ class CartServices {
         new: true,
         upsert: true,
       }
-    );
+    )
+      .populate("cart_products.product_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      })
+      .populate("cart_products.variation_id", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+      });
 
     return updatedCart;
   }
