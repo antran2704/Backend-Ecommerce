@@ -18,6 +18,7 @@ const CategoryModel = new Schema(
       type: String,
       require: true,
       default: null,
+      index: true
     },
     description: {
       type: String,

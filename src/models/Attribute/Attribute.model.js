@@ -10,12 +10,12 @@ const AttributeModel = new Schema(
     name: {
       type: String,
       require: true,
+      index: true
     },
     code: {
       type: String,
       require: true,
-      // slug: "name",
-      // unique: true,
+      index: true
     },
     variants: [
       {

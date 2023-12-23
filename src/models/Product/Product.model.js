@@ -10,6 +10,7 @@ const ProductModel = new Schema(
     title: {
       type: String,
       default: "",
+      index: true
     },
     categories: [
       {

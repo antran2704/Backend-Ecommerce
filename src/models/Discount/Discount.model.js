@@ -6,6 +6,7 @@ const DiscountModel = new Schema(
     discount_name: {
       type: String,
       require: true,
+      index: true
     },
     discount_description: {
       type: String,
@@ -14,6 +15,7 @@ const DiscountModel = new Schema(
     discount_code: {
       type: String,
       require: true,
+      index: true
     },
     discount_applies: {
       type: String,

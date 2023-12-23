@@ -7,6 +7,7 @@ const CartModel = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       require: true,
+      index: true
     },
     cart_status: {
       type: String,

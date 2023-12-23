@@ -5,6 +5,7 @@ const CategoryRoutes = require("./CategoryRoutes");
 const ProductRoutes = require("./ProductRoutes");
 const ProductrItemRoutes = require("./ProductRoutes/product_item");
 const OrderRoutes = require("./OrderRoutes");
+const OverviewRoutes = require("./OverviewRoutes");
 const UserRoutes = require("./UserRoutes");
 const AdminRoutes = require("./AdminRoutes");
 const DeleteRoutes = require("./DeleteRoutes");
@@ -21,6 +22,7 @@ const routes = (app) => {
   app.use("/api/v1/variations", ProductrItemRoutes);
   app.use("/api/v1/products", ProductRoutes);
   app.use("/api/v1/orders", OrderRoutes);
+  app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
   app.use("/api/v1/admin", AdminRoutes);
   app.use("/api/v1/attributes", AttributeRoutes);

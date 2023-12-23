@@ -10,10 +10,12 @@ const ProductItemModel = new Schema(
     product_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "product",
+      index: true
     },
     title: {
       type: String,
       default: null,
+      index: true
     },
     barcode: {
       type: String,

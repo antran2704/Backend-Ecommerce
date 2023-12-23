@@ -9,6 +9,7 @@ const CartServices = require("./Cart/Cart.services");
 const InventoryServices = require("./Inventory/Inventory.services");
 const DiscountServices = require("./Discount/Discount.services");
 const OrderServices = require("./Order/Order.services");
+const OverviewServices = require("./Overview/Overview.services");
 const AttributeServices = require("./Attribute/Attribute.services");
 
 module.exports = {
@@ -23,5 +24,6 @@ module.exports = {
   InventoryServices,
   DiscountServices,
   OrderServices,
-  AttributeServices
+  AttributeServices,
+  OverviewServices
 };

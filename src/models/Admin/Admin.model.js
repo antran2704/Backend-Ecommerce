@@ -6,10 +6,12 @@ const AdminModel = new Schema(
     name: {
       type: String,
       default: null,
+      index: true
     },
     email: {
       type: String,
       default: null,
+      index: true
     },
     password: {
       type: String,

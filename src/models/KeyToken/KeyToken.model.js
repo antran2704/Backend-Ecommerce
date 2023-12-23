@@ -7,6 +7,7 @@ const KeyTokenModel = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
       require: true,
+      index: true
     },
     privateKey: {
       type: String,

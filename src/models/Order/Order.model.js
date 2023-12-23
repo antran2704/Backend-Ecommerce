@@ -10,6 +10,7 @@ const OrderModel = new Schema(
     order_id: {
       type: String,
       require: true,
+      index: true
     },
     user_infor: {
       name: {
@@ -32,6 +33,7 @@ const OrderModel = new Schema(
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "user",
+      index: true
     },
     items: [
       {

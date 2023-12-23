@@ -7,6 +7,7 @@ const InventoryModel = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "product",
       require: true,
+      index: true
     },
     inventory_stock: {
       type: Number,
