@@ -28,6 +28,6 @@ router.delete("/:order_id", OrderController.deleteOrder)
 router.get("/", OrderController.getOrders);
 
 // [POST] AN ORDER
-router.post("/", DiscountMiddleware.checkDiscount, OrderController.createOrder);
+router.post("/", OrderController.createOrder);
 
 module.exports = router;

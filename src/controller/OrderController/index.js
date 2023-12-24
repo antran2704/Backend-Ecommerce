@@ -10,7 +10,7 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { OrderServices } = require("../../services");
+const { OrderServices, GrossDayServices } = require("../../services");
 
 const OrderController = {
   // [GET] ORDERS
@@ -104,6 +104,7 @@ const OrderController = {
   // [POST] AN ORDER
   createOrder: async (req, res) => {
     const data = req.body;
+
     if (!data) {
       return new BadResquestError().send(res);
     }
@@ -125,6 +126,47 @@ const OrderController = {
       };
 
       handleSendMail(mailContent);
+
+      const date = new Date().toLocaleDateString("en-GB");
+      const grossDay = await GrossDayServices.getGrossInDay(date);
+
+      if (!grossDay) {
+        const newGross = await GrossDayServices.createGross();
+
+        if (!newGross) {
+          return new BadResquestError(400, "Create new gross failed").send(res);
+        }
+
+        if (data.payment_method === "card") {
+          const query = {
+            $push: { orders: newOrder._id },
+            $inc: { gross: newOrder.total },
+          };
+
+          GrossDayServices.updateGross(newGross._id, query);
+        } else {
+          const query = {
+            $push: { orders: newOrder._id },
+          };
+
+          GrossDayServices.updateGross(newGross._id, query);
+        }
+      } else {
+        if (data.payment_method === "card") {
+          const query = {
+            $push: { orders: newOrder._id },
+            $inc: { gross: newOrder.total },
+          };
+
+          GrossDayServices.updateGross(grossDay._id, query);
+        } else {
+          const query = {
+            $push: { orders: newOrder._id },
+          };
+
+          GrossDayServices.updateGross(grossDay._id, query);
+        }
+      }
 
       return new CreatedResponse(201, newOrder).send(res);
     } catch (error) {
@@ -186,6 +228,35 @@ const OrderController = {
       };
 
       handleSendMail(mailContent);
+
+      if (data.status === typeStatus.delivered && order.payment_method !== "card") {
+        const date = new Date(order.createdAt).toLocaleDateString("en-GB");
+        const grossDay = await GrossDayServices.getGrossInDay(date);
+
+        if (!grossDay) {
+          const newGross = await GrossDayServices.createGross();
+
+          if (!newGross) {
+            return new BadResquestError(400, "Create new gross failed").send(
+              res
+            );
+          }
+
+          const query = {
+            $push: { orders: newOrder._id },
+            $inc: { gross: newOrder.total },
+          };
+
+          GrossDayServices.updateGross(newGross._id, query);
+        } else {
+          const query = {
+            $push: { orders: newOrder._id },
+            $inc: { gross: newOrder.total },
+          };
+
+          GrossDayServices.updateGross(grossDay._id, query);
+        }
+      }
 
       return new CreatedResponse(201, {
         message: "Updated order succesfully",
