@@ -1,25 +1,29 @@
 const { isValidObjectId } = require("mongoose");
 const { getDateTime } = require("../../helpers/getDateTime");
-const { GrossDay } = require("../../models/index");
+const { GrossMonth } = require("../../models/index");
 
-class GrossServices {
-  async getGross() {
-    const items = await GrossDay.find({}).lean().limit(7);
+class GrossMonthServices {
+  async getGrossByYear(year) {
+    if (!year) {
+      year = new Date().getFullYear();
+    }
+
+    const items = await GrossMonth.find({ year }).lean();
 
     return items;
   }
 
-  async getGrossInDay(date) {
-    if (!date) return null;
+  async getGrossByMonth(month, year) {
+    if (!month || !year) return null;
 
-    const item = await GrossDay.findOne({ date }).lean();
+    const item = await GrossMonth.findOne({ month, year }).lean();
     return item;
   }
 
-  async getGrossWithId(gross_id) {
+  async getGrossById(gross_id) {
     if (!gross_id || !isValidObjectId(gross_id)) return null;
 
-    const item = await GrossDay.findById({ _id: gross_id }).lean();
+    const item = await GrossMonth.findById({ _id: gross_id }).lean();
     return item;
   }
 
@@ -27,13 +31,10 @@ class GrossServices {
     const date = getDateTime();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-    const day = date.getDate();
 
-    const item = await GrossDay.create({
-      date: date.toLocaleDateString("en-GB"),
+    const item = await GrossMonth.create({
       month,
       year,
-      day,
     });
 
     return item;
@@ -44,7 +45,7 @@ class GrossServices {
 
     const date = getDateTime();
 
-    const item = await GrossDay.findByIdAndUpdate(
+    const item = await GrossMonth.findByIdAndUpdate(
       { _id: gross_id },
       {
         ...query,
@@ -57,4 +58,4 @@ class GrossServices {
   }
 }
 
-module.exports = new GrossServices();
+module.exports = new GrossMonthServices();

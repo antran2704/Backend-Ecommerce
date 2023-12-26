@@ -11,7 +11,7 @@ const DiscountServices = require("./Discount/Discount.services");
 const OrderServices = require("./Order/Order.services");
 const OverviewServices = require("./Overview/Overview.services");
 const AttributeServices = require("./Attribute/Attribute.services");
-const GrossDayServices = require("./GrossDay/grossDay.services");
+const { GrossDateServices, GrossMonthServices } = require("./Gross");
 
 module.exports = {
   CategoriesServices,
@@ -27,5 +27,6 @@ module.exports = {
   OrderServices,
   AttributeServices,
   OverviewServices,
-  GrossDayServices,
+  GrossDateServices,
+  GrossMonthServices
 };

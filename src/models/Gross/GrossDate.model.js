@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const GrossDayModel = new Schema(
+const GrossDateModel = new Schema(
   {
     day: {
       type: String,
@@ -26,6 +26,18 @@ const GrossDayModel = new Schema(
         ref: "order",
       },
     ],
+    orders_delivered: {
+      type: Number,
+      default: 0,
+    },
+    orders_cancle: {
+      type: Number,
+      default: 0,
+    },
+    sub_gross: {
+      type: Number,
+      default: 0,
+    },
     gross: {
       type: Number,
       default: 0,
@@ -34,6 +46,6 @@ const GrossDayModel = new Schema(
   { timestamps: true }
 );
 
-const GrossDay = mongoose.model("gross_day", GrossDayModel);
+const GrossDay = mongoose.model("gross_day", GrossDateModel);
 
 module.exports = GrossDay;

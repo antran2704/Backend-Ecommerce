@@ -3,12 +3,19 @@ const {
   BadResquestError,
 } = require("../../helpers/errorResponse");
 const { GetResponse } = require("../../helpers/successResponse");
-const { OverviewServices } = require("../../services");
+const { OverviewServices, GrossDateServices } = require("../../services");
 
 const OverviewController = {
   getOverviewsInHome: async (req, res) => {
+    let { date } = req.query;
+
+    if (!date) {
+      date = new Date().toLocaleDateString("en-GB");
+    }
+
     try {
-      const total_orders = await OverviewServices.getOrdersToday();
+      const item = await GrossDateServices.getGrossInDay(date);
+
       const pending_orders = await OverviewServices.getOrdersWithStatus(
         "pending"
       );
@@ -22,15 +29,27 @@ const OverviewController = {
         "cancle"
       );
 
+      if (item) {
+        return new GetResponse(200, {
+          total_orders: item.orders,
+          gross: item.gross,
+          pending_orders,
+          processing_orders,
+          delivered_orders,
+          cancle_orders,
+        }).send(res);
+      }
+
       return new GetResponse(200, {
-        total_orders,
+        total_orders: [],
+        gross: 0,
         pending_orders,
         processing_orders,
         delivered_orders,
         cancle_orders,
       }).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
 

@@ -10,7 +10,12 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { OrderServices, GrossDayServices } = require("../../services");
+const {
+  OrderServices,
+  GrossDateServices,
+  GrossMonthServices,
+} = require("../../services");
+const { GrossYearhServices } = require("../../services/Gross");
 
 const OrderController = {
   // [GET] ORDERS
@@ -127,50 +132,115 @@ const OrderController = {
 
       handleSendMail(mailContent);
 
-      const date = new Date().toLocaleDateString("en-GB");
-      const grossDay = await GrossDayServices.getGrossInDay(date);
+      const date = new Date();
+      const grossDay = await GrossDateServices.getGrossInDay(
+        date.toLocaleDateString("en-GB")
+      );
 
       if (!grossDay) {
-        const newGross = await GrossDayServices.createGross();
+        const newGross = await GrossDateServices.createGross();
 
         if (!newGross) {
           return new BadResquestError(400, "Create new gross failed").send(res);
         }
 
-        if (data.payment_method === "card") {
-          const query = {
-            $push: { orders: newOrder._id },
-            $inc: { gross: newOrder.total },
-          };
+        // if (data.payment_method === "card") {
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //     $inc: { gross: newOrder.total },
+        //   };
 
-          GrossDayServices.updateGross(newGross._id, query);
-        } else {
-          const query = {
-            $push: { orders: newOrder._id },
-          };
+        //   GrossDayServices.updateGross(newGross._id, query);
+        // } else {
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //   };
 
-          GrossDayServices.updateGross(newGross._id, query);
-        }
+        //   GrossDayServices.updateGross(newGross._id, query);
+        // }
+
+        const query = {
+          $push: { orders: newOrder._id },
+          $inc: { sub_gross: newOrder.total },
+        };
+
+        GrossDateServices.updateGross(newGross._id, query);
       } else {
-        if (data.payment_method === "card") {
-          const query = {
-            $push: { orders: newOrder._id },
-            $inc: { gross: newOrder.total },
-          };
+        // if (data.payment_method === "card") {
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //     $inc: { gross: newOrder.total },
+        //   };
 
-          GrossDayServices.updateGross(grossDay._id, query);
-        } else {
-          const query = {
-            $push: { orders: newOrder._id },
-          };
+        //   GrossDayServices.updateGross(grossDay._id, query);
+        // } else {
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //   };
 
-          GrossDayServices.updateGross(grossDay._id, query);
+        //   GrossDayServices.updateGross(grossDay._id, query);
+        // }
+
+        const query = {
+          $push: { orders: newOrder._id },
+          $inc: { sub_gross: newOrder.total },
+        };
+
+        GrossDateServices.updateGross(grossDay._id, query);
+      }
+
+      const grossYear = await GrossYearhServices.getGrossByYear(
+        date.getFullYear()
+      );
+
+      if (!grossYear) {
+        const newGross = await GrossYearhServices.createGross();
+
+        if (!newGross) {
+          return new BadResquestError(400, "Create new gross failed").send(res);
         }
+
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossYearhServices.updateGross(newGross._id, query);
+      } else {
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossYearhServices.updateGross(grossYear._id, query);
+      }
+
+      const grossMonth = await GrossMonthServices.getGrossByMonth(
+        date.getMonth() + 1,
+        date.getFullYear()
+      );
+
+      if (!grossMonth) {
+        const newGross = await GrossMonthServices.createGross();
+
+        if (!newGross) {
+          return new BadResquestError(400, "Create new gross failed").send(res);
+        }
+
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossMonthServices.updateGross(newGross._id, query);
+      } else {
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossMonthServices.updateGross(grossMonth._id, query);
       }
 
       return new CreatedResponse(201, newOrder).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [PATCH] AN ORDER
@@ -229,32 +299,107 @@ const OrderController = {
 
       handleSendMail(mailContent);
 
-      if (data.status === typeStatus.delivered && order.payment_method !== "card") {
-        const date = new Date(order.createdAt).toLocaleDateString("en-GB");
-        const grossDay = await GrossDayServices.getGrossInDay(date);
+      const date = new Date(order.createdAt);
 
-        if (!grossDay) {
-          const newGross = await GrossDayServices.createGross();
+      if (data.status === typeStatus.delivered) {
+        const grossDay = await GrossDateServices.getGrossInDay(
+          date.toLocaleDateString("en-GB")
+        );
 
-          if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(
-              res
-            );
-          }
-
-          const query = {
-            $push: { orders: newOrder._id },
-            $inc: { gross: newOrder.total },
+        if (grossDay) {
+          const queryGrossDate = {
+            $inc: { gross: order.total, orders_delivered: 1 },
           };
 
-          GrossDayServices.updateGross(newGross._id, query);
-        } else {
-          const query = {
-            $push: { orders: newOrder._id },
-            $inc: { gross: newOrder.total },
+          GrossDateServices.updateGross(grossDay._id, queryGrossDate);
+        }
+
+        const grossMonth = await GrossMonthServices.getGrossByMonth(
+          date.getMonth(),
+          date.getFullYear()
+        );
+
+        if (grossMonth) {
+          const queryGrossMonth = {
+            $inc: { gross: order.total, orders_delivered: 1 },
           };
 
-          GrossDayServices.updateGross(grossDay._id, query);
+          GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
+        }
+
+        const grossYear = await GrossYearhServices.getGrossByYear(
+          date.getFullYear()
+        );
+
+        if (grossYear) {
+          const queryGrossMonth = {
+            $inc: { gross: order.total, orders_delivered: 1 },
+          };
+
+          GrossYearhServices.updateGross(grossYear._id, queryGrossMonth);
+        }
+
+        // if (!grossDay) {
+        //   const newGross = await GrossDayServices.createGross();
+
+        //   if (!newGross) {
+        //     return new BadResquestError(400, "Create new gross failed").send(
+        //       res
+        //     );
+        //   }
+
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //     $inc: { gross: newOrder.total },
+        //   };
+
+        //   GrossDayServices.updateGross(newGross._id, query);
+        // } else {
+        //   const query = {
+        //     $push: { orders: newOrder._id },
+        //     $inc: { gross: newOrder.total },
+        //   };
+
+        //   GrossDayServices.updateGross(grossDay._id, query);
+        // }
+      }
+
+      if (data.status === typeStatus.cancle) {
+        const grossDay = await GrossDateServices.getGrossInDay(
+          date.toLocaleDateString("en-GB")
+        );
+
+        if (grossDay) {
+          const queryGrossDate = {
+            $inc: { orders_cancle: 1 },
+          };
+
+          GrossDateServices.updateGross(grossDay._id, queryGrossDate);
+        }
+
+        const grossMonth = await GrossMonthServices.getGrossByMonth(
+          date.getMonth(),
+          date.getFullYear()
+        );
+
+        if (grossMonth) {
+          const queryGrossMonth = {
+            $inc: { orders_cancle: 1 },
+          };
+
+          GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
+        }
+
+        const grossYear = await GrossYearhServices.getGrossByYear(
+          date.getFullYear()
+        );
+
+        if (grossYear) {
+          const queryGrossMonth = {
+            $inc: { orders_cancle: 1 },
+          };
+
+          GrossYearhServices.updateGross(grossYear._id, queryGrossMonth);
         }
       }
 
