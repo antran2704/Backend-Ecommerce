@@ -18,9 +18,9 @@ router.patch("/update/total", GrossMonthController.updateTotalGross);
 router.post("/", GrossMonthController.createGross);
 
 // [GET] GROSS MONTH IN 1 YEAR
-router.get("/year", GrossMonthController.getGrossById);
+router.get("/year", GrossMonthController.getGrossByYear);
 
-// [GET] GROSS BY MONTH
+// [GET] GROSS BY MONTH & YEAR
 router.get("/", GrossMonthController.getGrossByMonth);
 
 module.exports = router;

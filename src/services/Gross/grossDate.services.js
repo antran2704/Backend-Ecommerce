@@ -7,7 +7,7 @@ class GrossDateServices {
     const currentDate = new Date();
     const preDate = new Date();
     preDate.setDate(currentDate.getDate() - 5);
-    
+
     const items = await GrossDate.find({
       $and: [
         { createdAt: { $gte: new Date(preDate) } },
@@ -16,6 +16,23 @@ class GrossDateServices {
     })
       .lean()
       .limit(5);
+
+    return items;
+  }
+
+  async getGrossInWeek(start_date) {
+    const startDate = new Date(start_date);
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + 6);
+
+    const items = await GrossDate.find({
+      $and: [
+        { createdAt: { $gte: new Date(startDate) } },
+        { createdAt: { $lte: new Date(endDate) } },
+      ],
+    })
+      .lean()
+      .limit(7);
 
     return items;
   }
@@ -40,7 +57,6 @@ class GrossDateServices {
     const item = await GrossDate.find({ month, year }).lean();
     return item;
   }
-
 
   async createGross(data) {
     const date = getDateTime();

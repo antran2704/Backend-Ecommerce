@@ -15,7 +15,8 @@ const {
   GrossDateServices,
   GrossMonthServices,
 } = require("../../services");
-const { GrossYearhServices } = require("../../services/Gross");
+const { GrossYearServices } = require("../../services/Gross");
+const { Order } = require("../../models");
 
 const OrderController = {
   // [GET] ORDERS
@@ -115,6 +116,12 @@ const OrderController = {
     }
 
     try {
+      const order = await OrderServices.getOrderByOrderID(data.order_id);
+
+      if (order) {
+        return new BadResquestError(400, "Order ID is exit").send(res);
+      }
+
       const newOrder = await OrderServices.createOrder(data);
       if (!newOrder) {
         return new BadResquestError(400, "Create new order failed").send(res);
@@ -189,30 +196,6 @@ const OrderController = {
         GrossDateServices.updateGross(grossDay._id, query);
       }
 
-      const grossYear = await GrossYearhServices.getGrossByYear(
-        date.getFullYear()
-      );
-
-      if (!grossYear) {
-        const newGross = await GrossYearhServices.createGross();
-
-        if (!newGross) {
-          return new BadResquestError(400, "Create new gross failed").send(res);
-        }
-
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossYearhServices.updateGross(newGross._id, query);
-      } else {
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossYearhServices.updateGross(grossYear._id, query);
-      }
-
       const grossMonth = await GrossMonthServices.getGrossByMonth(
         date.getMonth() + 1,
         date.getFullYear()
@@ -236,6 +219,30 @@ const OrderController = {
         };
 
         GrossMonthServices.updateGross(grossMonth._id, query);
+      }
+
+      const grossYear = await GrossYearServices.getGrossByYear(
+        date.getFullYear()
+      );
+
+      if (!grossYear) {
+        const newGross = await GrossYearServices.createGross();
+
+        if (!newGross) {
+          return new BadResquestError(400, "Create new gross failed").send(res);
+        }
+
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossYearServices.updateGross(newGross._id, query);
+      } else {
+        const query = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        GrossYearServices.updateGross(grossYear._id, query);
       }
 
       return new CreatedResponse(201, newOrder).send(res);
@@ -315,7 +322,7 @@ const OrderController = {
         }
 
         const grossMonth = await GrossMonthServices.getGrossByMonth(
-          date.getMonth(),
+          date.getMonth() + 1,
           date.getFullYear()
         );
 
@@ -327,7 +334,7 @@ const OrderController = {
           GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
         }
 
-        const grossYear = await GrossYearhServices.getGrossByYear(
+        const grossYear = await GrossYearServices.getGrossByYear(
           date.getFullYear()
         );
 
@@ -336,7 +343,7 @@ const OrderController = {
             $inc: { gross: order.total, orders_delivered: 1 },
           };
 
-          GrossYearhServices.updateGross(grossYear._id, queryGrossMonth);
+          GrossYearServices.updateGross(grossYear._id, queryGrossMonth);
         }
 
         // if (!grossDay) {
@@ -378,7 +385,7 @@ const OrderController = {
         }
 
         const grossMonth = await GrossMonthServices.getGrossByMonth(
-          date.getMonth(),
+          date.getMonth() + 1,
           date.getFullYear()
         );
 
@@ -390,7 +397,7 @@ const OrderController = {
           GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
         }
 
-        const grossYear = await GrossYearhServices.getGrossByYear(
+        const grossYear = await GrossYearServices.getGrossByYear(
           date.getFullYear()
         );
 
@@ -399,7 +406,7 @@ const OrderController = {
             $inc: { orders_cancle: 1 },
           };
 
-          GrossYearhServices.updateGross(grossYear._id, queryGrossMonth);
+          GrossYearServices.updateGross(grossYear._id, queryGrossMonth);
         }
       }
 

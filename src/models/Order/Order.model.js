@@ -10,7 +10,8 @@ const OrderModel = new Schema(
     order_id: {
       type: String,
       require: true,
-      index: true
+      index: true,
+      unique: true,
     },
     user_infor: {
       name: {

@@ -3,18 +3,19 @@ const {
   BadResquestError,
   NotFoundError,
 } = require("../../helpers/errorResponse");
+const getSelect = require("../../helpers/getSelect");
 const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { GrossMonthServices } = require("../../services");
+const { GrossYearServices } = require("../../services");
 
-const GrossMonthController = {
-  getGrossByYear: async (req, res) => {
-    const { gross_year } = req.query;
+const GrossYearController = {
+  getGross: async (req, res) => {
+    const select = getSelect(req.query);
 
     try {
-      const items = await GrossMonthServices.getGrossByYear(gross_year);
+      const items = await GrossYearServices.getGross(select);
 
       if (!items) {
         return new NotFoundError().send(res);
@@ -25,24 +26,11 @@ const GrossMonthController = {
       return new InternalServerError().send(res);
     }
   },
-  getGrossByMonth: async (req, res) => {
-    const { gross_month, gross_year } = req.query;
+  getGrossByYear: async (req, res) => {
+    const {gross_year} = req.query;
+    
     try {
-      const item = await GrossMonthServices.getGrossByMonth(gross_month, gross_year);
-
-      if (!item) {
-        return new NotFoundError().send(res);
-      }
-
-      return new GetResponse(200, item).send(res);
-    } catch (error) {
-      return new InternalServerError().send(res);
-    }
-  },
-  getGrossById: async (req, res) => {
-    const { gross_id } = req.params;
-    try {
-      const item = await GrossMonthServices.getGrossById(gross_id);
+      const item = await GrossYearServices.getGrossByYear(gross_year);
 
       if (!item) {
         return new NotFoundError().send(res);
@@ -55,7 +43,7 @@ const GrossMonthController = {
   },
   createGross: async (req, res) => {
     try {
-      const item = await GrossMonthServices.createGross();
+      const item = await GrossYearServices.createGross();
 
       if (!item) {
         return new BadResquestError().send(res);
@@ -78,7 +66,7 @@ const GrossMonthController = {
         $inc: { orders: 1 },
       };
 
-      const item = await GrossMonthServices.updateGross(gross_id, query);
+      const item = await GrossYearServices.updateGross(gross_id, query);
 
       if (!item) {
         return new BadResquestError().send(res);
@@ -101,7 +89,7 @@ const GrossMonthController = {
         $inc: { orders_cancle: 1 },
       };
 
-      const item = await GrossMonthServices.updateGross(gross_id, query);
+      const item = await GrossYearServices.updateGross(gross_id, query);
 
       if (!item) {
         return new BadResquestError().send(res);
@@ -124,7 +112,7 @@ const GrossMonthController = {
         $inc: { gross: total, orders_delivered: 1 },
       };
 
-      const item = await GrossMonthServices.updateGross(gross_id, query);
+      const item = await GrossYearServices.updateGross(gross_id, query);
 
       if (!item) {
         return new BadResquestError().send(res);
@@ -137,4 +125,4 @@ const GrossMonthController = {
   },
 };
 
-module.exports = GrossMonthController;
+module.exports = GrossYearController;

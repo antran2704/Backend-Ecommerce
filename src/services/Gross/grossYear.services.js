@@ -3,16 +3,18 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { GrossYear } = require("../../models/index");
 
 class GrossYearServices {
-  async getGross() {
-    const items = await GrossYear.find({}).lean();
+  async getGross(select = {}) {
+    const items = await GrossYear.find({})
+      .select({ ...select })
+      .lean();
 
     return items;
   }
 
-  async getGrossByYear(year) {
+  async getGrossByYear(year, select = {}) {
     if (!year) return null;
 
-    const item = await GrossYear.findOne({ year }).lean();
+    const item = await GrossYear.findOne({ year }).select({...select}).lean();
     return item;
   }
 

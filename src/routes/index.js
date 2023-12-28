@@ -14,6 +14,7 @@ const DiscountRoutes = require("./DiscountRoutes");
 const AttributeRoutes = require("./AttributeRoutes");
 const GrossDateRoutes = require("./GrossRoutes/GrossDateRoutes");
 const GrossMonthRoutes = require("./GrossRoutes/GrossMonthRoutes");
+const GrossYearRoutes = require("./GrossRoutes/GrossYearRoutes");
 const HtmlRoutes = require("./HtmlRoutes");
 
 const routes = (app) => {
@@ -30,6 +31,7 @@ const routes = (app) => {
   app.use("/api/v1/attributes", AttributeRoutes);
   app.use("/api/v1/gross-date", GrossDateRoutes);
   app.use("/api/v1/gross-month", GrossMonthRoutes);
+  app.use("/api/v1/gross-year", GrossYearRoutes);
   app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));
   app.use("/public", express.static(path.resolve(__dirname, "../assets")));

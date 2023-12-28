@@ -11,6 +11,9 @@ router.get("/home", GrossDateController.getGrossInHome);
 // [GET] GROSS IN MONTH
 router.get("/month", GrossDateController.getGrossInMonth);
 
+// [GET] GROSS IN WEEK
+router.get("/week", GrossDateController.getGrossInWeek);
+
 // [PATCH] UPDATE GROSS
 router.patch("/update/order", GrossDateController.updateOrderGross);
 

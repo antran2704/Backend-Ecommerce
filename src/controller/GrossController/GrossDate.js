@@ -19,6 +19,20 @@ const GrossDayController = {
       return new InternalServerError().send(res);
     }
   },
+  getGrossInWeek: async (req, res) => {
+    const {start_date} = req.query;
+    try {
+      const items = await GrossDateServices.getGrossInWeek(start_date);
+
+      if(!items) {
+        return new NotFoundError().send(res);
+      }
+
+      return new GetResponse(200, items).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
   getGrossInDay: async (req, res) => {
     const { gross_date } = req.query;
     try {
