@@ -20,11 +20,11 @@ const GrossDayController = {
     }
   },
   getGrossInWeek: async (req, res) => {
-    const {start_date} = req.query;
+    const { start_date } = req.query;
     try {
       const items = await GrossDateServices.getGrossInWeek(start_date);
 
-      if(!items) {
+      if (!items) {
         return new NotFoundError().send(res);
       }
 
@@ -50,7 +50,10 @@ const GrossDayController = {
   getGrossInMonth: async (req, res) => {
     const { gross_month, gross_year } = req.query;
     try {
-      const items = await GrossDateServices.getGrossInMonth(gross_month, gross_year);
+      const items = await GrossDateServices.getGrossInMonth(
+        gross_month,
+        gross_year
+      );
 
       if (!items) {
         return new NotFoundError().send(res);
@@ -126,7 +129,7 @@ const GrossDayController = {
 
     try {
       const query = {
-        $inc: { orders_cancle: 1 },
+        $inc: { cancle_orders: 1 },
       };
 
       const item = await GrossDateServices.updateGross(gross_id, query);
@@ -149,7 +152,7 @@ const GrossDayController = {
 
     try {
       const query = {
-        $inc: { gross: total, orders_delivered: 1 },
+        $inc: { gross: total, delivered_orders: 1 },
       };
 
       const item = await GrossDateServices.updateGross(gross_id, query);

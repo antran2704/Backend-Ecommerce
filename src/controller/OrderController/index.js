@@ -315,7 +315,7 @@ const OrderController = {
 
         if (grossDay) {
           const queryGrossDate = {
-            $inc: { gross: order.total, orders_delivered: 1 },
+            $inc: { gross: order.total, delivered_orders: 1 },
           };
 
           GrossDateServices.updateGross(grossDay._id, queryGrossDate);
@@ -328,7 +328,7 @@ const OrderController = {
 
         if (grossMonth) {
           const queryGrossMonth = {
-            $inc: { gross: order.total, orders_delivered: 1 },
+            $inc: { gross: order.total, delivered_orders: 1 },
           };
 
           GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
@@ -340,7 +340,7 @@ const OrderController = {
 
         if (grossYear) {
           const queryGrossMonth = {
-            $inc: { gross: order.total, orders_delivered: 1 },
+            $inc: { gross: order.total, delivered_orders: 1 },
           };
 
           GrossYearServices.updateGross(grossYear._id, queryGrossMonth);
@@ -378,7 +378,7 @@ const OrderController = {
 
         if (grossDay) {
           const queryGrossDate = {
-            $inc: { orders_cancle: 1 },
+            $inc: { cancle_orders: 1 },
           };
 
           GrossDateServices.updateGross(grossDay._id, queryGrossDate);
@@ -391,7 +391,7 @@ const OrderController = {
 
         if (grossMonth) {
           const queryGrossMonth = {
-            $inc: { orders_cancle: 1 },
+            $inc: { cancle_orders: 1 },
           };
 
           GrossMonthServices.updateGross(grossMonth._id, queryGrossMonth);
@@ -403,7 +403,7 @@ const OrderController = {
 
         if (grossYear) {
           const queryGrossMonth = {
-            $inc: { orders_cancle: 1 },
+            $inc: { cancle_orders: 1 },
           };
 
           GrossYearServices.updateGross(grossYear._id, queryGrossMonth);

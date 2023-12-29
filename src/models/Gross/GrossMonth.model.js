@@ -15,11 +15,11 @@ const GrossMonthModel = new Schema(
       type: Number,
       default: 0,
     },
-    orders_delivered: {
+    delivered_orders: {
       type: Number,
       default: 0,
     },
-    orders_cancle: {
+    cancle_orders: {
       type: Number,
       default: 0,
     },

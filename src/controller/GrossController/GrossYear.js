@@ -86,7 +86,7 @@ const GrossYearController = {
 
     try {
       const query = {
-        $inc: { orders_cancle: 1 },
+        $inc: { cancle_orders: 1 },
       };
 
       const item = await GrossYearServices.updateGross(gross_id, query);
@@ -109,7 +109,7 @@ const GrossYearController = {
 
     try {
       const query = {
-        $inc: { gross: total, orders_delivered: 1 },
+        $inc: { gross: total, delivered_orders: 1 },
       };
 
       const item = await GrossYearServices.updateGross(gross_id, query);

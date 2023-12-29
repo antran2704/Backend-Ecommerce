@@ -22,13 +22,16 @@ class GrossDateServices {
 
   async getGrossInWeek(start_date) {
     const startDate = new Date(start_date);
-    const endDate = new Date();
+    const endDate = new Date(start_date);
     endDate.setDate(startDate.getDate() + 6);
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(24, 0, 0, -1);
 
     const items = await GrossDate.find({
       $and: [
-        { createdAt: { $gte: new Date(startDate) } },
-        { createdAt: { $lte: new Date(endDate) } },
+        { createdAt: { $gte: startDate } },
+        { createdAt: { $lte: endDate } },
       ],
     })
       .lean()
