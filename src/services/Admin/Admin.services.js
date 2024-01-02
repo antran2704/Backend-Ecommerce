@@ -46,7 +46,6 @@ class AdminServices {
 
   async changePassword(user_id, password) {
     if (!user_id || !password) return null;
-
     const date = getDateTime();
     const user = await Admin.findByIdAndUpdate(
       { _id: user_id },

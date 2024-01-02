@@ -86,7 +86,7 @@ const AdminController = {
         password: passwordHash,
         verify: true,
       });
-      
+
       if (!newUser) {
         return new BadResquestError(400, "Create user failed").send(res);
       }
@@ -231,10 +231,23 @@ const AdminController = {
         return new BadResquestError(400, "Update user failed").send(res);
       }
 
-      return new CreatedResponse().send(res);
+      return new CreatedResponse(201, user).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
+  },
+  uploadAvartar: async (req, res) => {
+    if (!req.file) {
+      return res.status(404).json({
+        status: 404,
+        message: "Image invalid",
+      });
+    }
+
+    const path = req.file.path;
+    const avartar = `${process.env.API_ENDPOINT}/${path}`;
+
+    return new CreatedResponse(201, avartar).send(res);
   },
   refreshToken: async (req, res) => {
     const { refreshToken } = req.body;
@@ -308,7 +321,7 @@ const AdminController = {
       }
 
       if (user.banned) {
-        return new ForbiddenError(403, "User was banned").send(res);
+        return new BadResquestError(400, "User was banned").send(res);
       }
 
       const paswordCompare = await checkBcrypt(password, user.password);
@@ -320,7 +333,7 @@ const AdminController = {
       const passwordHash = await generateBcrypt(newPassword);
 
       const updated = await AdminServices.changePassword(
-        decoded.id,
+        user._id,
         passwordHash
       );
 
@@ -328,7 +341,7 @@ const AdminController = {
         return new BadResquestError().send(res);
       }
 
-      return new CreatedResponse(updated).send(res);
+      return new CreatedResponse(201, updated).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
