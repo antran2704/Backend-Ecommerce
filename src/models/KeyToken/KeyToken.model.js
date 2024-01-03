@@ -21,6 +21,10 @@ const KeyTokenModel = new Schema(
       type: String,
       default: null
     },
+    forgetPasswordKey: {
+      type: String,
+      default: null
+    },
     refreshToken: {
       type: String,
       require: true,

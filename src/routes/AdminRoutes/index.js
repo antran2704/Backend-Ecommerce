@@ -21,6 +21,28 @@ router.post(
 );
 
 // [POST] REFRESH TOKEN
+router.post(
+  "/forget-password/send-email",
+  UserMiddleware.checkValidEmail,
+  AdminController.sendEmailForgetPassword
+);
+
+// [POST] REFRESH TOKEN
+router.post(
+  "/forget-password/check-key",
+  UserMiddleware.checkValidEmail,
+  AdminController.checkForgetKey
+);
+
+// [POST] REFRESH TOKEN
+router.post(
+  "/forget-password",
+  UserMiddleware.checkValidEmail,
+  UserMiddleware.checkValidPassword,
+  AdminController.forgetPassword
+);
+
+// [POST] REFRESH TOKEN
 router.post("/refreshToken", AdminController.refreshToken);
 
 // [GET] CHECK CHANGE PASSWORD KEY

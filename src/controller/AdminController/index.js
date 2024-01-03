@@ -26,6 +26,8 @@ const convertObjectToString = require("../../helpers/convertObjectString");
 const keyTokenServices = require("../../services/KeyToken/keyToken.services");
 const getSelect = require("../../helpers/getSelect");
 const { isValidObjectId } = require("mongoose");
+const { templateEmail } = require("../UserController/emailTemplate");
+const handleSendMail = require("../../configs/mailServices");
 
 const AdminController = {
   // [GET] USERS
@@ -342,6 +344,123 @@ const AdminController = {
       }
 
       return new CreatedResponse(201, updated).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  sendEmailForgetPassword: async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      const user = await AdminServices.getUserByEmail(email);
+
+      if (!user) {
+        return new NotFoundError(404, "Email not found").send(res);
+      }
+
+      const secretKey = crypto.randomUUID();
+      const token = generateToken({ id: user._id }, secretKey, "1 day");
+
+      keyTokenServices.updateKeyToken(user._id, {
+        forgetPasswordKey: secretKey,
+      });
+
+      let mailContent = {
+        to: email,
+        subject: "Antran shop thông báo:",
+        template: templateEmail.changePassword,
+        context: {
+          host: process.env.HOST_URL,
+          token,
+          key: secretKey,
+          email,
+        },
+      };
+
+      handleSendMail(mailContent);
+
+      return new CreatedResponse(201, req.body).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  checkForgetKey: async (req, res) => {
+    const { email, t_k: token, k_y: key } = req.body;
+    if (!email || !token || !key) {
+      return new BadResquestError().send(res);
+    }
+    
+    try {
+      const decoded = verifyToken(token, key);
+      if (decoded.message) {
+        return new BadResquestError(400, decoded.message).send(res);
+      }
+
+      const changePasswordKey = await KeyTokenServices.checkForgetPasswordKey(
+        decoded.id,
+        key
+      );
+
+      if (!changePasswordKey) {
+        return new BadResquestError(400).send(res);
+      }
+
+      return new GetResponse().send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  forgetPassword: async (req, res) => {
+    const { email, token, key, password } = req.body;
+    
+    if (!email || !token || !key || !password) {
+      return new BadResquestError().send(res);
+    }
+    try {
+      const decoded = verifyToken(token, key);
+
+      if (decoded.message) {
+        return new BadResquestError(400, decoded.message).send(res);
+      }
+
+      const changePasswordKey = await KeyTokenServices.checkForgetPasswordKey(
+        decoded.id,
+        key
+      );
+
+      if (!changePasswordKey) {
+        return new BadResquestError(400).send(res);
+      }
+
+      const user = await AdminServices.getUserByEmail(email);
+
+      if (!user) {
+        return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      if (user.banned) {
+        return new BadResquestError(400, "User was banned").send(res);
+      }
+
+      const passwordHash = await generateBcrypt(password);
+      const updated = await AdminServices.changePassword(
+        user._id,
+        passwordHash
+      );
+
+      if (!updated) {
+        return new BadResquestError().send(res);
+      }
+
+      keyTokenServices.updateKeyToken(user._id, {
+        forgetPasswordKey: null,
+      });
+
+      return new CreatedResponse().send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

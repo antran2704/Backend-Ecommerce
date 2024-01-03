@@ -5,7 +5,13 @@ const { isValidObjectId } = require("mongoose");
 
 class KeyTokenServices {
   async createKeyToken(user_id, privateKey, publicKey, refreshToken) {
-    if (!user_id || !isValidObjectId(user_id) || !privateKey || !publicKey || !refreshToken) {
+    if (
+      !user_id ||
+      !isValidObjectId(user_id) ||
+      !privateKey ||
+      !publicKey ||
+      !refreshToken
+    ) {
       return null;
     }
 
@@ -52,7 +58,8 @@ class KeyTokenServices {
     const date = getDateTime();
     const keyToken = await KeyToken.findOneAndUpdate(
       { user: user_id },
-      { $set: { ...payload, updatedAt: date } }
+      { $set: { ...payload, updatedAt: date } },
+      { new: true, upsert: true }
     );
 
     if (!keyToken) return null;
@@ -69,7 +76,8 @@ class KeyTokenServices {
       {
         $addToSet: { refreshTokenUseds: refreshToken },
         $set: { updatedAt: date },
-      }
+      },
+      { new: true, upsert: true }
     );
 
     if (!keyToken) return null;
@@ -82,9 +90,21 @@ class KeyTokenServices {
 
     const keyTokenUser = await this.getKeyByUserId(user_id);
 
-    if(!keyTokenUser) return null;
+    if (!keyTokenUser) return null;
 
     if (keyTokenUser.changePasswordKey !== key) return null;
+
+    return keyTokenUser;
+  }
+
+  async checkForgetPasswordKey(user_id, key) {
+    if (!user_id || !key) return null;
+
+    const keyTokenUser = await this.getKeyByUserId(user_id);
+
+    if (!keyTokenUser) return null;
+
+    if (keyTokenUser.forgetPasswordKey !== key) return null;
 
     return keyTokenUser;
   }
