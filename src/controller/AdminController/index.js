@@ -157,10 +157,13 @@ const AdminController = {
       }
 
       const accessToken = generateToken(
-        { id: convertObjectToString(user._id) },
+        {
+          id: convertObjectToString(user._id),
+        },
         publicKey,
         process.env.ACCESS_TOKEN_LIFE
       );
+
       const refreshToken = generateToken(
         { id: convertObjectToString(user._id) },
         privateKey,
@@ -174,6 +177,9 @@ const AdminController = {
         ).send(res);
       }
 
+      const accessTokenDecode = verifyToken(accessToken, publicKey);
+      const refreshTokenDecode = verifyToken(refreshToken, privateKey);
+
       const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
         _id: 1,
         privateKey: 1,
@@ -185,14 +191,27 @@ const AdminController = {
           user._id,
           { privateKey, publicKey, refreshToken, apiKey }
         );
-        await keyTokenUpdated.updateOne({
-          $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
-        });
+
+        if (keyTokenUpdated.refreshTokenUseds.length > 5) {
+          await keyTokenUpdated.updateOne({
+            $set: { refreshTokenUseds: [keyTokenUser.refreshToken] },
+          });
+        } else {
+          await keyTokenUpdated.updateOne({
+            $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
+          });
+        }
 
         return new GetResponse(200, {
-          accessToken,
+          accessToken: {
+            value: accessToken,
+            exp: accessTokenDecode.exp,
+          },
           publicKey,
-          refreshToken,
+          refreshToken: {
+            value: refreshToken,
+            exp: refreshTokenDecode.exp,
+          },
           apiKey: apiKey.key,
         }).send(res);
       }
@@ -209,9 +228,15 @@ const AdminController = {
       }
 
       return new GetResponse(200, {
-        accessToken,
+        accessToken: {
+          value: accessToken,
+          exp: accessTokenDecode.exp,
+        },
         publicKey,
-        refreshToken,
+        refreshToken: {
+          value: refreshToken,
+          exp: refreshTokenDecode.exp,
+        },
         apiKey: apiKey.key,
       }).send(res);
     } catch (error) {
@@ -252,11 +277,13 @@ const AdminController = {
     return new CreatedResponse(201, avartar).send(res);
   },
   refreshToken: async (req, res) => {
-    const { refreshToken } = req.body;
+    const refreshTokenHeader = req.header("refresh-token");
 
-    if (!refreshToken) {
-      return new BadResquestError(400, "body data is required").send(res);
+    if (!refreshTokenHeader) {
+      return new UnauthorizedError().send(res);
     }
+
+    const refreshToken = refreshTokenHeader.split(" ")[1];
 
     try {
       const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
@@ -288,7 +315,7 @@ const AdminController = {
       const decoded = verifyToken(refreshToken, keyToken.privateKey);
 
       if (decoded.message) {
-        return new BadResquestError(400, decoded.message).send(res);
+        return new UnauthorizedError(401, decoded.message).send(res);
       }
 
       const newAccessToken = generateToken(
@@ -393,7 +420,7 @@ const AdminController = {
     if (!email || !token || !key) {
       return new BadResquestError().send(res);
     }
-    
+
     try {
       const decoded = verifyToken(token, key);
       if (decoded.message) {
@@ -416,7 +443,7 @@ const AdminController = {
   },
   forgetPassword: async (req, res) => {
     const { email, token, key, password } = req.body;
-    
+
     if (!email || !token || !key || !password) {
       return new BadResquestError().send(res);
     }

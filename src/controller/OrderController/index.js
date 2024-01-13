@@ -17,6 +17,7 @@ const {
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { Order } = require("../../models");
+const { isValidObjectId } = require("mongoose");
 
 const OrderController = {
   // [GET] ORDERS
@@ -96,6 +97,10 @@ const OrderController = {
   getOrder: async (req, res) => {
     const { order_id } = req.params;
 
+    if (!isValidObjectId(order_id)) {
+      return new NotFoundError(404, "Not found order").send(res);
+    }
+
     try {
       const order = await OrderServices.getOrder(order_id);
       if (!order) {
@@ -151,21 +156,6 @@ const OrderController = {
           return new BadResquestError(400, "Create new gross failed").send(res);
         }
 
-        // if (data.payment_method === "card") {
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //     $inc: { gross: newOrder.total },
-        //   };
-
-        //   GrossDayServices.updateGross(newGross._id, query);
-        // } else {
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //   };
-
-        //   GrossDayServices.updateGross(newGross._id, query);
-        // }
-
         const query = {
           $push: { orders: newOrder._id },
           $inc: { sub_gross: newOrder.total },
@@ -173,21 +163,6 @@ const OrderController = {
 
         GrossDateServices.updateGross(newGross._id, query);
       } else {
-        // if (data.payment_method === "card") {
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //     $inc: { gross: newOrder.total },
-        //   };
-
-        //   GrossDayServices.updateGross(grossDay._id, query);
-        // } else {
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //   };
-
-        //   GrossDayServices.updateGross(grossDay._id, query);
-        // }
-
         const query = {
           $push: { orders: newOrder._id },
           $inc: { sub_gross: newOrder.total },
@@ -345,30 +320,6 @@ const OrderController = {
 
           GrossYearServices.updateGross(grossYear._id, queryGrossMonth);
         }
-
-        // if (!grossDay) {
-        //   const newGross = await GrossDayServices.createGross();
-
-        //   if (!newGross) {
-        //     return new BadResquestError(400, "Create new gross failed").send(
-        //       res
-        //     );
-        //   }
-
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //     $inc: { gross: newOrder.total },
-        //   };
-
-        //   GrossDayServices.updateGross(newGross._id, query);
-        // } else {
-        //   const query = {
-        //     $push: { orders: newOrder._id },
-        //     $inc: { gross: newOrder.total },
-        //   };
-
-        //   GrossDayServices.updateGross(grossDay._id, query);
-        // }
       }
 
       if (data.status === typeStatus.cancle) {

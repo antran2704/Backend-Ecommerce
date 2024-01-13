@@ -43,7 +43,7 @@ router.post(
 );
 
 // [POST] REFRESH TOKEN
-router.post("/refreshToken", AdminController.refreshToken);
+router.get("/refreshToken", AdminController.refreshToken);
 
 // [GET] CHECK CHANGE PASSWORD KEY
 router.post("/changePassword", AdminController.changePassword);

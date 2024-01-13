@@ -31,7 +31,7 @@ const UserMiddleware = {
   checkValidPassword: async (req, res, next) => {
     const { password } = req.body;
     const format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
-
+    
     if (!password) {
       return new BadResquestError(400, "Invalid password").send(res);
     }
@@ -82,7 +82,7 @@ const UserMiddleware = {
 
     const decoded = verifyToken(accessToken, publicKey);
     if (decoded.message) {
-      return new BadResquestError(400, decoded.message).send(res);
+      return new UnauthorizedError(401, decoded.message).send(res);
     }
 
     const keyToken = await KeyTokenServices.getKeyByUserId(decoded.id);

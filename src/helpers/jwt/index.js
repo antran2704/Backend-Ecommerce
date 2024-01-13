@@ -13,7 +13,7 @@ const verifyToken = (token, secretKey) => {
     }
     return decoded;
   });
-
+  
   return decoded;
 };
 
