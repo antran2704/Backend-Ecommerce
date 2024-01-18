@@ -13,10 +13,10 @@ POST http://localhost:3001/api/v1/orders
 content-type: application/json
 
 {
-    "order_id": "67840686-4f77-48a6-824f-90abbb02a2eb",
+    "order_id": "67840686-4f77-48a6-824f-90abbb02a2ef",
     "user_infor": {
-        "email": "luuquynhanh@gmail.com",
-        "name": "Luu quynh anh",
+        "email": "phamtrangiaan27@gmail.com",
+        "name": "Antran",
         "address": "55 Nguyễn Kiệm, Phường 3, Quận Gò Vấp, TP.Hồ Chí Minh",
         "phoneNumber": "0946003423"
     },
@@ -60,5 +60,5 @@ content-type: application/json
     "total": 600,
     "status": "pending",
     "discount_codes": [],
-    "payment_method": "cash"
+    "payment_method": "card"
 }

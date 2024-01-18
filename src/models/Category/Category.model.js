@@ -18,7 +18,7 @@ const CategoryModel = new Schema(
       type: String,
       require: true,
       default: null,
-      index: true
+      index: true,
     },
     description: {
       type: String,
@@ -47,6 +47,10 @@ const CategoryModel = new Schema(
     },
     breadcrumbs: [{ type: mongoose.Schema.Types.ObjectId, ref: documentName }],
     childrens: [{ type: mongoose.Schema.Types.ObjectId, ref: documentName }],
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

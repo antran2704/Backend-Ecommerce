@@ -11,15 +11,18 @@ const {
 } = require("../../helpers/successResponse");
 const getSelect = require("../../helpers/getSelect");
 
-const ProductController = {
+const UserProductController = {
   // [GET] ALL PRODUCT
   getProducts: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const select = getSelect(req.query);
+    const query = {
+      public: true,
+    };
 
     try {
-      const totalItems = await ProductServices.getProducts();
+      const totalItems = await ProductServices.getProducts(query);
       if (!totalItems) {
         return new NotFoundError(404, "No product found!").send(res);
       }
@@ -27,7 +30,8 @@ const ProductController = {
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
         currentPage,
-        select
+        select,
+        query
       );
 
       if (!products) {
@@ -54,9 +58,14 @@ const ProductController = {
     const lte = req.query.lte ? Number(req.query.lte) : null;
     const gte = req.query.gte ? Number(req.query.gte) : null;
     const { search } = req.query;
+
     const keys = Object.keys(req.query).filter(
       (query) => query !== "page" && query !== "lte" && query !== "gte"
     );
+
+    const query = {
+      public: true,
+    };
 
     try {
       if (keys.length > 0 || lte || gte) {
@@ -68,7 +77,8 @@ const ProductController = {
           keys,
           values,
           lte,
-          gte
+          gte,
+          query
         );
 
         if (!totalItems) {
@@ -83,7 +93,8 @@ const ProductController = {
           PAGE_SIZE,
           currentPage,
           lte,
-          gte
+          gte,
+          query
         );
 
         if (!products) {
@@ -131,8 +142,12 @@ const ProductController = {
   // [GET] A PRODUCT
   getProduct: async (req, res) => {
     const { slug } = req.params;
+    const query = {
+      public: true,
+    };
+
     try {
-      const product = await ProductServices.getProduct(slug);
+      const product = await ProductServices.getProduct(slug, query);
 
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
@@ -146,14 +161,17 @@ const ProductController = {
   getProductById: async (req, res) => {
     const { id } = req.params;
 
-    if(!id) {
+    if (!id) {
       return new BadResquestError().send(res);
     }
 
     const select = getSelect(req.query);
+    const query = {
+      public: true,
+    };
 
     try {
-      const product = await ProductServices.getProductById(id, select);
+      const product = await ProductServices.getProductById(id, select, query);
 
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
@@ -164,81 +182,21 @@ const ProductController = {
       return new InternalServerError().send(res);
     }
   },
-  // [POST] CREATE PRODUCT
-  createProduct: async (req, res) => {
-    const data = req.body;
-    try {
-      const newProduct = await ProductServices.createProduct(data);
-
-      if (!newProduct) {
-        return new BadResquestError(400, "Create product failed!").send(res);
-      }
-
-      const inventory = await InventoryServices.createInventory(newProduct._id);
-
-      if (!inventory) {
-        return new BadResquestError(400, "Create inventory failed!").send(res);
-      }
-
-      return new CreatedResponse(201, newProduct).send(res);
-    } catch (error) {
-      return new InternalServerError(500, error.stack).send(res);
-    }
-  },
-  uploadThumbnail: async (req, res) => {
-    if (!req.file) {
-      return res.status(404).json({
-        status: 404,
-        message: "Image invalid",
-      });
-    }
-
-    const path = req.file.path;
-    const thumbnail = `${process.env.API_ENDPOINT}/${path}`;
-
-    return new CreatedResponse(201, thumbnail).send(res);
-  },
-  uploadGallery: async (req, res) => {
-    if (req.files.length === 0) {
-      return res.status(404).json({
-        status: 404,
-        message: "Image invalid",
-      });
-    }
-
-    const list = req.files;
-    const gallery = list.map(
-      (item) => `${process.env.API_ENDPOINT}/${item.path}`
-    );
-    return new CreatedResponse(201, gallery).send(res);
-  },
-  // [PATCH] A PRODUCT
-  updateProduct: async (req, res) => {
-    const { id } = req.params;
-    const data = req.body;
-
-    try {
-      const product = await ProductServices.updateProduct(id, data);
-
-      if (!product) {
-        return new BadResquestError(400, "Updated product failed").send(res);
-      }
-
-      return new CreatedResponse(201, "Updated product success").send(res);
-    } catch (error) {
-      return new InternalServerError().send(res);
-    }
-  },
   // [SEARCH PRODUCT]
   searchProduct: async (req, res) => {
-    const { search, category, page } = req.query;
+    const { search, category, page, limit } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
+    const limitQuery = limit ? limit : PAGE_SIZE;
+    const query = {
+      public: true,
+    };
 
     try {
       const totalItems = await ProductServices.searchTextItems(
         search,
-        category
+        category,
+        query
       );
 
       if (!totalItems) {
@@ -251,7 +209,9 @@ const ProductController = {
         search,
         category,
         PAGE_SIZE,
-        currentPage
+        currentPage,
+        limitQuery,
+        query
       );
 
       if (!products) {
@@ -272,21 +232,6 @@ const ProductController = {
       return new InternalServerError(error.stack).send(res);
     }
   },
-  // [DELETE] A PRODUCT
-  deleteProduct: async (req, res) => {
-    const { id } = req.params;
-
-    try {
-      const product = await ProductServices.deleteProduct(id);
-      if (!product) {
-        return new BadResquestError(400, "Delete product failed").send(res);
-      }
-
-      return new CreatedResponse(201, "Deleted product succesfully").send(res);
-    } catch (error) {
-      return new InternalServerError().send(res);
-    }
-  },
 };
 
-module.exports = ProductController;
+module.exports = UserProductController;

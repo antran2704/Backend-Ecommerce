@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("../../middlewares/Multer");
 
-const ProductController = require("../../controller/ProductController");
+const ProductController = require("../../controller/ProductController/admin");
 
 // [GET] ALL PRODUCT
 router.get(

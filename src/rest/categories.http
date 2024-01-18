@@ -7,7 +7,7 @@ GET http://localhost:3001/api/v1/categories/parent
 GET http://localhost:3001/api/v1/categories/id/65203e8b731fb60dfc68f5ae
 
 ### Search category
-GET http://localhost:3001/api/v1/categories/search?search=asdasd
+GET http://localhost:3001/api/v1/categories/search?search=cate&limit=10
 
 ### Create category
 POST http://localhost:3001/api/v1/categories
@@ -30,9 +30,9 @@ content-type: application/json
 }
 
 ### Delete category
-POST http://localhost:3001/api/v1/categories/6533c0bd6e2264a5e10388bd
+DELETE http://localhost:3001/api/v1/categories/659a89caa28ab19b51369111
 content-type: application/json
 
 {
-    "parent_id": "6533c0bd6e2264a5e10388bd"
+    "parent_id": "654446d696123fda4c00d7ff"
 }

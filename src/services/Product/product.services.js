@@ -2,14 +2,17 @@ const { Product, Category } = require("../../models/index");
 const { getDateTime } = require("../../helpers/getDateTime");
 
 class ProductServices {
-  async getProducts() {
-    const items = await Product.find({});
+  async getProducts(query = {}) {
+    const items = await Product.countDocuments({
+      ...query,
+      isDeleted: false,
+    }).lean();
 
     return items;
   }
 
-  async getProductsWithPage(pageSize, currentPage, select = {}) {
-    const products = await Product.find({})
+  async getProductsWithPage(pageSize, currentPage, select = null, query = {}) {
+    const products = await Product.find({ ...query, isDeleted: false })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .populate("category", {
@@ -17,27 +20,38 @@ class ProductServices {
         title: 1,
         slug: 1,
       })
-      .select({ ...select });
+      .select({ ...select })
+      .lean();
 
     return products;
   }
 
   async getProductsInCategory(category_id) {
-    const category = await Category.findById({ _id: category_id });
+    const category = await Category.findById({
+      _id: category_id,
+      isDeleted: false,
+    });
 
     if (!category) {
       return null;
     }
 
-    const products = await Product.find({ category: category_id });
+    const products = await Product.countDocuments({
+      category: category_id,
+      isDeleted: false,
+    }).lean();
 
     return products;
   }
 
   async getProductsInCategoryWithPage(category_id, pageSize, currentPage) {
-    const products = await Product.find({ category: category_id })
+    const products = await Product.find({
+      category: category_id,
+      isDeleted: false,
+    })
       .skip((currentPage - 1) * pageSize)
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
 
     return products;
   }
@@ -48,9 +62,13 @@ class ProductServices {
     keys = null,
     values = null,
     lte = null,
-    gte = null
+    gte = null,
+    query = {}
   ) {
-    const category = await Category.findById({ _id: category_id });
+    const category = await Category.findById({
+      _id: category_id,
+      isDeleted: false,
+    });
     if (!category) {
       return null;
     }
@@ -58,14 +76,16 @@ class ProductServices {
     // case 3: filter voi option va gia
     if (keys.length > 0 && lte !== null && gte !== null) {
       console.log("case co moi gia va options");
-      const products = await Product.find({
+      const products = await Product.countDocuments({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
         price: { $gte: gte, $lte: lte },
         // $or: [{ price: { $gte: gte, $lte: lte } }, { price: { $gte: gte } }, { price: { $lte: lte } }],
-      });
+      }).lean();
 
       return products;
     }
@@ -73,22 +93,26 @@ class ProductServices {
     // case 4: filter moi gia
     if (lte !== null && gte !== null) {
       console.log("case co 2 gia");
-      const products = await Product.find({
+      const products = await Product.countDocuments({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         price: { $gte: gte, $lte: lte },
-      });
+      }).lean();
       return products;
     }
 
     // case 1: filter moi gia
     if (lte !== null || gte !== null) {
       console.log("case co moi gia");
-      const products = await Product.find({
+      const products = await Product.countDocuments({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
-      });
+      }).lean();
 
       return products;
     }
@@ -96,12 +120,14 @@ class ProductServices {
     // case 2: filter ko co gia
     if (keys.length > 0) {
       console.log("case co moi options");
-      const products = await Product.find({
+      const products = await Product.countDocuments({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
-      });
+      }).lean();
 
       return products;
     }
@@ -115,19 +141,23 @@ class ProductServices {
     pageSize,
     currentPage,
     lte = null,
-    gte = null
+    gte = null,
+    query = {}
   ) {
     // case 3: filter voi option va gia
     if (keys.length > 0 && lte !== null && gte !== null) {
       const products = await Product.find({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
         price: { $gte: gte, $lte: lte },
       })
         .skip((currentPage - 1) * pageSize)
-        .limit(pageSize);
+        .limit(pageSize)
+        .lean();
 
       return products;
     }
@@ -135,12 +165,15 @@ class ProductServices {
     // case 4: filter moi gia
     if (lte !== null && gte !== null) {
       const products = await Product.find({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         price: { $gte: gte, $lte: lte },
       })
         .skip((currentPage - 1) * pageSize)
-        .limit(pageSize);
+        .limit(pageSize)
+        .lean();
 
       return products;
     }
@@ -148,12 +181,15 @@ class ProductServices {
     // case 1: filter moi gia
     if (lte !== null || gte !== null) {
       const products = await Product.find({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
       })
         .skip((currentPage - 1) * pageSize)
-        .limit(pageSize);
+        .limit(pageSize)
+        .lean();
 
       return products;
     }
@@ -161,24 +197,31 @@ class ProductServices {
     // case 2: filter ko co gia
     if (keys.length > 0) {
       const products = await Product.find({
+        ...query,
         category: category_id,
+        isDeleted: false,
         title: { $regex: search, $options: "i" },
         options: { $elemMatch: { code: { $in: keys } } },
         "options.values": { $elemMatch: { label: { $in: values } } },
       })
         .skip((currentPage - 1) * pageSize)
-        .limit(pageSize);
+        .limit(pageSize)
+        .lean();
 
       return products;
     }
   }
 
-  async getProduct(slug) {
+  async getProduct(slug, query) {
     if (!slug) {
       return null;
     }
 
-    const product = await Product.find({ slug }).populate("category", {
+    const product = await Product.find({
+      slug,
+      isDeleted: false,
+      ...query,
+    }).populate("category", {
       title: 1,
       slug: 1,
     });
@@ -186,10 +229,14 @@ class ProductServices {
     return product;
   }
 
-  async getProductById(id, select = {}) {
+  async getProductById(id, select = null, query = {}) {
     if (!id) return null;
 
-    const product = await Product.findById({ _id: id })
+    const product = await Product.findById({
+      _id: id,
+      isDeleted: false,
+      ...query,
+    })
       .populate("category", {
         title: 1,
         slug: 1,
@@ -223,31 +270,44 @@ class ProductServices {
     return product;
   }
 
-  async searchTextItems(text, category = "") {
+  async searchTextItems(text, category = "", query = {}) {
     let totalItems;
 
     if (category.length > 0) {
-      totalItems = await Product.find({
+      totalItems = await Product.countDocuments({
+        ...query,
         category,
         title: { $regex: text, $options: "i" },
+        isDeleted: false,
       });
 
       return totalItems;
     }
 
     totalItems = await Product.find({
+      ...query,
       title: { $regex: text, $options: "i" },
+      isDeleted: false,
     });
     return totalItems;
   }
 
-  async searchTextWithPage(text, category = "", pageSize, currentPage) {
+  async searchTextWithPage(
+    text,
+    category = "",
+    pageSize,
+    currentPage,
+    limit = null,
+    query = {}
+  ) {
     let products;
 
     if (category.length > 0) {
       products = await Product.find({
+        ...query,
         category,
         title: { $regex: text, $options: "i" },
+        isDeleted: false,
       })
         .populate("category", {
           _id: 1,
@@ -255,13 +315,15 @@ class ProductServices {
           slug: 1,
         })
         .skip((currentPage - 1) * pageSize)
-        .limit(pageSize);
+        .limit(limit);
 
       return products;
     }
 
     products = await Product.find({
+      ...query,
       title: { $regex: text, $options: "i" },
+      isDeleted: false,
     })
       .populate("category", {
         _id: 1,
@@ -269,14 +331,19 @@ class ProductServices {
         slug: 1,
       })
       .skip((currentPage - 1) * pageSize)
-      .limit(pageSize);
+      .limit(limit);
     return products;
   }
 
   async deleteProduct(id) {
     if (!id) return null;
 
-    const product = await Product.findByIdAndDelete({ _id: id });
+    const date = getDateTime();
+    const product = await Product.findByIdAndUpdate(
+      { _id: id },
+      { $set: { isDeleted: true, updatedAt: date } },
+      { new: true, upsert: true }
+    );
     return product;
   }
 }

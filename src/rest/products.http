@@ -64,7 +64,7 @@ content-type: application/json
 }
 
 ### Search product
-GET http://localhost:3001/api/v1/products/search?search=inventory
+GET http://localhost:3001/api/v1/products/search?search=ip
 ### Upload thumbail
 PATCH http://localhost:3001/api/v1/products/649d9a30fd1f9aed9db239f4
 content-type: application/json

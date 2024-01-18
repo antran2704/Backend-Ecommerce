@@ -176,6 +176,19 @@ const UserController = {
         return new UnauthorizedError().send(res);
       }
 
+      const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
+        key: 1,
+        permissions: 1,
+      });
+
+      if (!apiKey) {
+        return new NotFoundError(404, "Not found api key");
+      }
+
+      if (!apiKey.permissions.includes("0000")) {
+        return new ForbiddenError().send(res);
+      }
+
       const privateKey = crypto.randomUUID();
       const publicKey = crypto.randomUUID();
 
@@ -184,10 +197,13 @@ const UserController = {
       }
 
       const accessToken = generateToken(
-        { id: convertObjectToString(user._id) },
+        {
+          id: convertObjectToString(user._id),
+        },
         publicKey,
         process.env.ACCESS_TOKEN_LIFE
       );
+
       const refreshToken = generateToken(
         { id: convertObjectToString(user._id) },
         privateKey,
@@ -201,13 +217,8 @@ const UserController = {
         ).send(res);
       }
 
-      const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
-        key: 1,
-      });
-
-      if (!apiKey) {
-        return new NotFoundError(404, "Not found api key");
-      }
+      const accessTokenDecode = verifyToken(accessToken, publicKey);
+      const refreshTokenDecode = verifyToken(refreshToken, privateKey);
 
       const keyTokenUser = await KeyTokenServices.getKeyByUserId(user._id, {
         _id: 1,
@@ -220,14 +231,27 @@ const UserController = {
           user._id,
           { privateKey, publicKey, refreshToken, apiKey }
         );
-        await keyTokenUpdated.updateOne({
-          $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
-        });
+
+        if (keyTokenUpdated.refreshTokenUseds.length > 5) {
+          await keyTokenUpdated.updateOne({
+            $set: { refreshTokenUseds: [keyTokenUser.refreshToken] },
+          });
+        } else {
+          await keyTokenUpdated.updateOne({
+            $addToSet: { refreshTokenUseds: keyTokenUser.refreshToken },
+          });
+        }
 
         return new GetResponse(200, {
-          accessToken,
+          accessToken: {
+            value: accessToken,
+            exp: accessTokenDecode.exp,
+          },
           publicKey,
-          refreshToken,
+          refreshToken: {
+            value: refreshToken,
+            exp: refreshTokenDecode.exp,
+          },
           apiKey: apiKey.key,
         }).send(res);
       }
@@ -244,9 +268,15 @@ const UserController = {
       }
 
       return new GetResponse(200, {
-        accessToken,
+        accessToken: {
+          value: accessToken,
+          exp: accessTokenDecode.exp,
+        },
         publicKey,
-        refreshToken,
+        refreshToken: {
+          value: refreshToken,
+          exp: refreshTokenDecode.exp,
+        },
         apiKey: apiKey.key,
       }).send(res);
     } catch (error) {

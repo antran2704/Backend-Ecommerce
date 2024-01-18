@@ -4,35 +4,59 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { Category } = require("../../models/index");
 
 class CategoriesServices {
-  async getCategories(select) {
-    const categories = await Category.find({}).lean().select({...select});
+  async getCategories(select = null, query = {}) {
+    const categories = await Category.find({
+      ...query,
+      isDeleted: false,
+    })
+      .lean()
+      .select({ ...select });
     return categories;
   }
 
-  async getCategoriesWithPage(pageSize, currentPage) {
-    const categories = await Category.find({})
+  async getCategoriesWithPage(
+    pageSize,
+    currentPage,
+    select = null,
+    query = {}
+  ) {
+    const categories = await Category.find({ ...query, isDeleted: false })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
+      .select({ ...select })
       .lean();
 
     return categories;
   }
 
   async getParentCategory(select) {
-    const categories = await Category.find({ parent_id: null }).select({
-      ...select,
-    });
+    const categories = await Category.find({
+      parent_id: null,
+      isDeleted: false,
+    })
+      .select({
+        ...select,
+      })
+      .lean();
     return categories;
   }
 
-  async findCategory(slug) {
-    const category = await Category.findOne({ slug }).lean();
+  async findCategory(slug, query = {}) {
+    const category = await Category.findOne({
+      slug,
+      isDeleted: false,
+      ...query,
+    }).lean();
 
     return category;
   }
 
-  async findCategoryById(id) {
-    const category = await Category.findById({ _id: id })
+  async findCategoryById(id, query = {}) {
+    const category = await Category.findById({
+      _id: id,
+      isDeleted: false,
+      ...query,
+    })
       .populate("parent_id", { _id: 1, title: 1 })
       .populate("breadcrumbs", { _id: 1, title: 1, slug: 1 })
       .lean();
@@ -54,19 +78,30 @@ class CategoriesServices {
     return category;
   }
 
-  async searchTextItems(text) {
-    const totalItems = await Category.find({
+  async searchTextItems(text, query = {}) {
+    const totalItems = await Category.countDocuments({
       title: { $regex: text, $options: "i" },
-    });
+      isDeleted: false,
+      ...query,
+    }).lean();
     return totalItems;
   }
 
-  async searchTextWithPage(text, pageSize, currentPage) {
+  async searchTextWithPage(
+    text,
+    pageSize,
+    currentPage,
+    limit = null,
+    query = {}
+  ) {
     const items = await Category.find({
       title: { $regex: text, $options: "i" },
+      isDeleted: false,
+      ...query,
     })
       .skip((currentPage - 1) * pageSize)
-      .limit(pageSize);
+      .limit(limit)
+      .lean();
 
     return items;
   }
@@ -138,7 +173,8 @@ class CategoriesServices {
   async deleteCategory(id) {
     if (!id) return null;
 
-    const category = await Category.findByIdAndDelete({ _id: id });
+    const date = getDateTime();
+    const category = await Category.findByIdAndRemove({ _id: id });
 
     return category;
   }

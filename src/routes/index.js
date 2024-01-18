@@ -1,8 +1,10 @@
 const express = require("express");
 const path = require("path");
 
-const CategoryRoutes = require("./CategoryRoutes");
-const ProductRoutes = require("./ProductRoutes");
+const AdminCategoryRoutes = require("./CategoryRoutes/admin");
+const AdminProductRoutes = require("./ProductRoutes/admin");
+const UserCategoryRoutes = require("./CategoryRoutes/user");
+const UserProductRoutes = require("./ProductRoutes/user");
 const ProductrItemRoutes = require("./ProductRoutes/product_item");
 const OrderRoutes = require("./OrderRoutes");
 const OverviewRoutes = require("./OverviewRoutes");
@@ -21,9 +23,11 @@ const routes = (app) => {
   app.use("/view", HtmlRoutes);
   app.use("/api/v1/carts", CartRoutes);
   app.use("/api/v1/discounts", DiscountRoutes);
-  app.use("/api/v1/categories", CategoryRoutes);
+  app.use("/api/v1/categories", UserCategoryRoutes);
+  app.use("/api/v1/admin/categories", AdminCategoryRoutes);
   app.use("/api/v1/variations", ProductrItemRoutes);
-  app.use("/api/v1/products", ProductRoutes);
+  app.use("/api/v1/admin/products", AdminProductRoutes);
+  app.use("/api/v1/products", UserProductRoutes);
   app.use("/api/v1/orders", OrderRoutes);
   app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
