@@ -26,12 +26,11 @@ router.post(
 router.post(
   "/login",
   UserMiddleware.checkValidEmail,
-  UserMiddleware.checkValidPassword,
   UserController.login
 );
 
 // [POST] REFRESH TOKEN
-router.post("/refreshToken", UserController.refreshToken);
+router.get("/refreshToken", UserController.refreshToken);
 
 // [GET] CHECK CHANGE PASSWORD KEY
 router.get("/checkPasswordKey", UserController.checkChangePasswordKey);

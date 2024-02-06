@@ -20,6 +20,24 @@ const ProductItemController = {
       return new BadResquestError().send(res);
     }
 
+    try {
+      const items = await ProductItemServices.getProductItems(product_id);
+      if (!items) {
+        return new NotFoundError(404, "No item found!").send(res);
+      }
+
+      return new GetResponse(200, items).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  getProductItemsWithPage: async (req, res) => {
+    const { product_id } = req.params;
+
+    if (!product_id) {
+      return new BadResquestError().send(res);
+    }
+
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 

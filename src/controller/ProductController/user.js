@@ -5,11 +5,9 @@ const {
   NotFoundError,
   BadResquestError,
 } = require("../../helpers/errorResponse");
-const {
-  GetResponse,
-  CreatedResponse,
-} = require("../../helpers/successResponse");
+const { GetResponse } = require("../../helpers/successResponse");
 const getSelect = require("../../helpers/getSelect");
+const { checkValidNumber } = require("../../helpers/number");
 
 const UserProductController = {
   // [GET] ALL PRODUCT
@@ -50,81 +48,37 @@ const UserProductController = {
       return new InternalServerError(error.stack).send(res);
     }
   },
-  // [GET] ALL PRODUCT FOLLOW CATEGORY
-  getProductsInCategory: async (req, res) => {
-    const { id } = req.params;
+  // [GET] ALL PRODUCT
+  getOtherProducts: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
-    const lte = req.query.lte ? Number(req.query.lte) : null;
-    const gte = req.query.gte ? Number(req.query.gte) : null;
-    const { search } = req.query;
-
-    const keys = Object.keys(req.query).filter(
-      (query) => query !== "page" && query !== "lte" && query !== "gte"
-    );
-
+    const { product_id, category_id } = req.query;
+    const select = getSelect(req.query);
     const query = {
+      category: category_id,
+      _id: { $nin: [product_id] },
       public: true,
     };
 
+    if (!category_id) {
+      return new NotFoundError(404, "No product found!").send(res);
+    }
+
     try {
-      if (keys.length > 0 || lte || gte) {
-        const values = Object.values(req.query).flat();
-
-        const totalItems = await ProductServices.getProductsFilter(
-          id,
-          search,
-          keys,
-          values,
-          lte,
-          gte,
-          query
-        );
-
-        if (!totalItems) {
-          return new NotFoundError(404, "Not found product!").send(res);
-        }
-
-        const products = await ProductServices.getProductsFilterWithPage(
-          id,
-          search,
-          keys,
-          values,
-          PAGE_SIZE,
-          currentPage,
-          lte,
-          gte,
-          query
-        );
-
-        if (!products) {
-          return new NotFoundError(404, "Not found product!").send(res);
-        }
-
-        return new GetResponse(200, products).send(res, {
-          optionName: "pagination",
-          data: {
-            totalItems: totalItems.length,
-            currentPage,
-            pageSize: PAGE_SIZE,
-          },
-        });
-      }
-
-      const totalItems = await ProductServices.getProductsInCategory(id);
-
+      const totalItems = await ProductServices.getProducts(query);
       if (!totalItems) {
-        return new NotFoundError(404, "Not found product!").send(res);
+        return new NotFoundError(404, "No product found!").send(res);
       }
 
-      const products = await ProductServices.getProductsInCategoryWithPage(
-        id,
+      const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
-        currentPage
+        currentPage,
+        select,
+        query
       );
 
       if (!products) {
-        return new NotFoundError(404, "Not found product!").send(res);
+        return new NotFoundError(404, "No product found!").send(res);
       }
 
       return new GetResponse(200, products).send(res, {
@@ -136,7 +90,80 @@ const UserProductController = {
         },
       });
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  // [GET] ALL PRODUCT FOLLOW CATEGORY
+  getProductsInCategory: async (req, res) => {
+    const { id } = req.params;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = req.query.page ? Number(req.query.page) : 1;
+    const gte =
+      req.query.price && checkValidNumber(req.query.price)
+        ? Number(req.query.price.split(".")[0])
+        : null;
+        
+    const lte =
+      req.query.price && checkValidNumber(req.query.price)
+        ? Number(req.query.price.split(".")[1])
+        : null;
+    const { search } = req.query;
+    const parseQuery = {};
+
+    const keys = Object.keys(req.query).filter(
+      (query) => query !== "page" && query !== "search" && query !== "price"
+    );
+
+    for (const key of keys) {
+      parseQuery[key] = [req.query[key]].flat();
+    }
+
+    const values = keys.map((key) => req.query[key]).flat();
+
+    const query = {
+      public: true,
+    };
+
+    try {
+      const totalItems = await ProductServices.getProductsFilter(
+        id,
+        search,
+        keys,
+        values,
+        lte,
+        gte,
+        query
+      );
+      if (!totalItems) {
+        return new NotFoundError(404, "Not found product!").send(res);
+      }
+
+      const products = await ProductServices.getProductsFilterWithPage(
+        id,
+        search,
+        keys,
+        values,
+        PAGE_SIZE,
+        currentPage,
+        lte,
+        gte,
+        query
+      );
+
+      if (!products) {
+        return new NotFoundError(404, "Not found product!").send(res);
+      }
+
+      return new GetResponse(200, products).send(res, {
+        optionName: "pagination",
+        data: {
+          totalItems: totalItems,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [GET] A PRODUCT
@@ -187,7 +214,9 @@ const UserProductController = {
     const { search, category, page, limit } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
-    const limitQuery = limit ? limit : PAGE_SIZE;
+    const limitQuery = limit ? Number(limit) : PAGE_SIZE;
+
+    const select = getSelect(req.query);
     const query = {
       public: true,
     };
@@ -208,10 +237,10 @@ const UserProductController = {
       const products = await ProductServices.searchTextWithPage(
         search,
         category,
-        PAGE_SIZE,
-        currentPage,
         limitQuery,
-        query
+        currentPage,
+        query,
+        select
       );
 
       if (!products) {
@@ -225,7 +254,7 @@ const UserProductController = {
         data: {
           totalItems: totalItems.length,
           currentPage,
-          pageSize: PAGE_SIZE,
+          pageSize: limitQuery,
         },
       });
     } catch (error) {

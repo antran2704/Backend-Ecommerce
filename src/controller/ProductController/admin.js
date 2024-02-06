@@ -51,8 +51,15 @@ const AdminProductController = {
     const { id } = req.params;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
-    const lte = req.query.lte ? Number(req.query.lte) : null;
-    const gte = req.query.gte ? Number(req.query.gte) : null;
+    const gte =
+      req.query.price && checkValidNumber(req.query.price)
+        ? Number(req.query.price.split(".")[0])
+        : null;
+
+    const lte =
+      req.query.price && checkValidNumber(req.query.price)
+        ? Number(req.query.price.split(".")[1])
+        : null;
     const { search } = req.query;
     const keys = Object.keys(req.query).filter(
       (query) => query !== "page" && query !== "lte" && query !== "gte"
@@ -146,7 +153,7 @@ const AdminProductController = {
   getProductById: async (req, res) => {
     const { id } = req.params;
 
-    if(!id) {
+    if (!id) {
       return new BadResquestError().send(res);
     }
 

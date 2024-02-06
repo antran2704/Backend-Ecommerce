@@ -17,14 +17,16 @@ router.patch("/:id", ProductItemController.updateProductItem);
 // [DELETE] A PRODUCT ITEM
 router.delete("/:id", ProductItemController.deleteProductItem);
 
-
 // [GET] A PRODUCT ITEM WITH ID
 router.get("/item/:id", ProductItemController.getProductItem);
+
+// [GET] ALL PRODUCT ITEMS
+router.get("/all/:product_id", ProductItemController.getProductItems);
 
 // [POST] CREATE PRODUCT ITEM
 router.post("/", ProductItemController.createProductItems);
 
 // [GET] ALL PRODUCT ITEMS
-router.get("/:product_id", ProductItemController.getProductItems);
+router.get("/:product_id", ProductItemController.getProductItemsWithPage);
 
 module.exports = router;

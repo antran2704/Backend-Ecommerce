@@ -1,13 +1,16 @@
 GET http://localhost:3001/api/v1/products
 
 ### Get product by category_id
-GET http://localhost:3001/api/v1/products/category/654446d696123fda4c00d7ff?color=Red
+GET http://localhost:3001/api/v1/products/category/654446d696123fda4c00d7ff?price=0.10000
 
 ### Get product by id
 GET http://localhost:3001/api/v1/products/id/655df956a5123e38b7383964
 
 ### Get product by slug
-GET http://localhost:3001/api/v1/products/asdtest
+GET http://localhost:3001/api/v1/products/apple-iphone-15-pro-max
+
+### Get ohter product
+GET http://localhost:3001/api/v1/products/other?product_id=655d5020c53cf61a9718fa50&category_id=654446d696123fda4c00d7ff&title=1&slug=1
 
 ### Create product
 POST http://localhost:3001/api/v1/products

@@ -20,6 +20,9 @@ router.post("/child/:id", AttributeController.addChildInAttribute);
 // [PATCH] UPDATE CHILD IN ATTRIBUTE
 router.patch("/child/:id", AttributeController.updateChildInAttibute);
 
+// [GET] ATTRIBUTE
+router.get("/all", AttributeController.getAttributes);
+
 // [PATCH] UPDATE ATTRIBUTE
 router.patch("/:id", AttributeController.updateAttribute);
 
@@ -33,6 +36,6 @@ router.get("/:id", AttributeController.getAttributeById);
 router.post("/", AttributeController.createAttribute);
 
 // [GET] ATTRIBUTE
-router.get("/", AttributeController.getAttributes);
+router.get("/", AttributeController.getAttributesWithPage);
 
 module.exports = router;

@@ -14,23 +14,23 @@ const CartModel = new Schema(
       enum: ["active", "pending", "failed", "completed"],
       default: "active",
     },
-    cart_products: [
-      {
-        product_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "product",
-          require: true,
-        },
-        variation_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "product_item",
-          require: true,
-        },
-        options: { type: String, default: null },
-        quantity: Number,
-        price: Number,
-      }
-    ],
+    // cart_products: [
+    //   {
+    //     product: {
+    //       type: mongoose.Schema.Types.ObjectId,
+    //       ref: "product",
+    //       require: true,
+    //     },
+    //     variation: {
+    //       type: mongoose.Schema.Types.ObjectId,
+    //       ref: "product_item",
+    //       require: true,
+    //     },
+    //     options: { type: String, default: null },
+    //     quantity: Number,
+    //     price: Number,
+    //   }
+    // ],
     cart_count: {
       type: Number,
       default: 0,
@@ -42,7 +42,7 @@ const CartModel = new Schema(
   },
   { timestamps: true }
 );
-// create user + create cart
-const KeyToken = mongoose.model("cart", CartModel);
 
-module.exports = KeyToken;
+const Cart = mongoose.model("cart", CartModel);
+
+module.exports = Cart;

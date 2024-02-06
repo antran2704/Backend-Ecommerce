@@ -73,64 +73,37 @@ class ProductServices {
       return null;
     }
 
-    // case 3: filter voi option va gia
-    if (keys.length > 0 && lte !== null && gte !== null) {
-      console.log("case co moi gia va options");
-      const products = await Product.countDocuments({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        options: { $elemMatch: { code: { $in: keys } } },
-        "options.values": { $elemMatch: { label: { $in: values } } },
-        price: { $gte: gte, $lte: lte },
-        // $or: [{ price: { $gte: gte, $lte: lte } }, { price: { $gte: gte } }, { price: { $lte: lte } }],
-      }).lean();
+    const queryFilter = {};
 
-      return products;
-    }
-
-    // case 4: filter moi gia
     if (lte !== null && gte !== null) {
-      console.log("case co 2 gia");
-      const products = await Product.countDocuments({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        price: { $gte: gte, $lte: lte },
-      }).lean();
-      return products;
+      queryFilter["$or"] = [
+        { $and: [{ price: { $gte: gte } }, { price: { $lte: lte } }] },
+        {
+          $and: [
+            { promotion_price: { $gt: 0 } },
+            { promotion_price: { $gte: gte } },
+            { promotion_price: { $lte: lte } },
+          ],
+        },
+      ];
     }
 
-    // case 1: filter moi gia
-    if (lte !== null || gte !== null) {
-      console.log("case co moi gia");
-      const products = await Product.countDocuments({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
-      }).lean();
-
-      return products;
-    }
-
-    // case 2: filter ko co gia
     if (keys.length > 0) {
-      console.log("case co moi options");
-      const products = await Product.countDocuments({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        options: { $elemMatch: { code: { $in: keys } } },
-        "options.values": { $elemMatch: { label: { $in: values } } },
-      }).lean();
-
-      return products;
+      queryFilter["options"] = { $elemMatch: { code: { $in: keys } } };
+      queryFilter["options.values"] = {
+        $elemMatch: { label: { $in: values } },
+      };
     }
+
+    const products = await Product.countDocuments({
+      ...query,
+      category: category_id,
+      isDeleted: false,
+      title: { $regex: search, $options: "i" },
+      ...queryFilter,
+    }).lean();
+
+    return products;
   }
 
   async getProductsFilterWithPage(
@@ -144,72 +117,40 @@ class ProductServices {
     gte = null,
     query = {}
   ) {
-    // case 3: filter voi option va gia
-    if (keys.length > 0 && lte !== null && gte !== null) {
-      const products = await Product.find({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        options: { $elemMatch: { code: { $in: keys } } },
-        "options.values": { $elemMatch: { label: { $in: values } } },
-        price: { $gte: gte, $lte: lte },
-      })
-        .skip((currentPage - 1) * pageSize)
-        .limit(pageSize)
-        .lean();
+    const queryFilter = {};
 
-      return products;
-    }
-
-    // case 4: filter moi gia
     if (lte !== null && gte !== null) {
-      const products = await Product.find({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        price: { $gte: gte, $lte: lte },
-      })
-        .skip((currentPage - 1) * pageSize)
-        .limit(pageSize)
-        .lean();
-
-      return products;
+      queryFilter["$or"] = [
+        { $and: [{ price: { $gte: gte } }, { price: { $lte: lte } }] },
+        {
+          $and: [
+            { promotion_price: { $gt: 0 } },
+            { promotion_price: { $gte: gte } },
+            { promotion_price: { $lte: lte } },
+          ],
+        },
+      ];
     }
 
-    // case 1: filter moi gia
-    if (lte !== null || gte !== null) {
-      const products = await Product.find({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        $or: [{ price: { $gte: gte } }, { price: { $lte: lte } }],
-      })
-        .skip((currentPage - 1) * pageSize)
-        .limit(pageSize)
-        .lean();
-
-      return products;
-    }
-
-    // case 2: filter ko co gia
     if (keys.length > 0) {
-      const products = await Product.find({
-        ...query,
-        category: category_id,
-        isDeleted: false,
-        title: { $regex: search, $options: "i" },
-        options: { $elemMatch: { code: { $in: keys } } },
-        "options.values": { $elemMatch: { label: { $in: values } } },
-      })
-        .skip((currentPage - 1) * pageSize)
-        .limit(pageSize)
-        .lean();
-
-      return products;
+      queryFilter["options"] = { $elemMatch: { code: { $in: keys } } };
+      queryFilter["options.values"] = {
+        $elemMatch: { label: { $in: values } },
+      };
     }
+
+    const products = await Product.find({
+      ...query,
+      category: category_id,
+      isDeleted: false,
+      title: { $regex: search, $options: "i" },
+      ...queryFilter,
+    })
+      .skip((currentPage - 1) * pageSize)
+      .limit(pageSize)
+      .lean();
+
+    return products;
   }
 
   async getProduct(slug, query) {
@@ -217,14 +158,19 @@ class ProductServices {
       return null;
     }
 
-    const product = await Product.find({
+    const product = await Product.findOne({
       slug,
       isDeleted: false,
       ...query,
-    }).populate("category", {
-      title: 1,
-      slug: 1,
-    });
+    })
+      .populate("category", {
+        title: 1,
+        slug: 1,
+      })
+      .populate("breadcrumbs", {
+        title: 1,
+        slug: 1,
+      });
 
     return product;
   }
@@ -297,8 +243,8 @@ class ProductServices {
     category = "",
     pageSize,
     currentPage,
-    limit = null,
-    query = {}
+    query = {},
+    select = null
   ) {
     let products;
 
@@ -315,7 +261,8 @@ class ProductServices {
           slug: 1,
         })
         .skip((currentPage - 1) * pageSize)
-        .limit(limit);
+        .limit(pageSize)
+        .select({ ...select });
 
       return products;
     }
@@ -331,7 +278,8 @@ class ProductServices {
         slug: 1,
       })
       .skip((currentPage - 1) * pageSize)
-      .limit(limit);
+      .limit(pageSize)
+      .select({ ...select });
     return products;
   }
 

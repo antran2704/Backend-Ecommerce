@@ -67,13 +67,10 @@ const UserCategoryController = {
     }
   },
   getParentCategories: async (req, res) => {
+    const select = getSelect(req.query);
+
     try {
-      const categories = await CategoriesServices.getParentCategory({
-        _id: 1,
-        parent_id: 1,
-        title: 1,
-        childrens: 1,
-      });
+      const categories = await CategoriesServices.getParentCategory(select);
 
       if (!categories) {
         return new NotFoundError(404, "No category found!").send(res);

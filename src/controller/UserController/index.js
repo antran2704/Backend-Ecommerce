@@ -104,9 +104,9 @@ const UserController = {
   },
   // [POST] CONFIRM EMAIL AND ADD USER
   creatUser: async (req, res) => {
-    const { name, password, email } = req.body;
+    const { name, email, avartar } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email) {
       return new BadResquestError(400, "Data confirm email invalid").send(res);
     }
 
@@ -120,7 +120,7 @@ const UserController = {
       const newUser = await UserServices.createUser({
         name,
         email,
-        password,
+        avartar,
         verify: true,
       });
       if (!newUser) {
@@ -150,9 +150,9 @@ const UserController = {
     }
   },
   login: async (req, res) => {
-    const { email, password } = req.body;
+    const { email } = req.body;
 
-    if (!email || !password) {
+    if (!email) {
       return new BadResquestError(400, "Data login invalid").send(res);
     }
 
@@ -170,12 +170,6 @@ const UserController = {
         return new ForbiddenError(403, "User was banned").send(res);
       }
 
-      const paswordCompare = await checkBcrypt(password, user.password);
-
-      if (!paswordCompare) {
-        return new UnauthorizedError().send(res);
-      }
-
       const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
         key: 1,
         permissions: 1,
@@ -185,7 +179,7 @@ const UserController = {
         return new NotFoundError(404, "Not found api key");
       }
 
-      if (!apiKey.permissions.includes("0000")) {
+      if (!apiKey.permissions.includes("1111")) {
         return new ForbiddenError().send(res);
       }
 
@@ -304,11 +298,12 @@ const UserController = {
     }
   },
   refreshToken: async (req, res) => {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return new BadResquestError(400, "body data is required").send(res);
+    const refreshTokenHeader = req.header("refresh-token");
+    if (!refreshTokenHeader) {
+      return new UnauthorizedError().send(res);
     }
+
+    const refreshToken = refreshTokenHeader.split(" ")[1];
 
     try {
       const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
@@ -340,7 +335,7 @@ const UserController = {
       const decoded = verifyToken(refreshToken, keyToken.privateKey);
 
       if (decoded.message) {
-        return new BadResquestError(400, decoded.message).send(res);
+        return new UnauthorizedError(401, decoded.message).send(res);
       }
 
       const newAccessToken = generateToken(

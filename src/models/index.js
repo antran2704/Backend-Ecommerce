@@ -7,6 +7,7 @@ const Order = require("./Order/Order.model");
 const KeyToken = require("./KeyToken/KeyToken.model");
 const ApiKey = require("./ApiKey/ApiKey.model");
 const Cart = require("./Cart/Cart.model");
+const CartItem = require("./Cart/CartItem.model");
 const Inventory = require("./Inventory/Inventory.model");
 const Discount = require("./Discount/Discount.model");
 const Attribute = require("./Attribute/Attribute.model");
@@ -22,6 +23,7 @@ module.exports = {
   KeyToken,
   ApiKey,
   Cart,
+  CartItem,
   Inventory,
   Discount,
   Attribute,

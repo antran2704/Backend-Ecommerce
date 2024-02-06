@@ -1,4 +1,4 @@
-const { Cart } = require("../../models");
+const { Cart, CartItem } = require("../../models");
 const convertObjectToString = require("../../helpers/convertObjectString");
 const { getDateTime } = require("../../helpers/getDateTime");
 
@@ -8,18 +8,32 @@ class CartServices {
 
     const cart = await Cart.findOne({
       cart_userId: convertObjectToString(user_id),
-    })
-      .populate("cart_products.product_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      })
-      .populate("cart_products.variation_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      });
+    });
     return cart;
+  }
+
+  async getItemsInCart(cart_id) {
+    if (!cart_id) return null;
+
+    const items = await CartItem.find({
+      cart_id: convertObjectToString(cart_id),
+    })
+      .populate("product", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+        price: 1,
+        promotion_price: 1,
+        slug: 1,
+      })
+      .populate("variation", {
+        inventory: 1,
+        title: 1,
+        thumbnail: 1,
+        price: 1,
+        promotion_price: 1,
+      });
+    return items;
   }
 
   async createCart(user_id) {
@@ -48,14 +62,26 @@ class CartServices {
     return total;
   }
 
-  async checkProductInCart(user_id, product_id, variation_id) {
-    if (!user_id || !product_id) return null;
+  // async checkProductInCart(user_id, product_id, variation_id) {
+  //   if (!user_id || !product_id) return null;
 
-    const productInCart = await Cart.findOne({
-      cart_userId: convertObjectToString(user_id),
-      cart_products: {
-        $elemMatch: { $and: [{ product_id }, { variation_id }] },
-      },
+  //   const productInCart = await Cart.findOne({
+  //     cart_userId: convertObjectToString(user_id),
+  //     cart_products: {
+  //       $elemMatch: { $and: [{ product: product_id }, { variation: variation_id }] },
+  //     },
+  //   });
+
+  //   return productInCart;
+  // }
+
+  async checkProductInCart(cart_id, product_id, variation_id) {
+    if (!cart_id || !product_id) return null;
+
+    const productInCart = await CartItem.findOne({
+      cart_id: convertObjectToString(cart_id),
+      product: product_id,
+      variation: variation_id,
     });
 
     return productInCart;
@@ -76,166 +102,200 @@ class CartServices {
         new: true,
         upsert: true,
       }
-    )
-      .populate("cart_products.product_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      })
-      .populate("cart_products.variation_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      });
-
+    );
     return updatedCart;
   }
 
-  async updateItemsCart(user_id, payload) {
+  // async updateItemsCart(user_id, payload) {
+  //   if (!user_id) return null;
+  //   const date = getDateTime();
+  //   const { product_id, variation_id, quantity, price } = payload;
+
+  //   // check shop is exit
+  //   // const shopInCart = await this.checkShopInCart(user_id, shop_id);
+
+  //   // case 1: chưa có shop và san pham tạo mới
+  //   // if (!shopInCart) {
+  //   //   console.log("case 1::: chưa có shop và san pham tạo mới");
+  //   //   const updatedCart = await Cart.findOneAndUpdate(
+  //   //     {
+  //   //       cart_userId: convertObjectToString(user_id),
+  //   //     },
+  //   //     {
+  //   //       $push: {
+  //   //         cart_products: {
+  //   //           shop_id,
+  //   //           products: [{ product_id, variation, quantity, price }],
+  //   //         },
+  //   //       },
+  //   //     }
+  //   //   );
+
+  //   //   return updatedCart;
+  //   // }
+
+  //   // case 2: đã có shop và có sản phẩm với id
+  //   const productInCart = await this.checkProductInCart(
+  //     user_id,
+  //     product_id,
+  //     variation_id
+  //   );
+
+  //   // case 3: đã có shop và chưa có sản phẩm với id
+  //   if (!productInCart) {
+  //     console.log("case 3::: chưa có sản phẩm với id");
+  //     const updatedCart = await Cart.findOneAndUpdate(
+  //       {
+  //         cart_userId: convertObjectToString(user_id),
+  //       },
+  //       {
+  //         $push: {
+  //           cart_products: {
+  //             product: product_id,
+  //             variation: variation_id,
+  //             quantity,
+  //             price,
+  //           },
+  //         },
+  //         $set: { updatedAt: date },
+  //       },
+  //       { new: true, upsert: true }
+  //     )
+  //       .populate("cart_products.product", {
+  //         inventory: 1,
+  //         title: 1,
+  //         thumbnail: 1,
+  //         price: 1,
+  //         promotion_price: 1,
+  //         slug: 1,
+  //       })
+  //       .populate("cart_products.variation", {
+  //         inventory: 1,
+  //         title: 1,
+  //         thumbnail: 1,
+  //         price: 1,
+  //         promotion_price: 1,
+  //       });
+
+  //     return updatedCart;
+  //   } else {
+  //     console.log("case 2::: có sản phẩm với id");
+
+  //     const updatedCart = await Cart.findOneAndUpdate(
+  //       {
+  //         cart_userId: convertObjectToString(user_id),
+  //       },
+  //       {
+  //         $set: { "cart_products.$[i].quantity": quantity, updatedAt: date },
+  //       },
+  //       {
+  //         arrayFilters: [
+  //           {
+  //             $and: [
+  //               { "i.product": product_id },
+  //               { "i.variation": variation_id },
+  //             ],
+  //           },
+  //         ],
+  //         new: true,
+  //         upsert: true,
+  //       }
+  //     )
+  //       .populate("cart_products.product", {
+  //         inventory: 1,
+  //         title: 1,
+  //         thumbnail: 1,
+  //         price: 1,
+  //         promotion_price: 1,
+  //         slug: 1,
+  //       })
+  //       .populate("cart_products.variation", {
+  //         inventory: 1,
+  //         title: 1,
+  //         thumbnail: 1,
+  //         price: 1,
+  //         promotion_price: 1,
+  //       });
+  //     return updatedCart;
+  //   }
+  // }
+
+  async updateItemsCart(user_id, cart_id, payload) {
     if (!user_id) return null;
     const date = getDateTime();
-    const { product_id, variation_id, quantity, price, options } = payload;
+    const { product_id, variation_id, quantity, price } = payload;
 
-    // check shop is exit
-    // const shopInCart = await this.checkShopInCart(user_id, shop_id);
-
-    // case 1: chưa có shop và san pham tạo mới
-    // if (!shopInCart) {
-    //   console.log("case 1::: chưa có shop và san pham tạo mới");
-    //   const updatedCart = await Cart.findOneAndUpdate(
-    //     {
-    //       cart_userId: convertObjectToString(user_id),
-    //     },
-    //     {
-    //       $push: {
-    //         cart_products: {
-    //           shop_id,
-    //           products: [{ product_id, variation, quantity, price }],
-    //         },
-    //       },
-    //     }
-    //   );
-
-    //   return updatedCart;
-    // }
-
-    // case 2: đã có shop và có sản phẩm với id
-    const productInCart = await this.checkProductInCart(
-      user_id,
-      product_id,
-      variation_id
+    const updateItems = await CartItem.findOneAndUpdate(
+      {
+        cart_id: convertObjectToString(cart_id),
+        product: product_id,
+        variation: variation_id,
+      },
+      {
+        $inc: { quantity },
+        $set: { price, updatedAt: date },
+      },
+      { new: true, upsert: true }
     );
 
-    // case 3: đã có shop và chưa có sản phẩm với id
-    if (!productInCart) {
-      console.log("case 3::: chưa có sản phẩm với id");
-      const updatedCart = await Cart.findOneAndUpdate(
-        {
-          cart_userId: convertObjectToString(user_id),
-        },
-        {
-          $push: {
-            cart_products: {
-              product_id,
-              variation_id,
-              quantity,
-              price,
-              options,
-            },
-          },
-          $set: { updatedAt: date },
-        },
-        { new: true, upsert: true }
-      )
-        .populate("cart_products.product_id", {
-          inventory: 1,
-          title: 1,
-          thumbnail: 1,
-        })
-        .populate("cart_products.variation_id", {
-          inventory: 1,
-          title: 1,
-          thumbnail: 1,
-        });
-
-      return updatedCart;
-    } else {
-      console.log("case 2::: có sản phẩm với id");
-
-      const updatedCart = await Cart.findOneAndUpdate(
-        {
-          cart_userId: convertObjectToString(user_id),
-        },
-        {
-          $set: { "cart_products.$[i].quantity": quantity, updatedAt: date },
-        },
-        {
-          arrayFilters: [
-            {
-              $and: [
-                { "i.product_id": product_id },
-                { "i.variation_id": variation_id },
-              ],
-            },
-          ],
-          new: true,
-          upsert: true,
-        }
-      )
-        .populate("cart_products.product_id", {
-          inventory: 1,
-          title: 1,
-          thumbnail: 1,
-        })
-        .populate("cart_products.variation_id", {
-          inventory: 1,
-          title: 1,
-          thumbnail: 1,
-        });
-      return updatedCart;
-    }
+    return updateItems;
   }
 
-  async deleteItemCart(user_id, payload) {
-    if (!user_id) return null;
+  // async deleteItemCart(user_id, payload) {
+  //   if (!user_id) return null;
+
+  //   const { product_id, variation_id } = payload;
+
+  //   if (!product_id) return null;
+
+  //   const productInCart = await this.checkProductInCart(
+  //     user_id,
+  //     product_id,
+  //     variation_id
+  //   );
+
+  //   if (!productInCart) return null;
+
+  //   const date = getDateTime();
+  //   const updatedCart = await Cart.findOneAndUpdate(
+  //     {
+  //       cart_userId: convertObjectToString(user_id),
+  //     },
+  //     {
+  //       $pull: { cart_products: { product_id, variation_id } },
+  //       $set: { updatedAt: date },
+  //     },
+  //     {
+  //       new: true,
+  //       upsert: true,
+  //     }
+  //   )
+  //     .populate("product_id", {
+  //       inventory: 1,
+  //       title: 1,
+  //       thumbnail: 1,
+  //     })
+  //     .populate("variation_id", {
+  //       inventory: 1,
+  //       title: 1,
+  //       thumbnail: 1,
+  //     });
+
+  //   return updatedCart;
+  // }
+
+  async deleteItemCart(cart_id, payload) {
+    if (!cart_id) return null;
 
     const { product_id, variation_id } = payload;
 
     if (!product_id) return null;
 
-    const productInCart = await this.checkProductInCart(
-      user_id,
-      product_id,
-      variation_id
-    );
-
-    if (!productInCart) return null;
-
-    const date = getDateTime();
-    const updatedCart = await Cart.findOneAndUpdate(
-      {
-        cart_userId: convertObjectToString(user_id),
-      },
-      {
-        $pull: { cart_products: { product_id, variation_id } },
-        $set: { updatedAt: date },
-      },
-      {
-        new: true,
-        upsert: true,
-      }
-    )
-      .populate("cart_products.product_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      })
-      .populate("cart_products.variation_id", {
-        inventory: 1,
-        title: 1,
-        thumbnail: 1,
-      });
-
+    const updatedCart = await CartItem.findOneAndDelete({
+      cart_id: convertObjectToString(cart_id),
+      product: product_id,
+      variation: variation_id,
+    });
     return updatedCart;
   }
 

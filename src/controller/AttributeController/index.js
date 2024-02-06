@@ -14,6 +14,19 @@ const { removeUndefindedObj } = require("../../helpers/NestedObjectParse");
 
 const AttributeController = {
   getAttributes: async (req, res) => {
+    try {
+      const attributes = await AttributeServices.getAttributes();
+
+      if (!attributes) {
+        return new NotFoundError(404, "No attributes found!").send(res);
+      }
+
+      return new GetResponse(200, attributes).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  getAttributesWithPage: async (req, res) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 

@@ -35,6 +35,10 @@ class CategoriesServices {
       isDeleted: false,
     })
       .select({
+        // _id: 1,
+        // parent_id: 1,
+        // title: 1,
+        // childrens: 1,
         ...select,
       })
       .lean();
@@ -58,6 +62,7 @@ class CategoriesServices {
       ...query,
     })
       .populate("parent_id", { _id: 1, title: 1 })
+      .populate("childrens", { _id: 1, title: 1, slug: 1 })
       .populate("breadcrumbs", { _id: 1, title: 1, slug: 1 })
       .lean();
     return category;

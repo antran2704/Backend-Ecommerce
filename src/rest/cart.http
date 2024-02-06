@@ -1,4 +1,4 @@
-GET http://137.184.232.94/api/v1/carts/6572b176b34b8805e84d6c8b
+GET http://localhost:3001/api/v1/carts/65b68c534aeec67d1fcf1720
 
 ### Update cart item
 POST http://localhost:3001/api/v1/carts/update/656dda8c80d2bc76a5a4f07f

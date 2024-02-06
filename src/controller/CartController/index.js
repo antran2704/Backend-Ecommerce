@@ -31,9 +31,17 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      return new GetResponse(200, cart).send(res);
+      const cart_products = await CartServices.getItemsInCart(cart._id);
+
+      return new GetResponse(200, {
+        cart_userId: cart.cart_userId,
+        cart_status: cart.cart_status,
+        cart_count: cart.cart_count,
+        cart_total: cart.cart_total,
+        cart_products,
+      }).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   updateCart: async (req, res) => {
@@ -58,22 +66,7 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      if (!product_id || !isValidObjectId(product_id)) {
-        return new NotFoundError(400, "Object id invalid").send(res);
-      }
-
-      const product = await ProductServices.getProductById(data.product_id, {
-        inventory: 1,
-        price: 1,
-        promotion_price: 1,
-      });
-
-      if (!product) {
-        return new NotFoundError(404, "Not found product").send(res);
-      }
-
-      data.price =
-        product.promotion_price > 0 ? product.promotion_price : product.price;
+      let inventoryProduct = 0;
 
       if (variation_id && isValidObjectId(variation_id)) {
         const variationProduct = await ProductItemServices.getProductItemById(
@@ -87,36 +80,70 @@ const CartController = {
           );
         }
 
-        if (quantity > variationProduct.inventory) {
-          return new BadResquestError(
-            400,
-            "Quantity order bigger than inventory type variation"
-          ).send(res);
-        }
-
         data.price =
           variationProduct.promotion_price > 0
             ? variationProduct.promotion_price
             : variationProduct.price;
-            
-      } else if (quantity > product.inventory) {
+
+        inventoryProduct = variationProduct.inventory;
+      } else {
+        if (!product_id || !isValidObjectId(product_id)) {
+          return new NotFoundError(400, "Object id invalid").send(res);
+        }
+
+        const product = await ProductServices.getProductById(data.product_id, {
+          inventory: 1,
+          price: 1,
+          promotion_price: 1,
+        });
+
+        if (!product) {
+          return new NotFoundError(404, "Not found product").send(res);
+        }
+
+        data.price =
+          product.promotion_price > 0 ? product.promotion_price : product.price;
+        inventoryProduct = product.inventory;
+      }
+      // else if (quantity > product.inventory) {
+      //   return new BadResquestError(
+      //     400,
+      //     "Quantity order bigger than inventory"
+      //   ).send(res);
+      // }
+
+      const checkProductInCart = await CartServices.checkProductInCart(
+        cart._id,
+        product_id,
+        variation_id
+      );
+
+      if (
+        checkProductInCart &&
+        inventoryProduct < checkProductInCart.quantity + quantity
+      ) {
         return new BadResquestError(
           400,
           "Quantity order bigger than inventory"
         ).send(res);
       }
 
-      const updatedCart = await CartServices.updateItemsCart(user_id, data);
+      // const updatedCart = await CartServices.updateItemsCart(user_id, data);
+      const updatedCart = await CartServices.updateItemsCart(
+        user_id,
+        cart._id,
+        data
+      );
 
       if (!updatedCart) {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
-      const totalItems = updatedCart.cart_products.length;
-      const totalPrice = CartServices.getTotalPrice(updatedCart.cart_products);
+      const totalItems = await CartServices.getItemsInCart(cart._id);
+      const totalPrice = CartServices.getTotalPrice(totalItems);
 
       const updated = await CartServices.updateCart(user_id, {
-        cart_count: totalItems,
+        cart_count: totalItems.length,
         cart_total: totalPrice,
       });
 
@@ -124,23 +151,23 @@ const CartController = {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
-      return new CreatedResponse(201, updated).send(res);
+      return new CreatedResponse(201, {
+        cart_userId: updated.cart_userId,
+        cart_status: updated.cart_status,
+        cart_count: updated.cart_count,
+        cart_total: updated.cart_total,
+        cart_products: totalItems,
+      }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }
   },
   deleteItemCart: async (req, res) => {
     const { user_id } = req.params;
-    const data = req.body;
+    const data = req.body; //body = { product_id, variation_id }
 
-    if (!user_id || !data) {
+    if (!user_id || !isValidObjectId(user_id) || !data) {
       return new BadResquestError().send(res);
-    }
-
-    const validUserId = isValidObjectId(user_id);
-
-    if (!validUserId) {
-      return new BadResquestError(400, "Object id invalid").send(res);
     }
 
     try {
@@ -156,7 +183,7 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      const updatedCart = await CartServices.deleteItemCart(user_id, data);
+      const updatedCart = await CartServices.deleteItemCart(cart._id, data);
 
       if (!updatedCart) {
         return new BadResquestError(400, "Deleted item in cart failed").send(
@@ -164,11 +191,11 @@ const CartController = {
         );
       }
 
-      const totalItems = updatedCart.cart_products.length;
-      const totalPrice = CartServices.getTotalPrice(updatedCart.cart_products);
+      const totalItems = await CartServices.getItemsInCart(cart._id);
+      const totalPrice = CartServices.getTotalPrice(totalItems);
 
       const updated = await CartServices.updateCart(user_id, {
-        cart_count: totalItems,
+        cart_count: totalItems.length,
         cart_total: totalPrice,
       });
 
@@ -176,7 +203,13 @@ const CartController = {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
-      return new CreatedResponse(201, updated).send(res);
+      return new CreatedResponse(201, {
+        cart_userId: updated.cart_userId,
+        cart_status: updated.cart_status,
+        cart_count: updated.cart_count,
+        cart_total: updated.cart_total,
+        cart_products: totalItems,
+      }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }
