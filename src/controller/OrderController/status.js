@@ -5,6 +5,12 @@ const typeStatus = {
   cancle: "cancle",
 };
 
+const paymentStatus = {
+  pending: "pending",
+  cancle: "cancle",
+  success: "success",
+};
+
 const templateEmail = {
   pending: {
     template: "email/pending",
@@ -20,4 +26,4 @@ const templateEmail = {
   },
 };
 
-module.exports = { typeStatus, templateEmail };
+module.exports = { typeStatus, templateEmail, paymentStatus };

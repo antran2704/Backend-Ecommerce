@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const OrderController = require("../../controller/OrderController");
-const DiscountMiddleware = require("../../middlewares/Discount");
 
 // [GET] SEARCH ODERS
 router.get("/search", OrderController.searchOrders);
@@ -16,7 +15,7 @@ router.get("/:order_id", OrderController.getOrder);
 router.post("/sendEmail", OrderController.sendEmail);
 
 // [PATCH] STATUS ORDER
-router.patch("/status/:order_id", OrderController.updateStatusOrder)
+router.patch("/status/:order_id", OrderController.updateOrderStatus)
 
 // [PATCH] AN ORDER
 router.patch("/:order_id", OrderController.updateOrder)

@@ -182,7 +182,7 @@ class DiscountServices {
 
   validDateDiscount(start_date, end_date) {
     if (
-      new Date() < new Date(start_date) ||
+      // new Date() < new Date(start_date) ||
       new Date() > new Date(end_date) ||
       new Date(start_date) > new Date(end_date)
     ) {

@@ -9,7 +9,7 @@ const DiscountMiddleware = {
   checkDiscount: async (req, res, next) => {
     const { discount_code, user_id, total } = req.body;
 
-    if (!discount_code || !user_id || !isValidObjectId(user_id)) {
+    if (!discount_code) {
       return new BadResquestError().send(res);
     }
 
@@ -71,9 +71,6 @@ const DiscountMiddleware = {
         if (countUsed.count >= discount.discount_per_user) {
           return new BadResquestError(400, "Discount was used max").send(res);
         }
-        DiscountServices.updateUsedCountDiscount(discount_code, user_id);
-      } else {
-        DiscountServices.updateUsedDiscount(discount_code, user_id);
       }
 
       req.discount = discount;

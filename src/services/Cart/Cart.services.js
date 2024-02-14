@@ -232,6 +232,26 @@ class CartServices {
         variation: variation_id,
       },
       {
+        $set: { quantity, price, updatedAt: date },
+      },
+      { new: true, upsert: true }
+    );
+
+    return updateItems;
+  }
+
+  async increaseItemsCart(user_id, cart_id, payload) {
+    if (!user_id) return null;
+    const date = getDateTime();
+    const { product_id, variation_id, quantity, price } = payload;
+
+    const updateItems = await CartItem.findOneAndUpdate(
+      {
+        cart_id: convertObjectToString(cart_id),
+        product: product_id,
+        variation: variation_id,
+      },
+      {
         $inc: { quantity },
         $set: { price, updatedAt: date },
       },
@@ -299,27 +319,15 @@ class CartServices {
     return updatedCart;
   }
 
-  async deleteAllItemCart(user_id) {
-    if (!user_id) return null;
-    const date = getDateTime();
+  async deleteAllItemCart(cart_id) {
+    if (!cart_id) return null;
 
-    const updatedCart = await Cart.findOneAndUpdate(
+    const updatedCart = await CartItem.deleteMany(
       {
-        cart_userId: convertObjectToString(user_id),
-      },
-      {
-        $set: {
-          cart_products: [],
-          cart_count: 0,
-          cart_total: 0,
-          updatedAt: date,
-        },
-      },
-      {
-        new: true,
-        upsert: true,
+        cart_id: convertObjectToString(cart_id)
       }
     );
+
     return updatedCart;
   }
 }

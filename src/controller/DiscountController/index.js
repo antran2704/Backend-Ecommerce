@@ -50,7 +50,7 @@ const DiscountController = {
     }
   },
   getDiscount: async (req, res) => {
-    const { discount_code } = req.params;
+    const { discount_code } = req.body;
 
     if (!discount_code) {
       return new BadResquestError(400, "Invalid discount code").send(res);
@@ -141,7 +141,11 @@ const DiscountController = {
   useDiscount: async (req, res) => {
     // get discount from middleware
     const { discount } = req;
-    const { discount_code, total } = req.body;
+    const { total, user_id } = req.body;
+
+    if (!user_id || !isValidObjectId(user_id)) {
+      return new BadResquestError().send(res);
+    }
 
     try {
       let total_discount = 0;
@@ -152,8 +156,10 @@ const DiscountController = {
         total_discount = total - discount.discount_value;
       }
 
+      DiscountServices.updateUsedDiscount(discount.discount_code, user_id);
+
       return new GetResponse(200, {
-        discount_code,
+        discount,
         total,
         total_discount,
       }).send(res);
@@ -248,7 +254,7 @@ const DiscountController = {
           discount_code
         );
 
-        if (id !== convertObjectToString(discount._id)) {
+        if (discount) {
           return new BadResquestError(400, "Discount is exited").send(res);
         }
       }

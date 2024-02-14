@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid");
 const { getDateTime } = require("../../helpers/getDateTime");
 const handleQueryParse = require("../../helpers/queryParse");
 const { Order } = require("../../models");
@@ -58,7 +59,7 @@ class OrderServices {
   async createOrder(payload) {
     if (!payload) return null;
 
-    const newOrder = await Order.create({ ...payload });
+    const newOrder = await Order.create({ order_id: uuidv4(), ...payload });
     return newOrder;
   }
 

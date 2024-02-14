@@ -1,4 +1,4 @@
-const { typeStatus, templateEmail } = require("./status");
+const { typeStatus, templateEmail, paymentStatus } = require("./status");
 const handleSendMail = require("../../configs/mailServices");
 
 const {
@@ -121,11 +121,11 @@ const OrderController = {
     }
 
     try {
-      const order = await OrderServices.getOrderByOrderID(data.order_id);
+      // const order = await OrderServices.getOrderByOrderID(data.order_id);
 
-      if (order) {
-        return new BadResquestError(400, "Order ID is exit").send(res);
-      }
+      // if (order) {
+      //   return new BadResquestError(400, "Order ID is exit").send(res);
+      // }
 
       const newOrder = await OrderServices.createOrder(data);
       if (!newOrder) {
@@ -244,7 +244,7 @@ const OrderController = {
       return new InternalServerError().send(res);
     }
   },
-  updateStatusOrder: async (req, res) => {
+  updateOrderStatus: async (req, res) => {
     const { order_id } = req.params;
     if (!order_id) {
       return new BadResquestError().send(res);
@@ -363,6 +363,53 @@ const OrderController = {
 
       return new CreatedResponse(201, {
         message: "Updated order succesfully",
+      }).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  updatePaymentStatus: async (req, res) => {
+    const { order_id } = req.params;
+    if (!order_id) {
+      return new BadResquestError().send(res);
+    }
+
+    const data = req.body;
+
+    if (
+      !data.status ||
+      !Object.keys(paymentStatus).includes(data.paymentStatus)
+    ) {
+      return new BadResquestError(400, { message: "Invalid status" }).send(res);
+    }
+
+    try {
+      const order = await OrderServices.getOrder(order_id);
+      if (!order) {
+        return new NotFoundError(404, "Not found order").send(res);
+      }
+
+      const updated = await OrderServices.updateOrder(order_id, data);
+      if (!updated) {
+        return new BadResquestError(400, {
+          message: "Updated order failed",
+        }).send(res);
+      }
+
+      // let mailContent = {
+      //   to: order.user_infor.email,
+      //   subject: "Antran shop thông báo:",
+      //   template: templateEmail[data.status].template,
+      //   context: {
+      //     orderId: order.order_id,
+      //     content: data.cancleContent,
+      //   },
+      // };
+
+      // handleSendMail(mailContent);
+
+      return new CreatedResponse(201, {
+        message: "Updated payment status succesfully",
       }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);

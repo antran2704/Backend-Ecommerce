@@ -12,6 +12,7 @@ const UserRoutes = require("./UserRoutes");
 const AdminRoutes = require("./AdminRoutes");
 const DeleteRoutes = require("./DeleteRoutes");
 const CartRoutes = require("./CartRoutes");
+const VNPayRoutes = require("./PaymentRoutes/VNPayRoutes");
 const DiscountRoutes = require("./DiscountRoutes");
 const AttributeRoutes = require("./AttributeRoutes");
 const GrossDateRoutes = require("./GrossRoutes/GrossDateRoutes");
@@ -31,6 +32,7 @@ const routes = (app) => {
   app.use("/api/v1/orders", OrderRoutes);
   app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
+  app.use("/api/v1/payment/vnpay", VNPayRoutes);
   app.use("/api/v1/admin", AdminRoutes);
   app.use("/api/v1/attributes", AttributeRoutes);
   app.use("/api/v1/gross-date", GrossDateRoutes);

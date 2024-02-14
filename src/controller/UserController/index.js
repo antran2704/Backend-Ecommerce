@@ -304,7 +304,7 @@ const UserController = {
     }
 
     const refreshToken = refreshTokenHeader.split(" ")[1];
-
+    
     try {
       const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
         user: 1,

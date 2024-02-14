@@ -3,10 +3,6 @@ const Schema = mongoose.Schema;
 
 const OrderModel = new Schema(
   {
-    _id: {
-      type: Schema.Types.ObjectId,
-      default: () => mongoose.Types.ObjectId(),
-    },
     order_id: {
       type: String,
       require: true,
@@ -34,27 +30,24 @@ const OrderModel = new Schema(
     user_id: {
       type: Schema.Types.ObjectId,
       ref: "user",
-      index: true
+      index: true,
     },
     items: [
       {
-        _id: {
-          type: Schema.Types.ObjectId,
-          ref: "product_item",
-        },
-        product_id: {
-          type: Schema.Types.ObjectId,
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
           ref: "product",
+          require: true,
         },
-        name: String,
-        options: [{ type: String }],
+        variation: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "product_item",
+          require: true,
+        },
+        // options: [{ type: String }],
         price: {
           type: Number,
           default: 0,
-        },
-        thumbnail: {
-          type: String,
-          default: null,
         },
         promotion_price: {
           type: Number,
@@ -63,10 +56,6 @@ const OrderModel = new Schema(
         quantity: {
           type: Number,
           default: 0,
-        },
-        link: {
-          type: String,
-          default: null,
         },
       },
     ],
@@ -88,6 +77,7 @@ const OrderModel = new Schema(
       default: "pending",
     },
     discount_codes: {
+      discount_id: String,
       dicount_name: String,
       discount_code: String,
       discount_value: Number,
@@ -96,6 +86,11 @@ const OrderModel = new Schema(
     payment_method: {
       type: String,
       require: true,
+    },
+    payment_status: {
+      type: String,
+      enum: ["pending", "cancle", "success"],
+      default: "pending",
     },
     cancleContent: {
       type: String,

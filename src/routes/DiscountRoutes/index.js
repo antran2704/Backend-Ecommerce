@@ -5,8 +5,8 @@ const UserMiddleware = require("../../middlewares/Auth");
 const multer = require("../../middlewares/Multer");
 const DiscountMiddleware = require("../../middlewares/Discount");
 
-router.use(UserMiddleware.authentication);
-router.use(UserMiddleware.authorization("0000"));
+// router.use(UserMiddleware.authentication);
+// router.use(UserMiddleware.authorization("0000"));
 
 router.get("/search", DiscountController.searchDiscounts);
 
@@ -20,6 +20,9 @@ router.post(
   multer.upload("./uploads/discount").single("thumbnail"),
   DiscountController.uploadThumbnail
 );
+
+// [POST] GET DISCOUNT ON CLIENT BY CODE ID
+router.post("/client",DiscountMiddleware.checkDiscount, DiscountController.getDiscount);
 
 // [POST] USE DISCOUNT
 router.post(

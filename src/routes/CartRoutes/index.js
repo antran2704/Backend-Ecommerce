@@ -9,6 +9,9 @@ router.post("/items/:user_id", CartController.deleteAllItemCart);
 router.post("/item/:user_id", CartController.deleteItemCart);
 
 // [POST] UPDATE PRODUCT CART
+router.post("/increase/:user_id", CartController.increaseCart);
+
+// [POST] UPDATE PRODUCT CART
 router.post("/update/:user_id", CartController.updateCart);
 
 // [GET] CART BY USER ID
