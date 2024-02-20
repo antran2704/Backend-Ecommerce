@@ -14,7 +14,7 @@ const DiscountMiddleware = {
     }
 
     try {
-      const discount = await DiscountServices.getDiscountByCode(discount_code, {
+      const discount = await DiscountServices.getDiscountClient(discount_code, {
         discount_code: 1,
         discount_type: 1,
         discount_value: 1,

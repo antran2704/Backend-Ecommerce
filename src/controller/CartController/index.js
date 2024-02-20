@@ -216,12 +216,6 @@ const CartController = {
           product.promotion_price > 0 ? product.promotion_price : product.price;
         inventoryProduct = product.inventory;
       }
-      // else if (quantity > product.inventory) {
-      //   return new BadResquestError(
-      //     400,
-      //     "Quantity order bigger than inventory"
-      //   ).send(res);
-      // }
 
       const checkProductInCart = await CartServices.checkProductInCart(
         cart._id,
@@ -236,7 +230,6 @@ const CartController = {
         ).send(res);
       }
 
-      // const updatedCart = await CartServices.updateItemsCart(user_id, data);
       const updatedCart = await CartServices.updateItemsCart(
         user_id,
         cart._id,

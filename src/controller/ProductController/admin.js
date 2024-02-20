@@ -13,11 +13,11 @@ const getSelect = require("../../helpers/getSelect");
 
 const AdminProductController = {
   // [GET] ALL PRODUCT
-  getProducts: async (req, res) => {
+  getProducts: async (req, res, next) => {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const select = getSelect(req.query);
-
+    
     try {
       const totalItems = await ProductServices.getProducts();
       if (!totalItems) {

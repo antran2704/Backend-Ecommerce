@@ -39,13 +39,14 @@ class ProductItemServices {
     return variation;
   }
 
-  async updateProductItem(id, payload) {
-    if (!id || !payload || !isValidObjectId(id)) return null;
+  async updateProductItem(id, payload, query = {}) {
+    // if (!id || !payload || !isValidObjectId(id)) return null;
+    if (!id || !isValidObjectId(id)) return null;
 
     const date = getDateTime();
     const variation = ProductItem.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...payload, updatedAt: date } },
+      { $set: { ...payload, updatedAt: date }, ...query  },
       { upsert: true, new: true }
     );
 

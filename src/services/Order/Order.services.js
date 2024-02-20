@@ -1,7 +1,8 @@
-const { v4: uuidv4 } = require("uuid");
+const { format } = require("date-fns");
 const { getDateTime } = require("../../helpers/getDateTime");
 const handleQueryParse = require("../../helpers/queryParse");
 const { Order } = require("../../models");
+const { paymentStatus } = require("../../controller/OrderController/status");
 
 class OrderServices {
   async getOrders() {
@@ -52,22 +53,31 @@ class OrderServices {
 
     const order = await Order.findOne({ order_id })
       .select({ ...select })
+      .populate("items.product", {
+        title: 1,
+        thumbnail: 1,
+        slug: 1,
+      })
+      .populate("items.variation", {
+        title: 1,
+        thumbnail: 1,
+      })
       .lean();
     return order;
   }
 
   async createOrder(payload) {
     if (!payload) return null;
-
-    const newOrder = await Order.create({ order_id: uuidv4(), ...payload });
+    const date = new Date()
+    const newOrder = await Order.create({ order_id: format(date, "yyMMddHHmmss"), ...payload });
     return newOrder;
   }
 
   async updateOrder(order_id, payload) {
     if (!order_id) return null;
     const date = getDateTime();
-    const updated = await Order.findByIdAndUpdate(
-      { _id: order_id },
+    const updated = await Order.findOneAndUpdate(
+      { order_id },
       { $set: { ...payload, updatedAt: date } }
     );
 

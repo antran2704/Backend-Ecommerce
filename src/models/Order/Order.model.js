@@ -76,12 +76,16 @@ const OrderModel = new Schema(
       enum: ["pending", "cancle", "processing", "delivered"],
       default: "pending",
     },
-    discount_codes: {
-      discount_id: String,
-      dicount_name: String,
-      discount_code: String,
-      discount_value: Number,
-      discount_min_value: Number,
+    discount: {
+      type: {
+        _id: String,
+        discount_type: String,
+        discount_name: String,
+        discount_code: String,
+        discount_value: Number,
+        discount_min_value: Number,
+      },
+      default: null,
     },
     payment_method: {
       type: String,

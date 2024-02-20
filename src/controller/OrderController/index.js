@@ -1,4 +1,9 @@
-const { typeStatus, templateEmail, paymentStatus } = require("./status");
+const {
+  typeStatus,
+  templateEmail,
+  paymentStatus,
+  paymentMethod,
+} = require("./status");
 const handleSendMail = require("../../configs/mailServices");
 
 const {
@@ -14,6 +19,9 @@ const {
   OrderServices,
   GrossDateServices,
   GrossMonthServices,
+  CartServices,
+  ProductItemServices,
+  ProductServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { Order } = require("../../models");
@@ -112,112 +120,68 @@ const OrderController = {
       return new InternalServerError().send(res);
     }
   },
+  getOrderById: async (req, res) => {
+    const { order_id } = req.params;
+
+    if (!order_id) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      const order = await OrderServices.getOrderByOrderID(order_id);
+      if (!order) {
+        return new NotFoundError(404, "Not found order").send(res);
+      }
+
+      return new GetResponse(200, order).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
   // [POST] AN ORDER
-  createOrder: async (req, res) => {
+  createOrder: async (req, res, next) => {
     const data = req.body;
 
     if (!data) {
       return new BadResquestError().send(res);
     }
 
-    try {
-      // const order = await OrderServices.getOrderByOrderID(data.order_id);
+    if (
+      !data.payment_status ||
+      !data.payment_method ||
+      !paymentStatus[data.payment_status] ||
+      !paymentMethod[data.payment_method]
+    ) {
+      return new BadResquestError(400, { message: "Invalid data" }).send(res);
+    }
 
-      // if (order) {
-      //   return new BadResquestError(400, "Order ID is exit").send(res);
-      // }
+    try {
+      const cart = await CartServices.getCartByUserId(data.user_id);
+
+      if (!cart || cart.cart_count === 0) {
+        return new BadResquestError(400, "No item").send(res);
+      }
 
       const newOrder = await OrderServices.createOrder(data);
       if (!newOrder) {
         return new BadResquestError(400, "Create new order failed").send(res);
       }
 
-      const link = `${process.env.HOST_URL}/orders/${newOrder._id}`;
-      let mailContent = {
-        to: "phamtrangiaan27@gmail.com",
-        subject: "Antran shop thông báo:",
-        template: "email/newOrder",
-        context: {
-          link,
-        },
-      };
+      for (let i = 0; i < data.items.length; i++) {
+        const item = data.items[0];
+        const queryDB = {
+          $inc: { inventory: -item.quantity, sold: item.quantity },
+        };
 
-      handleSendMail(mailContent);
+        await ProductServices.updateProduct(item.product, {}, queryDB);
 
-      const date = new Date();
-      const grossDay = await GrossDateServices.getGrossInDay(
-        date.toLocaleDateString("en-GB")
-      );
-
-      if (!grossDay) {
-        const newGross = await GrossDateServices.createGross();
-
-        if (!newGross) {
-          return new BadResquestError(400, "Create new gross failed").send(res);
+        if (item.variation) {
+          await ProductItemServices.updateProductItem(
+            item.variation,
+            {},
+            queryDB
+          );
         }
-
-        const query = {
-          $push: { orders: newOrder._id },
-          $inc: { sub_gross: newOrder.total },
-        };
-
-        GrossDateServices.updateGross(newGross._id, query);
-      } else {
-        const query = {
-          $push: { orders: newOrder._id },
-          $inc: { sub_gross: newOrder.total },
-        };
-
-        GrossDateServices.updateGross(grossDay._id, query);
-      }
-
-      const grossMonth = await GrossMonthServices.getGrossByMonth(
-        date.getMonth() + 1,
-        date.getFullYear()
-      );
-
-      if (!grossMonth) {
-        const newGross = await GrossMonthServices.createGross();
-
-        if (!newGross) {
-          return new BadResquestError(400, "Create new gross failed").send(res);
-        }
-
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossMonthServices.updateGross(newGross._id, query);
-      } else {
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossMonthServices.updateGross(grossMonth._id, query);
-      }
-
-      const grossYear = await GrossYearServices.getGrossByYear(
-        date.getFullYear()
-      );
-
-      if (!grossYear) {
-        const newGross = await GrossYearServices.createGross();
-
-        if (!newGross) {
-          return new BadResquestError(400, "Create new gross failed").send(res);
-        }
-
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossYearServices.updateGross(newGross._id, query);
-      } else {
-        const query = {
-          $inc: { orders: 1, sub_gross: newOrder.total },
-        };
-
-        GrossYearServices.updateGross(grossYear._id, query);
       }
 
       return new CreatedResponse(201, newOrder).send(res);
@@ -233,6 +197,7 @@ const OrderController = {
     }
 
     const data = req.body;
+
     try {
       const order = await OrderServices.updateOrder(order_id, data);
       if (!order) {
@@ -280,6 +245,23 @@ const OrderController = {
       };
 
       handleSendMail(mailContent);
+
+      for (let i = 0; i < order.items.length; i++) {
+        const item = order.items[0];
+        const queryDB = {
+          $inc: { inventory: item.quantity, sold: -item.quantity },
+        };
+
+        await ProductServices.updateProduct(item.product, {}, queryDB);
+
+        if (item.variation) {
+          await ProductItemServices.updateProductItem(
+            item.variation,
+            {},
+            queryDB
+          );
+        }
+      }
 
       const date = new Date(order.createdAt);
 
@@ -370,43 +352,152 @@ const OrderController = {
   },
   updatePaymentStatus: async (req, res) => {
     const { order_id } = req.params;
+
     if (!order_id) {
       return new BadResquestError().send(res);
     }
 
     const data = req.body;
-
-    if (
-      !data.status ||
-      !Object.keys(paymentStatus).includes(data.paymentStatus)
-    ) {
-      return new BadResquestError(400, { message: "Invalid status" }).send(res);
+    if (!data.payment_status || !paymentStatus[data.payment_status]) {
+      return new BadResquestError(400, "Invalid data").send(res);
     }
 
     try {
-      const order = await OrderServices.getOrder(order_id);
+      const order = await OrderServices.getOrderByOrderID(order_id);
       if (!order) {
         return new NotFoundError(404, "Not found order").send(res);
       }
 
       const updated = await OrderServices.updateOrder(order_id, data);
       if (!updated) {
-        return new BadResquestError(400, {
-          message: "Updated order failed",
-        }).send(res);
+        return new BadResquestError(400, "Updated order failed").send(res);
       }
 
-      // let mailContent = {
-      //   to: order.user_infor.email,
-      //   subject: "Antran shop thông báo:",
-      //   template: templateEmail[data.status].template,
-      //   context: {
-      //     orderId: order.order_id,
-      //     content: data.cancleContent,
-      //   },
-      // };
+      if (data.payment_status === paymentStatus.success) {
+        const link = `${process.env.HOST_URL}/orders/${order_id}`;
+        let mailContent = {
+          to: "phamtrangiaan27@gmail.com",
+          subject: "Antran shop thông báo:",
+          template: "email/newOrder",
+          context: {
+            link,
+          },
+        };
 
-      // handleSendMail(mailContent);
+        handleSendMail(mailContent);
+
+        const date = new Date();
+        const grossDay = await GrossDateServices.getGrossInDay(
+          date.toLocaleDateString("en-GB")
+        );
+  
+        if (!grossDay) {
+          const newGross = await GrossDateServices.createGross();
+  
+          if (!newGross) {
+            return new BadResquestError(400, "Create new gross failed").send(res);
+          }
+  
+          const query = {
+            $push: { orders: order._id },
+            $inc: { sub_gross: order.total },
+          };
+  
+          GrossDateServices.updateGross(newGross._id, query);
+        } else {
+          const query = {
+            $push: { orders: order._id },
+            $inc: { sub_gross: order.total },
+          };
+  
+          GrossDateServices.updateGross(grossDay._id, query);
+        }
+  
+        const grossMonth = await GrossMonthServices.getGrossByMonth(
+          date.getMonth() + 1,
+          date.getFullYear()
+        );
+  
+        if (!grossMonth) {
+          const newGross = await GrossMonthServices.createGross();
+  
+          if (!newGross) {
+            return new BadResquestError(400, "Create new gross failed").send(res);
+          }
+  
+          const query = {
+            $inc: { orders: 1, sub_gross: order.total },
+          };
+  
+          GrossMonthServices.updateGross(newGross._id, query);
+        } else {
+          const query = {
+            $inc: { orders: 1, sub_gross: order.total },
+          };
+  
+          GrossMonthServices.updateGross(grossMonth._id, query);
+        }
+  
+        const grossYear = await GrossYearServices.getGrossByYear(
+          date.getFullYear()
+        );
+  
+        if (!grossYear) {
+          const newGross = await GrossYearServices.createGross();
+  
+          if (!newGross) {
+            return new BadResquestError(400, "Create new gross failed").send(res);
+          }
+  
+          const query = {
+            $inc: { orders: 1, sub_gross: order.total },
+          };
+  
+          GrossYearServices.updateGross(newGross._id, query);
+        } else {
+          const query = {
+            $inc: { orders: 1, sub_gross: order.total },
+          };
+  
+          GrossYearServices.updateGross(grossYear._id, query);
+        }
+  
+      }
+
+      if (data.payment_status === paymentStatus.cancle) {
+        for (let i = 0; i < order.items.length; i++) {
+          const item = order.items[0];
+          const queryDB = {
+            $inc: { inventory: item.quantity, sold: -item.quantity },
+          };
+
+          await ProductServices.updateProduct(item.product._id, {}, queryDB);
+
+          if (item.variation) {
+            await ProductItemServices.updateProductItem(
+              item.variation._id,
+              {},
+              queryDB
+            );
+          }
+        }
+      }
+
+      if(data.payment_status === paymentStatus.success || data.payment_status === paymentStatus.cancle) {
+        const cart = await CartServices.getCartByUserId(order.user_id);
+
+        if (!cart) {
+          return new BadResquestError(400, "Not found cart").send(res);
+        }
+
+        CartServices.deleteAllItemCart(cart._id);
+        CartServices.updateCart(order.user_id, {
+          cart_count: 0,
+          cart_total: 0,
+        });
+
+        return res.redirect(`http://localhost:3000/checkout/${order_id}`);
+      }
 
       return new CreatedResponse(201, {
         message: "Updated payment status succesfully",

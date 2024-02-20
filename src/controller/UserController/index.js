@@ -151,7 +151,6 @@ const UserController = {
   },
   login: async (req, res) => {
     const { email } = req.body;
-
     if (!email) {
       return new BadResquestError(400, "Data login invalid").send(res);
     }

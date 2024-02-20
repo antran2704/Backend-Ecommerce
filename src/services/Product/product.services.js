@@ -204,13 +204,12 @@ class ProductServices {
     return newProduct;
   }
 
-  async updateProduct(id, payload) {
+  async updateProduct(id, payload, query = {}) {
     if (!id) return null;
-
     const date = getDateTime();
     const product = await Product.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...payload, updatedAt: date } }
+      { $set: { ...payload, updatedAt: date }, ...query }
     );
 
     return product;

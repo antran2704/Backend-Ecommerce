@@ -5,7 +5,7 @@ const { Discount } = require("../../models");
 class DiscountServices {
   async getDiscountsAvailable() {
     const discount = await Discount.find({
-      discount_active: true,
+      isDelete: false,
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -13,7 +13,7 @@ class DiscountServices {
   }
 
   async getDiscounts(select = {}) {
-    const discounts = await Discount.find({})
+    const discounts = await Discount.find({ isDelete: false })
       .select({ ...select })
       .sort({ createdAt: -1 })
       .lean();
@@ -21,7 +21,7 @@ class DiscountServices {
   }
 
   async getDiscountsWithPage(pageSize, currentPage, select = {}) {
-    const discounts = await Discount.find({})
+    const discounts = await Discount.find({ isDelete: false })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .select({ ...select })
@@ -34,7 +34,7 @@ class DiscountServices {
   async getDiscountById(id, select) {
     if (!id || !isValidObjectId(id)) return null;
 
-    const discount = await Discount.findById({ _id: id })
+    const discount = await Discount.findOne({ _id: id, isDelete: false })
       .select({ ...select })
       .lean();
     return discount;
@@ -43,7 +43,20 @@ class DiscountServices {
   async getDiscountByCode(discount_code, select) {
     if (!discount_code) return null;
 
-    const discount = await Discount.findOne({ discount_code })
+    const discount = await Discount.findOne({ discount_code, isDelete: false })
+      .select({ ...select })
+      .lean();
+    return discount;
+  }
+
+  async getDiscountClient(discount_code, select) {
+    if (!discount_code) return null;
+
+    const discount = await Discount.findOne({
+      discount_code,
+      isDelete: false,
+      discount_public: true,
+    })
       .select({ ...select })
       .lean();
     return discount;
@@ -63,6 +76,7 @@ class DiscountServices {
         ],
         discount_start_date: { $gte: new Date(start_date) },
         discount_end_date: { $lte: new Date(end_date) },
+        isDelete: false,
       })
         .sort({ createdAt: -1 })
         .lean();
@@ -77,6 +91,7 @@ class DiscountServices {
           { discount_code: { $regex: text, $options: "i" } },
         ],
         discount_end_date: { $lte: new Date(end_date) },
+        isDelete: false,
       })
         .sort({ createdAt: -1 })
         .lean();
@@ -91,6 +106,7 @@ class DiscountServices {
           { discount_code: { $regex: text, $options: "i" } },
         ],
         discount_start_date: { $gte: new Date(start_date) },
+        isDelete: false,
       })
         .sort({ createdAt: -1 })
         .lean();
@@ -103,6 +119,7 @@ class DiscountServices {
         { discount_name: { $regex: text, $options: "i" } },
         { discount_code: { $regex: text, $options: "i" } },
       ],
+      isDelete: false,
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -125,6 +142,7 @@ class DiscountServices {
         ],
         discount_start_date: { $gte: new Date(start_date) },
         discount_end_date: { $lte: new Date(end_date) },
+        isDelete: false,
       })
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
@@ -141,6 +159,7 @@ class DiscountServices {
           { discount_code: { $regex: text, $options: "i" } },
         ],
         discount_end_date: { $lte: new Date(end_date) },
+        isDelete: false,
       })
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
@@ -157,6 +176,7 @@ class DiscountServices {
           { discount_code: { $regex: text, $options: "i" } },
         ],
         discount_start_date: { $gte: new Date(start_date) },
+        isDelete: false,
       })
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
@@ -171,6 +191,7 @@ class DiscountServices {
         { discount_name: { $regex: text, $options: "i" } },
         { discount_code: { $regex: text, $options: "i" } },
       ],
+      isDelete: false,
     })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
@@ -197,7 +218,7 @@ class DiscountServices {
 
     const date = getDateTime();
     const updated = await Discount.findOneAndUpdate(
-      { _id: id },
+      { _id: id, isDelete: false },
       { $set: { ...payload, updatedAt: date } },
       { upsert: true, new: true }
     );
@@ -210,6 +231,7 @@ class DiscountServices {
     const used = await Discount.findOne({
       discount_code,
       discount_user_used: { $elemMatch: { user_id } },
+      isDelete: false,
     })
       .select({ ...select })
       .lean();
@@ -258,7 +280,11 @@ class DiscountServices {
   async deleteDiscount(id) {
     if (!id || !isValidObjectId(id)) return null;
 
-    const discount = await Discount.findByIdAndDelete({ _id: id });
+    const date = getDateTime();
+    const discount = await Discount.findOneAndUpdate(
+      { _id: id },
+      { $set: { isDelete: true, updatedAt: date } }
+    );
     return discount;
   }
 }

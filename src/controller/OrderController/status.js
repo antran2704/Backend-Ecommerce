@@ -11,6 +11,14 @@ const paymentStatus = {
   success: "success",
 };
 
+const paymentMethod = {
+  cod: "cod",
+  card: "card",
+  cash: "cash",
+  vnpay: "vnpay",
+  banking: "banking"
+}
+
 const templateEmail = {
   pending: {
     template: "email/pending",
@@ -26,4 +34,4 @@ const templateEmail = {
   },
 };
 
-module.exports = { typeStatus, templateEmail, paymentStatus };
+module.exports = { typeStatus, templateEmail, paymentStatus, paymentMethod };

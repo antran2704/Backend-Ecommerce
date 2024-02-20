@@ -10,7 +10,6 @@ const {
 } = require("../../helpers/successResponse");
 const getSelect = require("../../helpers/getSelect");
 const { isValidDate } = require("../../helpers/getDateTime");
-const convertObjectToString = require("../../helpers/convertObjectString");
 
 const DISCOUT_TYPE = ["fixed_amount", "percentage"];
 const DISCOUNT_APPLIES = ["all", "specific"];
