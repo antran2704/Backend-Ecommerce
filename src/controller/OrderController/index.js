@@ -222,7 +222,7 @@ const OrderController = {
     }
 
     try {
-      const order = await OrderServices.getOrder(order_id);
+      const order = await OrderServices.getOrderByOrderID(order_id);
       if (!order) {
         return new NotFoundError(404, "Not found order").send(res);
       }
@@ -246,22 +246,22 @@ const OrderController = {
 
       handleSendMail(mailContent);
 
-      for (let i = 0; i < order.items.length; i++) {
-        const item = order.items[0];
-        const queryDB = {
-          $inc: { inventory: item.quantity, sold: -item.quantity },
-        };
+      // for (let i = 0; i < order.items.length; i++) {
+      //   const item = order.items[0];
+      //   const queryDB = {
+      //     $inc: { inventory: item.quantity, sold: -item.quantity },
+      //   };
 
-        await ProductServices.updateProduct(item.product, {}, queryDB);
+      //   await ProductServices.updateProduct(item.product, {}, queryDB);
 
-        if (item.variation) {
-          await ProductItemServices.updateProductItem(
-            item.variation,
-            {},
-            queryDB
-          );
-        }
-      }
+      //   if (item.variation) {
+      //     await ProductItemServices.updateProductItem(
+      //       item.variation,
+      //       {},
+      //       queryDB
+      //     );
+      //   }
+      // }
 
       const date = new Date(order.createdAt);
 
@@ -352,7 +352,6 @@ const OrderController = {
   },
   updatePaymentStatus: async (req, res) => {
     const { order_id } = req.params;
-
     if (!order_id) {
       return new BadResquestError().send(res);
     }
@@ -374,9 +373,9 @@ const OrderController = {
       }
 
       if (data.payment_status === paymentStatus.success) {
-        const link = `${process.env.HOST_URL}/orders/${order_id}`;
+        const link = `${process.env.ADMIN_ENDPOINT}/orders/${order_id}`;
         let mailContent = {
-          to: "phamtrangiaan27@gmail.com",
+          to: process.env.SHOP_EMAIL,
           subject: "Antran shop thông báo:",
           template: "email/newOrder",
           context: {
@@ -390,78 +389,83 @@ const OrderController = {
         const grossDay = await GrossDateServices.getGrossInDay(
           date.toLocaleDateString("en-GB")
         );
-  
+
         if (!grossDay) {
           const newGross = await GrossDateServices.createGross();
-  
+
           if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(res);
+            return new BadResquestError(400, "Create new gross failed").send(
+              res
+            );
           }
-  
+
           const query = {
             $push: { orders: order._id },
             $inc: { sub_gross: order.total },
           };
-  
+
           GrossDateServices.updateGross(newGross._id, query);
         } else {
           const query = {
             $push: { orders: order._id },
             $inc: { sub_gross: order.total },
           };
-  
+
           GrossDateServices.updateGross(grossDay._id, query);
         }
-  
+
         const grossMonth = await GrossMonthServices.getGrossByMonth(
           date.getMonth() + 1,
           date.getFullYear()
         );
-  
+
         if (!grossMonth) {
           const newGross = await GrossMonthServices.createGross();
-  
+
           if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(res);
+            return new BadResquestError(400, "Create new gross failed").send(
+              res
+            );
           }
-  
+
           const query = {
             $inc: { orders: 1, sub_gross: order.total },
           };
-  
+
           GrossMonthServices.updateGross(newGross._id, query);
         } else {
           const query = {
             $inc: { orders: 1, sub_gross: order.total },
           };
-  
+
           GrossMonthServices.updateGross(grossMonth._id, query);
         }
-  
+
         const grossYear = await GrossYearServices.getGrossByYear(
           date.getFullYear()
         );
-  
+
         if (!grossYear) {
           const newGross = await GrossYearServices.createGross();
-  
+
           if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(res);
+            return new BadResquestError(400, "Create new gross failed").send(
+              res
+            );
           }
-  
+
           const query = {
             $inc: { orders: 1, sub_gross: order.total },
           };
-  
+
           GrossYearServices.updateGross(newGross._id, query);
         } else {
           const query = {
             $inc: { orders: 1, sub_gross: order.total },
           };
-  
+
           GrossYearServices.updateGross(grossYear._id, query);
         }
-  
       }
 
       if (data.payment_status === paymentStatus.cancle) {
@@ -483,7 +487,10 @@ const OrderController = {
         }
       }
 
-      if(data.payment_status === paymentStatus.success || data.payment_status === paymentStatus.cancle) {
+      if (
+        data.payment_status === paymentStatus.success ||
+        data.payment_status === paymentStatus.cancle
+      ) {
         const cart = await CartServices.getCartByUserId(order.user_id);
 
         if (!cart) {
@@ -495,8 +502,12 @@ const OrderController = {
           cart_count: 0,
           cart_total: 0,
         });
-
-        return res.redirect(`http://localhost:3000/checkout/${order_id}`);
+        
+        if (order.payment_method !== paymentMethod.cod) {
+          return res.redirect(
+            `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`
+          );
+        }
       }
 
       return new CreatedResponse(201, {
@@ -554,10 +565,10 @@ const OrderController = {
   },
   sendEmail: async (req, res) => {
     const data = req.body;
-    const link = `${process.env.HOST_URL}/orders/${data.id}`;
+    const link = `${process.env.ADMIN_ENDPOINT}/orders/${data.id}`;
 
     const mailContent = {
-      to: "phamtrangiaan27@gmail.com",
+      to: process.env.SHOP_EMAIL,
       subject: "Antrand shop thông báo:",
       template: "email/newOrder",
       context: {

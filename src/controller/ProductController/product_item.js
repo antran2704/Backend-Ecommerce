@@ -155,7 +155,7 @@ const ProductItemController = {
     }
   },
   uploadImage: (req, res) => {
-    const image = `${process.env.API_ENDPOINT}/${req.file.path}`;
+    const image = `${process.env.SERVER_ENDPOINT}/${req.file.path}`;
 
     if (!image) {
       return new BadResquestError().send(res);

@@ -272,7 +272,7 @@ const AdminController = {
     }
 
     const path = req.file.path;
-    const avartar = `${process.env.API_ENDPOINT}/${path}`;
+    const avartar = `${process.env.SERVER_ENDPOINT}/${path}`;
 
     return new CreatedResponse(201, avartar).send(res);
   },
@@ -401,7 +401,7 @@ const AdminController = {
         subject: "Antran shop thông báo:",
         template: templateEmail.changePassword,
         context: {
-          host: process.env.HOST_URL,
+          host: process.env.ADMIN_ENDPOINT,
           token,
           key: secretKey,
           email,

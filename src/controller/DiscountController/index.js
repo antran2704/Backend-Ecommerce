@@ -269,7 +269,7 @@ const DiscountController = {
     }
   },
   uploadThumbnail: async (req, res) => {
-    const thumbnail = `${process.env.API_ENDPOINT}/${req.file.path}`;
+    const thumbnail = `${process.env.SERVER_ENDPOINT}/${req.file.path}`;
     return new CreatedResponse(201, thumbnail).send(res);
   },
   deleteDiscount: async (req, res) => {

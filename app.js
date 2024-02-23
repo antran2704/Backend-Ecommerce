@@ -9,6 +9,12 @@ const compression = require("compression");
 // middleware
 env.config();
 
+if(process.env.NODE_ENV === "development") {
+    env.config({path: "./.env.development"})
+} else {
+    env.config({path: "./.env.production"})
+}
+
 const routes = require("./src/routes");
 const configHbs = require("./src/configs/handlerbar");
 const db = require("./src/db/index");

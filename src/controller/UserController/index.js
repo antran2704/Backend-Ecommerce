@@ -88,7 +88,7 @@ const UserController = {
         subject: "Antran shop thông báo:",
         template: templateEmail.signup,
         context: {
-          host: process.env.HOST_URL,
+          host: process.env.ADMIN_ENDPOINT,
           name,
           password: passwordHash,
           email,
@@ -380,7 +380,7 @@ const UserController = {
         subject: "Antran shop thông báo:",
         template: templateEmail.changePassword,
         context: {
-          host: process.env.HOST_URL,
+          host: process.env.ADMIN_ENDPOINT,
           token,
           key: secretKey,
           email,

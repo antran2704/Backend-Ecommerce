@@ -201,7 +201,7 @@ const AdminProductController = {
     }
 
     const path = req.file.path;
-    const thumbnail = `${process.env.API_ENDPOINT}/${path}`;
+    const thumbnail = `${process.env.SERVER_ENDPOINT}/${path}`;
 
     return new CreatedResponse(201, thumbnail).send(res);
   },
@@ -215,7 +215,7 @@ const AdminProductController = {
 
     const list = req.files;
     const gallery = list.map(
-      (item) => `${process.env.API_ENDPOINT}/${item.path}`
+      (item) => `${process.env.SERVER_ENDPOINT}/${item.path}`
     );
     return new CreatedResponse(201, gallery).send(res);
   },

@@ -15,7 +15,7 @@ router.post("/images", async (req, res) => {
   if (images.length > 0) {
     for (let i = 0; i < images.length; i++) {
       const path = images[i].filePath;
-      const filePath = path.replace(process.env.API_ENDPOINT, "./");
+      const filePath = path.replace(process.env.SERVER_ENDPOINT, "./");
       fs.unlinkSync(filePath);
     }
 
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
       }).send(res);
     }
 
-    const path = filePath.replace(process.env.API_ENDPOINT, "./");
+    const path = filePath.replace(process.env.SERVER_ENDPOINT, "./");
 
     const response = await fs.promises.rm(path);
 

@@ -61,6 +61,7 @@ class OrderServices {
       .populate("items.variation", {
         title: 1,
         thumbnail: 1,
+        options: 1
       })
       .lean();
     return order;
