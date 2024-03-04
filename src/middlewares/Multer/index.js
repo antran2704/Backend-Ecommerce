@@ -5,7 +5,6 @@ const upload = (destination) => {
   const checkFileType = function (file, cb) {
     //Allowed file extensions
     const fileTypes = /jpeg|jpg|png|webp|gif|svg/;
-
     //check extension names
     const extName = fileTypes.test(
       path.extname(file.originalname).toLowerCase()
@@ -19,13 +18,13 @@ const upload = (destination) => {
       cb("Error: You can Only Upload Images!!");
     }
   };
-
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, destination);
     },
     filename: function (req, file, cb) {
-      cb(null, Date.now() + file.originalname);
+      const nameFile = file.originalname.replaceAll(" ", "");
+      cb(null, Date.now() + nameFile);
     },
   });
 

@@ -14,6 +14,9 @@ router.post("/increase/:user_id", CartController.increaseCart);
 // [POST] UPDATE PRODUCT CART
 router.post("/update/:user_id", CartController.updateCart);
 
+// [POST] CHECK INVENTORY ITEM
+router.post("/check_inventory/:user_id", CartController.checkInventoryItem);
+
 // [GET] CART BY USER ID
 router.get("/:user_id", CartController.getCart);
 

@@ -5,8 +5,8 @@ const UserMiddleware = require("../../middlewares/Auth");
 const multer = require("../../middlewares/Multer");
 const DiscountMiddleware = require("../../middlewares/Discount");
 
-// router.use(UserMiddleware.authentication);
-// router.use(UserMiddleware.authorization("0000"));
+router.use(UserMiddleware.authentication);
+router.use(UserMiddleware.authorization("0000"));
 
 router.get("/search", DiscountController.searchDiscounts);
 

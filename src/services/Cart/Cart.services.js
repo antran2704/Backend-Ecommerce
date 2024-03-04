@@ -12,6 +12,15 @@ class CartServices {
     return cart;
   }
 
+  async getCartById(cart_id) {
+    if (!cart_id) return null;
+
+    const cart = await Cart.findById({
+      _id: convertObjectToString(cart_id),
+    });
+    return cart;
+  }
+
   async getItemsInCart(cart_id) {
     if (!cart_id) return null;
 
@@ -322,11 +331,9 @@ class CartServices {
   async deleteAllItemCart(cart_id) {
     if (!cart_id) return null;
 
-    const updatedCart = await CartItem.deleteMany(
-      {
-        cart_id: convertObjectToString(cart_id)
-      }
-    );
+    const updatedCart = await CartItem.deleteMany({
+      cart_id: convertObjectToString(cart_id),
+    });
 
     return updatedCart;
   }

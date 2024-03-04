@@ -8,6 +8,7 @@ const {
 const { GetResponse } = require("../../helpers/successResponse");
 const getSelect = require("../../helpers/getSelect");
 const { checkValidNumber } = require("../../helpers/number");
+const { isValidObjectId } = require("mongoose");
 
 const UserProductController = {
   // [GET] ALL PRODUCT
@@ -96,13 +97,18 @@ const UserProductController = {
   // [GET] ALL PRODUCT FOLLOW CATEGORY
   getProductsInCategory: async (req, res) => {
     const { id } = req.params;
+
+    if (!id || !isValidObjectId(id)) {
+      return new BadResquestError().send(res);
+    }
+
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const gte =
       req.query.price && checkValidNumber(req.query.price)
         ? Number(req.query.price.split(".")[0])
         : null;
-        
+
     const lte =
       req.query.price && checkValidNumber(req.query.price)
         ? Number(req.query.price.split(".")[1])

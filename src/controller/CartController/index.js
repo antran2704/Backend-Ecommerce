@@ -34,6 +34,7 @@ const CartController = {
       const cart_products = await CartServices.getItemsInCart(cart._id);
 
       return new GetResponse(200, {
+        _id: cart._id,
         cart_userId: cart.cart_userId,
         cart_status: cart.cart_status,
         cart_count: cart.cart_count,
@@ -259,6 +260,48 @@ const CartController = {
         cart_total: updated.cart_total,
         cart_products: totalItems,
       }).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  checkInventoryItem: async (req, res) => {
+    const { user_id } = req.params;
+    const data = req.body;
+    
+    if (!user_id || !data) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      const cart = await CartServices.getCartByUserId(user_id);
+
+      if (!cart) {
+        return new NotFoundError(404, "Not found cart").send(res);
+      }
+
+      for (let i = 0; i < data.cart_products.length; i++) {
+        const item = data.cart_products[0];
+
+        if (item.variation) {
+          const product = await ProductItemServices.getProductItemById(
+            item.variation
+          );
+
+          if (!product || product.inventory <= 0) {
+            return new BadResquestError(400, "Out of stock").send(res);
+          }
+        }
+
+        if (item.product) {
+          const product = await ProductServices.getProductById(item.product);
+
+          if (!product || product.inventory <= 0) {
+            return new BadResquestError(400, "Out of stock").send(res);
+          }
+        }
+      }
+
+      return new GetResponse().send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }

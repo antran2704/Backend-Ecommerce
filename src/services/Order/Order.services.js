@@ -20,17 +20,27 @@ class OrderServices {
     return orders;
   }
 
-  async getOrdersByUserId(user_id) {
+  async getOrdersByUserId(user_id, query = {}) {
     if (!user_id) return null;
 
-    const orders = await Order.find({ user_id }).lean();
+    const orders = await Order.find({ user_id, ...query }).lean();
     return orders;
   }
 
-  async getOrdersByUserIdWithPage(user_id, pageSize, currentPage) {
+  async getOrdersByUserIdWithPage(user_id, pageSize, currentPage, query = {}) {
     if (!user_id) return null;
 
-    const orders = await Order.find({ user_id })
+    const orders = await Order.find({ user_id, ...query })
+      .populate("items.product", {
+        title: 1,
+        thumbnail: 1,
+        slug: 1,
+      })
+      .populate("items.variation", {
+        title: 1,
+        thumbnail: 1,
+        options: 1,
+      })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .sort({ createdAt: -1 })
@@ -61,7 +71,7 @@ class OrderServices {
       .populate("items.variation", {
         title: 1,
         thumbnail: 1,
-        options: 1
+        options: 1,
       })
       .lean();
     return order;
@@ -69,8 +79,11 @@ class OrderServices {
 
   async createOrder(payload) {
     if (!payload) return null;
-    const date = new Date()
-    const newOrder = await Order.create({ order_id: format(date, "yyMMddHHmmss"), ...payload });
+    const date = new Date();
+    const newOrder = await Order.create({
+      order_id: format(date, "yyMMddHHmmss"),
+      ...payload,
+    });
     return newOrder;
   }
 

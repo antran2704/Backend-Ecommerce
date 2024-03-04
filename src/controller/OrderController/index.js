@@ -69,11 +69,19 @@ const OrderController = {
     const currentPage = page ? Number(page) : 1;
 
     const { user_id } = req.params;
-    if (!user_id) {
+    const data = req.body;
+    let query = {};
+    
+    if (!user_id || !isValidObjectId(user_id)) {
       return new BadResquestError().send(res);
     }
+
+    // if (status) {
+    //   query = { status };
+    // }
+
     try {
-      const totalItems = await OrderServices.getOrdersByUserId(user_id);
+      const totalItems = await OrderServices.getOrdersByUserId(user_id, data);
 
       if (!totalItems) {
         return new NotFoundError(404, "No order found!").send(res);
@@ -82,7 +90,8 @@ const OrderController = {
       const orders = await OrderServices.getOrdersByUserIdWithPage(
         user_id,
         PAGE_SIZE,
-        currentPage
+        currentPage,
+        data
       );
 
       if (!orders) {
@@ -162,6 +171,29 @@ const OrderController = {
         return new BadResquestError(400, "No item").send(res);
       }
 
+      for (let i = 0; i < data.items.length; i++) {
+        const item = data.items[0];
+
+        if (item.variation) {
+          const product = await ProductItemServices.getProductItemById(
+            item.variation
+          );
+
+          if (!product || product.inventory <= 0) {
+            return new BadResquestError().send(res);
+          }
+        }
+
+        if (item.product) {
+          const product = await ProductServices.getProductById(item.product);
+
+          if (!product || product.inventory <= 0) {
+            return new BadResquestError().send(res);
+          }
+        }
+      }
+      // return new BadResquestError().send(res);
+      console.log("create");
       const newOrder = await OrderServices.createOrder(data);
       if (!newOrder) {
         return new BadResquestError(400, "Create new order failed").send(res);
@@ -502,7 +534,7 @@ const OrderController = {
           cart_count: 0,
           cart_total: 0,
         });
-        
+
         if (order.payment_method !== paymentMethod.cod) {
           return res.redirect(
             `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`

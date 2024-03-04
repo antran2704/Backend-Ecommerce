@@ -11,6 +11,7 @@ const CartItem = require("./Cart/CartItem.model");
 const Inventory = require("./Inventory/Inventory.model");
 const Discount = require("./Discount/Discount.model");
 const Attribute = require("./Attribute/Attribute.model");
+const Banner = require("./Banner/Banner.model");
 const { GrossDate, GrossMonth, GrossYear } = require("./Gross");
 
 module.exports = {
@@ -30,4 +31,5 @@ module.exports = {
   GrossDate,
   GrossMonth,
   GrossYear,
+  Banner
 };
