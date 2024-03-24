@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("../../middlewares/Multer");
 
 const ProductController = require("../../controller/ProductController/admin");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 // [GET] ALL PRODUCT
 router.get(
@@ -23,6 +24,7 @@ router.get("/:slug", ProductController.getProduct);
 router.post(
   "/uploadImage",
   multer.upload("./uploads/product").single("image"),
+  ImageMiddleware.checkPathImage,
   ProductController.uploadThumbnail
 );
 

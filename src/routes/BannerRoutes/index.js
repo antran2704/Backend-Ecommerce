@@ -3,6 +3,7 @@ const router = express.Router();
 
 const multer = require("../../middlewares/Multer");
 const BannerController = require("../../controller/BannerController");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 // [GET] ALL CATEGORIES
 router.get("/admin", BannerController.getBannersWithPage);
@@ -12,6 +13,7 @@ router.get("/admin", BannerController.getBannersWithPage);
 router.post(
   "/uploadImage",
   multer.upload("./uploads/banner").single("image"),
+  ImageMiddleware.checkPathImage,
   BannerController.uploadImage
 );
 

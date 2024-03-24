@@ -13,6 +13,7 @@ const Discount = require("./Discount/Discount.model");
 const Attribute = require("./Attribute/Attribute.model");
 const Banner = require("./Banner/Banner.model");
 const { GrossDate, GrossMonth, GrossYear } = require("./Gross");
+const { NotificationItemAdmin } = require("./Notification");
 
 module.exports = {
   Category,
@@ -31,5 +32,6 @@ module.exports = {
   GrossDate,
   GrossMonth,
   GrossYear,
-  Banner
+  Banner,
+  NotificationItemAdmin,
 };

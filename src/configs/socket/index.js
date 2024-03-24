@@ -1,5 +1,9 @@
 const { Server } = require("socket.io");
 
+const SOCKET_EVENT = {
+  notification: "notification",
+};
+
 class SocketConfig {
   constructor(server) {
     this.io = new Server(server, {
@@ -14,7 +18,7 @@ class SocketConfig {
   }
 
   connection(socket) {
-    console.log("new connection")
+    console.log("new connection");
 
     socket.on("disconnect", () => {
       console.log("diconnect");
@@ -22,4 +26,4 @@ class SocketConfig {
   }
 }
 
-module.exports = SocketConfig;
+module.exports = { SocketConfig, SOCKET_EVENT };

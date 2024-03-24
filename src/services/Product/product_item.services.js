@@ -1,6 +1,7 @@
 const { isValidObjectId } = require("mongoose");
 const { ProductItem } = require("../../models");
 const { getDateTime } = require("../../helpers/getDateTime");
+const { NotificationAdminServices, NotificationTypes } = require("../Notification");
 
 class ProductItemServices {
   async getProductItems(id) {
@@ -40,15 +41,26 @@ class ProductItemServices {
   }
 
   async updateProductItem(id, payload, query = {}) {
-    // if (!id || !payload || !isValidObjectId(id)) return null;
     if (!id || !isValidObjectId(id)) return null;
 
     const date = getDateTime();
-    const variation = ProductItem.findByIdAndUpdate(
+    const variation = await ProductItem.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...payload, updatedAt: date }, ...query  },
+      { $set: { ...payload, updatedAt: date }, ...query },
       { upsert: true, new: true }
     );
+
+    if (variation.inventory <= 10) {
+      const link = `/products/${variation.product_id}`;
+
+      const dataNotification = {
+        content: `${variation.title} còn lại ${variation.inventory} sản phẩm`,
+        type: NotificationTypes.Product,
+        path: link,
+      };
+
+      NotificationAdminServices.createNotification(dataNotification);
+    }
 
     return variation;
   }

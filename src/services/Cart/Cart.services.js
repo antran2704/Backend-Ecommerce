@@ -41,6 +41,7 @@ class CartServices {
         thumbnail: 1,
         price: 1,
         promotion_price: 1,
+        options: 1
       });
     return items;
   }

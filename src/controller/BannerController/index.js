@@ -61,7 +61,7 @@ const BannerController = {
     }
   },
   uploadImage: async (req, res) => {
-    const image = `${process.env.SERVER_ENDPOINT}/${req.file.path}`;
+    const image = req.file.path;
     return new CreatedResponse(201, image).send(res);
   },
   getBannersWithPageInClient: async (req, res) => {

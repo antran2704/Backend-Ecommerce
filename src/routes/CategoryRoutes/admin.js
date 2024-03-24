@@ -3,6 +3,7 @@ const router = express.Router();
 
 const multer = require("../../middlewares/Multer");
 const CategoryController = require("../../controller/Categories/admin");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 // [GET] ALL CATEGORIES
 router.get("/all", CategoryController.getCategoriesAll);
@@ -23,6 +24,7 @@ router.get("/:slug", CategoryController.getCategory);
 router.post(
   "/uploadThumbnail",
   multer.upload("./uploads/category").single("thumbnail"),
+  ImageMiddleware.checkPathImage,
   CategoryController.uploadThumbnail
 );
 

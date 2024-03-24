@@ -4,10 +4,8 @@ const config_VNPAY = require("../../configs/VNPAY");
 
 const {
   InternalServerError,
-  BadResquestError,
 } = require("../../helpers/errorResponse");
 const { CreatedResponse } = require("../../helpers/successResponse");
-const { OrderServices, CartServices } = require("../../services");
 const { paymentStatus } = require("../OrderController/status");
 
 const sortObject = (params) => {
@@ -85,7 +83,6 @@ const PaymentController = {
     const vnp_Params = req.query;
     const secureHash = vnp_Params["vnp_SecureHash"];
     const res_code = vnp_Params["vnp_ResponseCode"];
-    const order_id = vnp_Params["vnp_TxnRef"];
 
     delete vnp_Params["vnp_SecureHash"];
     delete vnp_Params["vnp_SecureHashType"];
@@ -104,51 +101,11 @@ const PaymentController = {
       .digest("hex");
 
     try {
-      // const order = await OrderServices.getOrderByOrderID(order_id);
-
-      // if (!order) {
-      //   return new BadResquestError(400, {
-      //     message: "Not found order",
-      //   }).send(res);
-      // }
-
       if (secureHash === signed && res_code === "00") {
         req.body.payment_status = paymentStatus.success;
-        // const updated = await OrderServices.updateOrder(order_id, {
-        //   payment_status: paymentStatus.success,
-        // });
-
-        // if (!updated) {
-        //   return new BadResquestError(400, {
-        //     message: "Updated order failed",
-        //   }).send(res);
-        // }
       } else {
         req.body.payment_status = paymentStatus.cancle;
-        // const updated = await OrderServices.updateOrder(order_id, {
-        //   payment_status: paymentStatus.cancle,
-        // });
-
-        // if (!updated) {
-        //   return new BadResquestError(400, {
-        //     message: "Updated order failed",
-        //   }).send(res);
-        // }
       }
-
-      // const cart = await CartServices.getCartByUserId(order.user_id);
-
-      // if (!cart) {
-      //   return new BadResquestError(400, "Not found cart").send(res);
-      // }
-
-      // CartServices.deleteAllItemCart(cart._id);
-      // CartServices.updateCart(order.user_id, {
-      //   cart_count: 0,
-      //   cart_total: 0,
-      // });
-
-      // res.redirect(`http://localhost:3000/checkout/${order_id}`);
       next();
     } catch (error) {
       return new InternalServerError(error.stack).send(res);

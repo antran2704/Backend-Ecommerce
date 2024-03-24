@@ -15,6 +15,10 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
+const {
+  NotificationTypes,
+  NotificationAdminServices,
+} = require("../../services/Notification");
 
 const CartController = {
   getCart: async (req, res) => {
@@ -267,7 +271,7 @@ const CartController = {
   checkInventoryItem: async (req, res) => {
     const { user_id } = req.params;
     const data = req.body;
-    
+
     if (!user_id || !data) {
       return new BadResquestError().send(res);
     }
@@ -281,21 +285,47 @@ const CartController = {
 
       for (let i = 0; i < data.cart_products.length; i++) {
         const item = data.cart_products[0];
-
         if (item.variation) {
           const product = await ProductItemServices.getProductItemById(
-            item.variation
+            item.variation._id
           );
 
           if (!product || product.inventory <= 0) {
+            // Send notification
+            const link = `/products/${item.product._id}`;
+
+            const dataNotification = {
+              content: `${product.title} hết hàng`,
+              type: NotificationTypes.Product,
+              path: link,
+            };
+
+            await NotificationAdminServices.createNotification(
+              dataNotification
+            );
+
             return new BadResquestError(400, "Out of stock").send(res);
           }
         }
 
-        if (item.product) {
-          const product = await ProductServices.getProductById(item.product);
+        if (!item.variation) {
+          const product = await ProductServices.getProductById(
+            item.product._id
+          );
 
           if (!product || product.inventory <= 0) {
+            // Send notification
+            const link = `/products/${item.product._id}`;
+            const dataNotification = {
+              content: `${product.title} hết hàng`,
+              type: NotificationTypes.Product,
+              path: link,
+            };
+
+            await NotificationAdminServices.createNotification(
+              dataNotification
+            );
+
             return new BadResquestError(400, "Out of stock").send(res);
           }
         }

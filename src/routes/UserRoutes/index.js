@@ -38,6 +38,9 @@ router.get("/checkPasswordKey", UserController.checkChangePasswordKey);
 // [GET] CHECK CHANGE PASSWORD KEY
 router.post("/changePassword", UserController.changePassword);
 
+// [GET] USER
+router.post("/email",  UserMiddleware.checkValidEmail, UserController.getUserByEmail);
+
 // [POST] BAN USER
 router.post("/ban", UserController.banUser);
 

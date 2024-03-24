@@ -67,6 +67,29 @@ const UserController = {
       return new InternalServerError().send(res);
     }
   },
+  getUserByEmail: async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return new BadResquestError(400, "Email is required").send(res);
+    }
+
+    try {
+      const users = await UserServices.getUserByEmail(email, {
+        name: 1,
+        email: 1,
+        avartar: 1,
+      });
+
+      if (!users) {
+        return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      return new GetResponse(200, users).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
   // [POST] SEND CONFIRM EMAIL
   sendConfirmEmail: async (req, res) => {
     const { name, email, password } = req.body;
@@ -303,7 +326,7 @@ const UserController = {
     }
 
     const refreshToken = refreshTokenHeader.split(" ")[1];
-    
+
     try {
       const keyToken = await KeyTokenServices.getRefeshToken(refreshToken, {
         user: 1,

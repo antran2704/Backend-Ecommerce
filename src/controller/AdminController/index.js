@@ -271,8 +271,7 @@ const AdminController = {
       });
     }
 
-    const path = req.file.path;
-    const avartar = `${process.env.SERVER_ENDPOINT}/${path}`;
+    const avartar =  req.file.path;
 
     return new CreatedResponse(201, avartar).send(res);
   },

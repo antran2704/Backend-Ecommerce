@@ -3,11 +3,13 @@ const router = express.Router();
 const multer = require("../../middlewares/Multer");
 
 const ProductItemController = require("../../controller/ProductController/product_item");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 // UPLOAD IMAGE
 router.post(
   "/upload/image",
   multer.upload("./uploads/product_item").single("product_image"),
+  ImageMiddleware.checkPathImage,
   ProductItemController.uploadImage
 );
 

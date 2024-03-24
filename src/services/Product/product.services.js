@@ -1,5 +1,6 @@
 const { Product, Category } = require("../../models/index");
 const { getDateTime } = require("../../helpers/getDateTime");
+const { NotificationAdminServices, NotificationTypes } = require("../Notification");
 
 class ProductServices {
   async getProducts(query = {}) {
@@ -189,7 +190,7 @@ class ProductServices {
       })
       .populate("categories", {
         title: 1,
-        slug: 1,
+        slug: 1
       })
       .populate("variations")
       .select({ ...select });
@@ -209,8 +210,21 @@ class ProductServices {
     const date = getDateTime();
     const product = await Product.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...payload, updatedAt: date }, ...query }
+      { $set: { ...payload, updatedAt: date }, ...query },
+      { new: true, upsert: true }
     );
+
+    if (product.inventory <= 10) {
+      const link = `/products/${product._id}`;
+
+      const dataNotification = {
+        content: `${product.title} còn lại ${product.inventory} sản phẩm`,
+        type: NotificationTypes.Product,
+        path: link,
+      };
+
+      NotificationAdminServices.createNotification(dataNotification);
+    }
 
     return product;
   }

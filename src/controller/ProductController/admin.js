@@ -200,8 +200,7 @@ const AdminProductController = {
       });
     }
 
-    const path = req.file.path;
-    const thumbnail = `${process.env.SERVER_ENDPOINT}/${path}`;
+    const thumbnail = req.file.path;
 
     return new CreatedResponse(201, thumbnail).send(res);
   },

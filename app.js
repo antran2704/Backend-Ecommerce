@@ -20,10 +20,13 @@ const server = createServer(app);
 const routes = require("./src/routes");
 const configHbs = require("./src/configs/handlerbar");
 const db = require("./src/db/index");
-const SocketConfig = require("./src/configs/socket");
+const { SocketConfig } = require("./src/configs/socket");
+const ReddisConnect = require("./src/configs/Reddis");
 
-// database
+// database Mongo
 db.connect();
+
+// const client = new ReddisConnect().createConnect();
 
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));

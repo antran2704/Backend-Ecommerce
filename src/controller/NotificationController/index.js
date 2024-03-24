@@ -1,13 +1,3 @@
-const { CreatedResponse } = require("../../helpers/successResponse");
+const NotificationAdminController = require("./admin");
 
-const NotificationController = {
-  sendNotifi(req, res) {
-    const { content } = req.body;
-   
-    socket.emit("notification", content);
-
-    return new CreatedResponse().send(res);
-  },
-};
-
-module.exports = NotificationController;
+module.exports = { NotificationAdminController };

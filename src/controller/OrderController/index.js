@@ -22,10 +22,12 @@ const {
   CartServices,
   ProductItemServices,
   ProductServices,
+  NotificationAdminServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { Order } = require("../../models");
 const { isValidObjectId } = require("mongoose");
+const { NotificationTypes } = require("../../services/Notification");
 
 const OrderController = {
   // [GET] ORDERS
@@ -71,7 +73,7 @@ const OrderController = {
     const { user_id } = req.params;
     const data = req.body;
     let query = {};
-    
+
     if (!user_id || !isValidObjectId(user_id)) {
       return new BadResquestError().send(res);
     }
@@ -172,35 +174,60 @@ const OrderController = {
       }
 
       for (let i = 0; i < data.items.length; i++) {
-        const item = data.items[0];
+        // const item = data.items[0];
+        const item = data.items[i];
 
         if (item.variation) {
           const product = await ProductItemServices.getProductItemById(
             item.variation
           );
 
-          if (!product || product.inventory <= 0) {
+          if (!product) {
             return new BadResquestError().send(res);
+          }
+
+          if (product.inventory <= 0) {
+            const link = `/products/${product.product_id}`;
+
+            const dataNotification = {
+              content: `${product.title} hết hàng`,
+              type: NotificationTypes.Product,
+              path: link,
+            };
+
+            NotificationAdminServices.createNotification(dataNotification);
           }
         }
 
         if (item.product) {
           const product = await ProductServices.getProductById(item.product);
 
-          if (!product || product.inventory <= 0) {
+          if (!product) {
             return new BadResquestError().send(res);
+          }
+
+          if (product.inventory <= 0) {
+            const link = `${process.env.ADMIN_ENDPOINT}/products/${product._id}`;
+
+            const dataNotification = {
+              content: `${product.title} hết hàng`,
+              type: NotificationTypes.Product,
+              path: link,
+            };
+
+            NotificationAdminServices.createNotification(dataNotification);
           }
         }
       }
-      // return new BadResquestError().send(res);
-      console.log("create");
+
       const newOrder = await OrderServices.createOrder(data);
       if (!newOrder) {
         return new BadResquestError(400, "Create new order failed").send(res);
       }
 
       for (let i = 0; i < data.items.length; i++) {
-        const item = data.items[0];
+        // const item = data.items[0];
+        const item = data.items[i];
         const queryDB = {
           $inc: { inventory: -item.quantity, sold: item.quantity },
         };
@@ -277,23 +304,6 @@ const OrderController = {
       };
 
       handleSendMail(mailContent);
-
-      // for (let i = 0; i < order.items.length; i++) {
-      //   const item = order.items[0];
-      //   const queryDB = {
-      //     $inc: { inventory: item.quantity, sold: -item.quantity },
-      //   };
-
-      //   await ProductServices.updateProduct(item.product, {}, queryDB);
-
-      //   if (item.variation) {
-      //     await ProductItemServices.updateProductItem(
-      //       item.variation,
-      //       {},
-      //       queryDB
-      //     );
-      //   }
-      // }
 
       const date = new Date(order.createdAt);
 
@@ -414,6 +424,14 @@ const OrderController = {
             link,
           },
         };
+
+        const dataNotification = {
+          content: "Đơn hàng mới",
+          type: NotificationTypes.Order,
+          path: `/orders/${order_id}`,
+        };
+
+        NotificationAdminServices.createNotification(dataNotification);
 
         handleSendMail(mailContent);
 

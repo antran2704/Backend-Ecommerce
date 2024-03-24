@@ -4,6 +4,7 @@ const multer = require("../../middlewares/Multer");
 
 const AdminController = require("../../controller/AdminController");
 const UserMiddleware = require("../../middlewares/Auth");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 // [GET] ALL USERS
 router.get(
@@ -64,6 +65,7 @@ router.patch("/:id", AdminController.updateUser);
 router.post(
   "/avartar",
   multer.upload("./uploads/user").single("image"),
+  ImageMiddleware.checkPathImage,
   AdminController.uploadAvartar
 );
 
