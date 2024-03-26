@@ -293,15 +293,32 @@ const OrderController = {
         }).send(res);
       }
 
-      let mailContent = {
-        to: order.user_infor.email,
-        subject: "Antran shop thông báo:",
-        template: templateEmail[data.status].template,
-        context: {
-          orderId: order.order_id,
-          content: data.cancleContent,
-        },
-      };
+      let mailContent;
+
+      if (data.status === typeStatus.delivered) {
+        const link = `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`;
+
+        mailContent = {
+          to: order.user_infor.email,
+          subject: "Antran shop thông báo:",
+          template: templateEmail[data.status].template,
+          context: {
+            orderId: order.order_id,
+            content: data.cancleContent,
+            link,
+          },
+        };
+      } else {
+        mailContent = {
+          to: order.user_infor.email,
+          subject: "Antran shop thông báo:",
+          template: templateEmail[data.status].template,
+          context: {
+            orderId: order.order_id,
+            content: data.cancleContent,
+          },
+        };
+      }
 
       handleSendMail(mailContent);
 
@@ -414,7 +431,10 @@ const OrderController = {
         return new BadResquestError(400, "Updated order failed").send(res);
       }
 
-      if (data.payment_status === paymentStatus.success) {
+      if (
+        data.payment_status === paymentStatus.success &&
+        order.payment_method !== paymentMethod.cod
+      ) {
         const link = `${process.env.ADMIN_ENDPOINT}/orders/${order_id}`;
         let mailContent = {
           to: process.env.SHOP_EMAIL,

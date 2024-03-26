@@ -4,6 +4,8 @@ const SOCKET_EVENT = {
   notification: "notification",
 };
 
+let connected = 0;
+
 class SocketConfig {
   constructor(server) {
     this.io = new Server(server, {
@@ -18,10 +20,12 @@ class SocketConfig {
   }
 
   connection(socket) {
-    console.log("new connection");
+    connected++
+    console.log("new connection", connected);
 
     socket.on("disconnect", () => {
-      console.log("diconnect");
+      connected--;
+      console.log("diconnect", connected);
     });
   }
 }

@@ -10,9 +10,12 @@
       <div>
         <p style="font-size: 16px; color: #282828;">
           Đơn hàng
-          <strong>{{orderId}}</strong>
-          của bạn đã được shop chuyển đi thành công
+          <strong>#{{orderId}}</strong>
+          của bạn đã được shop chuyển đi thành công.
         </p>
+         <a href="{{link}}" style="font-size: 16px;">
+         Chi tiết đơn hàng
+        </a>
         {{> thanks}}
          {{> footerOrder}}
       </div>
