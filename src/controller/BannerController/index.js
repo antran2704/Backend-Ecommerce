@@ -49,8 +49,7 @@ const BannerController = {
       }
 
       return new GetResponse(200, banners).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -90,8 +89,7 @@ const BannerController = {
       }
 
       return new GetResponse(200, banners).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,

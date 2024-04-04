@@ -1,4 +1,4 @@
-const handleQueryParse = (query) => {
+const handleCheckQuery = (query) => {
   const queryParse = {};
 
   for (const key of Object.keys(query)) {
@@ -14,4 +14,16 @@ const handleQueryParse = (query) => {
   return queryParse;
 };
 
-module.exports = handleQueryParse;
+const handleParseQuery = (query) => {
+  const queryParse = {};
+
+  for (const key of Object.keys(query)) {
+    if (key !== "page" && key !== "limit") {
+      queryParse[key] = query[key];
+    }
+  }
+
+  return queryParse;
+};
+
+module.exports = { handleParseQuery, handleCheckQuery };

@@ -2,6 +2,7 @@ const { isValidObjectId } = require("mongoose");
 const { ProductItem } = require("../../models");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { NotificationAdminServices, NotificationTypes } = require("../Notification");
+const { ADMIN_NOTIFI_PATH } = require("../../controller/NotificationController/data");
 
 class ProductItemServices {
   async getProductItems(id) {
@@ -51,7 +52,7 @@ class ProductItemServices {
     );
 
     if (variation.inventory <= 10) {
-      const link = `/products/${variation.product_id}`;
+      const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${variation.product_id}`;
 
       const dataNotification = {
         content: `${variation.title} còn lại ${variation.inventory} sản phẩm`,

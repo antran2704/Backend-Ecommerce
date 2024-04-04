@@ -1,5 +1,8 @@
 const express = require("express");
 const path = require("path");
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('../routes');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 const AdminCategoryRoutes = require("./CategoryRoutes/admin");
 const AdminProductRoutes = require("./ProductRoutes/admin");
@@ -22,7 +25,30 @@ const NotificationAdminRoutes = require("./NotificationRoutes/admin");
 const BannerRoutes = require("./BannerRoutes");
 const HtmlRoutes = require("./HtmlRoutes");
 
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'API for Shop Antran',
+    version: '1.0.0',
+    description: "This is document for api shop Antran. Please check it"
+  },
+  servers: [
+    {
+      url: 'http://localhost:3001/api/v1',
+      description: 'Development server',
+    },
+  ],
+};
+
+const options = {
+  swaggerDefinition,
+  apis: [__dirname + '/ProductRoutes/*.js'],
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
 const routes = (app) => {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.use("/view", HtmlRoutes);
   app.use("/api/v1/carts", CartRoutes);
   app.use("/api/v1/discounts", DiscountRoutes);

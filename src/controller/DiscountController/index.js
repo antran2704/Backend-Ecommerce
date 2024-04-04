@@ -37,8 +37,7 @@ const DiscountController = {
       }
 
       return new GetResponse(200, discounts).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -195,8 +194,7 @@ const DiscountController = {
       }
 
       return new GetResponse(200, discounts).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,

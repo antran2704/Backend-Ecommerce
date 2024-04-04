@@ -1,6 +1,6 @@
 const { format } = require("date-fns");
 const { getDateTime } = require("../../helpers/getDateTime");
-const handleQueryParse = require("../../helpers/queryParse");
+const {handleCheckQuery} = require("../../helpers/queryParse");
 const { Order } = require("../../models");
 const { paymentStatus } = require("../../controller/OrderController/status");
 
@@ -99,7 +99,7 @@ class OrderServices {
   }
 
   async searchOrders(queryParam) {
-    const queryParse = handleQueryParse(queryParam);
+    const queryParse = handleCheckQuery(queryParam);
     const { start_date, end_date } = queryParse;
     const query = {};
 
@@ -157,7 +157,7 @@ class OrderServices {
   }
 
   async searchOrdersWithPage(queryParam, pageSize, currentPage) {
-    const queryParse = handleQueryParse(queryParam);
+    const queryParse = handleCheckQuery(queryParam);
     const { start_date, end_date } = queryParse;
     const query = {};
 

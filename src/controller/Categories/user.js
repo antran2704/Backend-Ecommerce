@@ -37,8 +37,7 @@ const UserCategoryController = {
       }
 
       return new GetResponse(200, categories).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -157,8 +156,7 @@ const UserCategoryController = {
       }
 
       return new GetResponse(200, items).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,

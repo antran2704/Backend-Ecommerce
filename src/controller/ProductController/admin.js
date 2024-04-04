@@ -35,8 +35,7 @@ const AdminProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -98,8 +97,7 @@ const AdminProductController = {
         }
 
         return new GetResponse(200, products).send(res, {
-          optionName: "pagination",
-          data: {
+          pagination: {
             totalItems: totalItems.length,
             currentPage,
             pageSize: PAGE_SIZE,
@@ -124,8 +122,7 @@ const AdminProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -268,8 +265,7 @@ const AdminProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,

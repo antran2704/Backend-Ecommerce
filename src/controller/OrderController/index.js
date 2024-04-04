@@ -28,6 +28,7 @@ const { GrossYearServices } = require("../../services/Gross");
 const { Order } = require("../../models");
 const { isValidObjectId } = require("mongoose");
 const { NotificationTypes } = require("../../services/Notification");
+const { ADMIN_NOTIFI_PATH } = require("../NotificationController/data");
 
 const OrderController = {
   // [GET] ORDERS
@@ -53,8 +54,7 @@ const OrderController = {
       }
 
       return new GetResponse(200, orders).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -101,8 +101,7 @@ const OrderController = {
       }
 
       return new GetResponse(200, orders).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -187,7 +186,7 @@ const OrderController = {
           }
 
           if (product.inventory <= 0) {
-            const link = `/products/${product.product_id}`;
+            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}${product.product_id}`;
 
             const dataNotification = {
               content: `${product.title} hết hàng`,
@@ -207,7 +206,7 @@ const OrderController = {
           }
 
           if (product.inventory <= 0) {
-            const link = `${process.env.ADMIN_ENDPOINT}/products/${product._id}`;
+            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${product._id}`;
 
             const dataNotification = {
               content: `${product.title} hết hàng`,
@@ -439,7 +438,7 @@ const OrderController = {
         let mailContent = {
           to: process.env.SHOP_EMAIL,
           subject: "Antran shop thông báo:",
-          template: "email/newOrder",
+          template: templateEmail.order.template,
           context: {
             link,
           },
@@ -448,7 +447,7 @@ const OrderController = {
         const dataNotification = {
           content: "Đơn hàng mới",
           type: NotificationTypes.Order,
-          path: `/orders/${order_id}`,
+          path: `${ADMIN_NOTIFI_PATH.ORDER}/${order_id}`,
         };
 
         NotificationAdminServices.createNotification(dataNotification);
@@ -602,8 +601,7 @@ const OrderController = {
       );
 
       return new GetResponse(200, orders).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -640,7 +638,7 @@ const OrderController = {
     const mailContent = {
       to: process.env.SHOP_EMAIL,
       subject: "Antrand shop thông báo:",
-      template: "email/newOrder",
+      template: templateEmail.order.template,
       context: {
         link,
       },

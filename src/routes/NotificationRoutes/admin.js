@@ -14,6 +14,8 @@ router.patch(
 
 router.post("/", NotificationAdminController.createNofication);
 
-router.get("/", NotificationAdminController.getNotifications);
+router.get("/home", NotificationAdminController.getNotifications);
+
+router.get("/", NotificationAdminController.getNotificationsWithPage);
 
 module.exports = router;

@@ -10,13 +10,13 @@ class SuccessResponse {
   }
 
   send(res, options) {
-    if (options) {
-      return res
-        .status(this.status)
-        .json({ ...this, [options.optionName]: options.data });
-    }
+    // if (options) {
+    //   return res
+    //     .status(this.status)
+    //     .json({ ...this, [options.optionName]: options.data });
+    // }
 
-    return res.status(this.status).json(this);
+    return res.status(this.status).json({...this, ...options});
   }
 }
 

@@ -22,9 +22,6 @@ const UserProductController = {
 
     try {
       const totalItems = await ProductServices.getProducts(query);
-      if (!totalItems) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
 
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
@@ -38,8 +35,7 @@ const UserProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -67,9 +63,6 @@ const UserProductController = {
 
     try {
       const totalItems = await ProductServices.getProducts(query);
-      if (!totalItems) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
 
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
@@ -83,8 +76,7 @@ const UserProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -161,8 +153,7 @@ const UserProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems,
           currentPage,
           pageSize: PAGE_SIZE,
@@ -256,8 +247,7 @@ const UserProductController = {
       }
 
       return new GetResponse(200, products).send(res, {
-        optionName: "pagination",
-        data: {
+        pagination: {
           totalItems: totalItems.length,
           currentPage,
           pageSize: limitQuery,

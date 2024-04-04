@@ -1,10 +1,11 @@
 const { Product, Category } = require("../../models/index");
 const { getDateTime } = require("../../helpers/getDateTime");
 const { NotificationAdminServices, NotificationTypes } = require("../Notification");
+const { ADMIN_NOTIFI_PATH } = require("../../controller/NotificationController/data");
 
 class ProductServices {
   async getProducts(query = {}) {
-    const items = await Product.countDocuments({
+    const items = await Product.find({
       ...query,
       isDeleted: false,
     }).lean();
@@ -215,7 +216,7 @@ class ProductServices {
     );
 
     if (product.inventory <= 10) {
-      const link = `/products/${product._id}`;
+      const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${product._id}`;
 
       const dataNotification = {
         content: `${product.title} còn lại ${product.inventory} sản phẩm`,

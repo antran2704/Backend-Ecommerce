@@ -32,6 +32,9 @@ const templateEmail = {
   cancle: {
     template: "email/cancle",
   },
+  order: {
+    template: "email/newOrder"
+  }
 };
 
 module.exports = { typeStatus, templateEmail, paymentStatus, paymentMethod };

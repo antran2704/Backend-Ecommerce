@@ -6,6 +6,11 @@ const {
 const { NotificationAdminServices } = require("../../services");
 const { BadResquestError } = require("../../helpers/errorResponse");
 
+const {
+  handleCheckQuery,
+  handleParseQuery,
+} = require("../../helpers/queryParse");
+
 const NotificationController = {
   sendNotifi(req, res) {
     const { content } = req.body;
@@ -19,6 +24,7 @@ const NotificationController = {
 
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 6;
+
     const notifications =
       await NotificationAdminServices.getNotificationsWithPage(limit, page);
 
@@ -33,6 +39,33 @@ const NotificationController = {
     };
 
     return new GetResponse(200, payload).send(res);
+  },
+  async getNotificationsWithPage(req, res) {
+    const query = req.query;
+
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 6;
+
+    const parseQuery = handleParseQuery(handleCheckQuery(query));
+
+    const notifications =
+      await NotificationAdminServices.getNotificationsWithPage(
+        limit,
+        page,
+        parseQuery
+      );
+
+    const total = await NotificationAdminServices.countNotifications(
+      parseQuery
+    );
+
+    return new GetResponse(200, notifications).send(res, {
+      pagination: {
+        totalItems: total,
+        currentPage: page,
+        pageSize: limit,
+      },
+    });
   },
   async createNofication(req, res) {
     const data = req.body;

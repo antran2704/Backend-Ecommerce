@@ -19,6 +19,7 @@ const {
   NotificationTypes,
   NotificationAdminServices,
 } = require("../../services/Notification");
+const { ADMIN_NOTIFI_PATH } = require("../NotificationController/data");
 
 const CartController = {
   getCart: async (req, res) => {
@@ -292,7 +293,7 @@ const CartController = {
 
           if (!product || product.inventory <= 0) {
             // Send notification
-            const link = `/products/${item.product._id}`;
+            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
 
             const dataNotification = {
               content: `${product.title} hết hàng`,
@@ -315,7 +316,7 @@ const CartController = {
 
           if (!product || product.inventory <= 0) {
             // Send notification
-            const link = `/products/${item.product._id}`;
+            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
             const dataNotification = {
               content: `${product.title} hết hàng`,
               type: NotificationTypes.Product,

@@ -3,8 +3,8 @@ const { NotificationItemAdmin } = require("../../models");
 const { SOCKET_EVENT } = require("../../configs/socket");
 
 class NotificationAdminServices {
-  async getNotificationsWithPage(pageSize, currentPage) {
-    const notifications = await NotificationItemAdmin.find({})
+  async getNotificationsWithPage(pageSize, currentPage, query = {}) {
+    const notifications = await NotificationItemAdmin.find({ ...query })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .sort({ createdAt: -1 })
@@ -13,8 +13,8 @@ class NotificationAdminServices {
     return notifications;
   }
 
-  async countNotifications() {
-    const count = await NotificationItemAdmin.count().lean();
+  async countNotifications(query = {}) {
+    const count = await NotificationItemAdmin.count({ ...query }).lean();
 
     return count;
   }
