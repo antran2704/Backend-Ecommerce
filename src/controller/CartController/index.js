@@ -5,6 +5,7 @@ const {
   ProductServices,
   DiscountServices,
   ProductItemServices,
+  CacheCartServices,
 } = require("../../services");
 const {
   InternalServerError,
@@ -30,6 +31,21 @@ const CartController = {
     }
 
     try {
+      const cacheCart = await CacheCartServices.getCart(
+        CacheCartServices.KEY_CART + user_id
+      );
+
+      if (cacheCart) {
+        const cart_products = await CartServices.getItemsInCart(cacheCart._id);
+        
+        return new GetResponse(200, {
+          ...cacheCart,
+          cart_count: Number(cacheCart.cart_count),
+          cart_total: Number(cacheCart.cart_total),
+          cart_products,
+        }).send(res);
+      }
+
       const cart = await CartServices.getCartByUserId(user_id);
 
       if (!cart) {
@@ -37,6 +53,19 @@ const CartController = {
       }
 
       const cart_products = await CartServices.getItemsInCart(cart._id);
+
+      await CacheCartServices.setCacheCart(
+        CacheCartServices.KEY_CART + user_id,
+        {
+          _id: cart._id.toString(),
+          cart_userId: cart.cart_userId.toString(),
+          cart_status: cart.cart_status,
+          cart_count: cart.cart_count,
+          cart_total: cart.cart_total,
+        }
+      );
+
+      // await redisGlobal.expire(`cart:${user_id}`, 30)
 
       return new GetResponse(200, {
         _id: cart._id,
@@ -150,6 +179,17 @@ const CartController = {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
+      await CacheCartServices.setCacheCart(
+        CacheCartServices.KEY_CART + user_id,
+        {
+          _id: cart._id.toString(),
+          cart_userId: cart.cart_userId.toString(),
+          cart_status: cart.cart_status,
+          cart_count: updated.cart_count,
+          cart_total: updated.cart_total,
+        }
+      );
+
       return new CreatedResponse(201, {
         cart_userId: updated.cart_userId,
         cart_status: updated.cart_status,
@@ -257,6 +297,17 @@ const CartController = {
       if (!updated) {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
+
+      await CacheCartServices.setCacheCart(
+        CacheCartServices.KEY_CART + user_id,
+        {
+          _id: cart._id.toString(),
+          cart_userId: cart.cart_userId.toString(),
+          cart_status: cart.cart_status,
+          cart_count: updated.cart_count,
+          cart_total: updated.cart_total,
+        }
+      );
 
       return new CreatedResponse(201, {
         cart_userId: updated.cart_userId,
@@ -378,6 +429,17 @@ const CartController = {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
 
+      await CacheCartServices.setCacheCart(
+        CacheCartServices.KEY_CART + user_id,
+        {
+          _id: cart._id.toString(),
+          cart_userId: cart.cart_userId.toString(),
+          cart_status: cart.cart_status,
+          cart_count: updated.cart_count,
+          cart_total: updated.cart_total,
+        }
+      );
+
       return new CreatedResponse(201, {
         cart_userId: updated.cart_userId,
         cart_status: updated.cart_status,
@@ -425,6 +487,17 @@ const CartController = {
       if (!updated) {
         return new BadResquestError(400, "Updated cart failed").send(res);
       }
+
+      await CacheCartServices.setCacheCart(
+        CacheCartServices.KEY_CART + user_id,
+        {
+          _id: cart._id.toString(),
+          cart_userId: cart.cart_userId.toString(),
+          cart_status: cart.cart_status,
+          cart_count: updated.cart_count,
+          cart_total: updated.cart_total,
+        }
+      );
 
       return new CreatedResponse(201, {
         cart_userId: updated.cart_userId,

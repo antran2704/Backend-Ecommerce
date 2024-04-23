@@ -24,6 +24,13 @@ router.post(
 
 // [POST] LOGIN
 router.post(
+  "/login/beta",
+  UserMiddleware.checkValidEmail,
+  UserController.loginBeta
+);
+
+// [POST] LOGIN
+router.post(
   "/login",
   UserMiddleware.checkValidEmail,
   UserController.login
@@ -46,6 +53,9 @@ router.post("/ban", UserController.banUser);
 
 // [POST] UNBAN USER
 router.post("/unban", UserController.unbanUser);
+
+// [POST] CONFIRM EMAIL AND ADD USER
+router.post("/beta", UserController.creatUserBeta);
 
 // [POST] CONFIRM EMAIL AND ADD USER
 router.post("/", UserController.creatUser);

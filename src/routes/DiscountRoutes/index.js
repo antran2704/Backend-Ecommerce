@@ -4,6 +4,7 @@ const DiscountController = require("../../controller/DiscountController");
 const UserMiddleware = require("../../middlewares/Auth");
 const multer = require("../../middlewares/Multer");
 const DiscountMiddleware = require("../../middlewares/Discount");
+const { ImageMiddleware } = require("../../middlewares/Image");
 
 router.use(UserMiddleware.authentication);
 router.use(UserMiddleware.authorization("0000"));
@@ -18,6 +19,7 @@ router.delete("/:discount_id", DiscountController.deleteDiscount);
 router.post(
   "/uploadThumbnail",
   multer.upload("./uploads/discount").single("thumbnail"),
+  ImageMiddleware.checkPathImage,
   DiscountController.uploadThumbnail
 );
 

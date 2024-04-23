@@ -4,7 +4,10 @@ const {
 } = require("../../helpers/errorResponse");
 const getSelect = require("../../helpers/getSelect");
 const { GetResponse } = require("../../helpers/successResponse");
-const { CategoriesServices } = require("../../services/index");
+const {
+  CategoriesServices,
+  CacheCategoriesServices,
+} = require("../../services/index");
 
 const UserCategoryController = {
   // [GET] ALL CATEGORY WITH PAGE
@@ -67,17 +70,45 @@ const UserCategoryController = {
   },
   getParentCategories: async (req, res) => {
     const select = getSelect(req.query);
+    // const test = await redisGlobal.lRem(
+    //   "categories_parent",
+    //   0,
+    //   JSON.stringify({
+    //     _id: "65f9905036850919aae0746c",
+    //     title: "test 5",
+    //     description: "asdasd",
+    //     thumbnail:
+    //       "/uploads/category/1710854222269heather-ford-5gkYsrH_ebY-unsplash.jpg",
+    //     slug: "test-5",
+    //   })
+    // );
+
+    // console.log("test", test)
+
+    // // check cache
+    const cacheCategories = await CacheCategoriesServices.getCache(
+      "categories_parent"
+    );
+
+    if (cacheCategories) {
+      console.log("cacheCategories");
+      return new GetResponse(200, cacheCategories).send(res);
+    }
 
     try {
       const categories = await CategoriesServices.getParentCategory(select);
 
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
+      // add cache
+      if (categories.length > 0) {
+        await CacheCategoriesServices.createCache(
+          "categories_parent",
+          categories
+        );
       }
 
       return new GetResponse(200, categories).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [GET] A CATEGORY

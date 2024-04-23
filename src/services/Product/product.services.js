@@ -1,7 +1,12 @@
 const { Product, Category } = require("../../models/index");
 const { getDateTime } = require("../../helpers/getDateTime");
-const { NotificationAdminServices, NotificationTypes } = require("../Notification");
-const { ADMIN_NOTIFI_PATH } = require("../../controller/NotificationController/data");
+const {
+  NotificationAdminServices,
+  NotificationTypes,
+} = require("../Notification");
+const {
+  ADMIN_NOTIFI_PATH,
+} = require("../../controller/NotificationController/data");
 
 class ProductServices {
   async getProducts(query = {}) {
@@ -101,7 +106,7 @@ class ProductServices {
       ...query,
       category: category_id,
       isDeleted: false,
-      title: { $regex: search, $options: "i" },
+      title: { $regex: search, $options: "ui" },
       ...queryFilter,
     }).lean();
 
@@ -117,7 +122,8 @@ class ProductServices {
     currentPage,
     lte = null,
     gte = null,
-    query = {}
+    query = {},
+    select = null
   ) {
     const queryFilter = {};
 
@@ -145,11 +151,12 @@ class ProductServices {
       ...query,
       category: category_id,
       isDeleted: false,
-      title: { $regex: search, $options: "i" },
+      title: { $regex: search, $options: "ui" },
       ...queryFilter,
     })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
+      .select({ ...select })
       .lean();
 
     return products;
@@ -191,7 +198,7 @@ class ProductServices {
       })
       .populate("categories", {
         title: 1,
-        slug: 1
+        slug: 1,
       })
       .populate("variations")
       .select({ ...select });

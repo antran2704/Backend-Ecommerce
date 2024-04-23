@@ -118,6 +118,10 @@ const ProductModel = new Schema(
       slug: "title",
       unique: true,
     },
+    isHot: {
+      type: Boolean,
+      default: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -20,9 +20,9 @@ const AdminProductController = {
     
     try {
       const totalItems = await ProductServices.getProducts();
-      if (!totalItems) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
+      // if (!totalItems) {
+      //   return new NotFoundError(404, "No product found!").send(res);
+      // }
 
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
@@ -30,9 +30,9 @@ const AdminProductController = {
         select
       );
 
-      if (!products) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
+      // if (!products) {
+      //   return new NotFoundError(404, "No product found!").send(res);
+      // }
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -77,9 +77,9 @@ const AdminProductController = {
           gte
         );
 
-        if (!totalItems) {
-          return new NotFoundError(404, "Not found product!").send(res);
-        }
+        // if (!totalItems) {
+        //   return new NotFoundError(404, "Not found product!").send(res);
+        // }
 
         const products = await ProductServices.getProductsFilterWithPage(
           id,
@@ -92,9 +92,9 @@ const AdminProductController = {
           gte
         );
 
-        if (!products) {
-          return new NotFoundError(404, "Not found product!").send(res);
-        }
+        // if (!products) {
+        //   return new NotFoundError(404, "Not found product!").send(res);
+        // }
 
         return new GetResponse(200, products).send(res, {
           pagination: {
@@ -107,9 +107,9 @@ const AdminProductController = {
 
       const totalItems = await ProductServices.getProductsInCategory(id);
 
-      if (!totalItems) {
-        return new NotFoundError(404, "Not found product!").send(res);
-      }
+      // if (!totalItems) {
+      //   return new NotFoundError(404, "Not found product!").send(res);
+      // }
 
       const products = await ProductServices.getProductsInCategoryWithPage(
         id,
@@ -117,9 +117,9 @@ const AdminProductController = {
         currentPage
       );
 
-      if (!products) {
-        return new NotFoundError(404, "Not found product!").send(res);
-      }
+      // if (!products) {
+      //   return new NotFoundError(404, "Not found product!").send(res);
+      // }
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -243,12 +243,6 @@ const AdminProductController = {
         search,
         category
       );
-
-      if (!totalItems) {
-        return new NotFoundError(404, `No product with title ${search}`).send(
-          res
-        );
-      }
 
       const products = await ProductServices.searchTextWithPage(
         search,

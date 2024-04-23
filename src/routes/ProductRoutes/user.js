@@ -18,6 +18,9 @@ router.get("/id/:id", ProductController.getProductById);
 // [GET] A PRODUCT WITH ID
 router.get("/other", ProductController.getOtherProducts);
 
+// [GET] A PRODUCT WITH ID
+router.get("/hot", ProductController.getHotProducts);
+
 // [GET] A PRODUCT
 router.get("/:slug", ProductController.getProduct);
 

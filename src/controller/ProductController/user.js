@@ -50,20 +50,25 @@ const UserProductController = {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const { product_id, category_id } = req.query;
-    const select = getSelect(req.query);
-    const query = {
-      category: category_id,
-      _id: { $nin: [product_id] },
-      public: true,
-    };
+    const select = getSelect(req.query, ["product_id", "category_id"]);
 
-    if (!category_id) {
-      return new NotFoundError(404, "No product found!").send(res);
+    let query = {};
+
+    if (category_id) {
+      query = {
+        category: category_id,
+        _id: { $ne: product_id },
+        public: true,
+      };
+    } else {
+      query = {
+        _id: { $ne: product_id },
+        public: true,
+      };
     }
 
     try {
       const totalItems = await ProductServices.getProducts(query);
-
       const products = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
         currentPage,
@@ -71,9 +76,33 @@ const UserProductController = {
         query
       );
 
-      if (!products) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
+      return new GetResponse(200, products).send(res, {
+        pagination: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  // [GET] ALL PRODUCT
+  getHotProducts: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = req.query.page ? Number(req.query.page) : 1;
+    const select = getSelect(req.query, ["product_id", "category_id"]);
+
+    let query = { public: true, isHot: true };
+
+    try {
+      const totalItems = await ProductServices.getProducts(query);
+      const products = await ProductServices.getProductsWithPage(
+        PAGE_SIZE,
+        currentPage,
+        select,
+        query
+      );
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -97,19 +126,19 @@ const UserProductController = {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const gte =
-      req.query.price && checkValidNumber(req.query.price)
-        ? Number(req.query.price.split(".")[0])
+      req.query.filterPrice && checkValidNumber(req.query.filterPrice)
+        ? Number(req.query.filterPrice.split(".")[0])
         : null;
 
     const lte =
-      req.query.price && checkValidNumber(req.query.price)
-        ? Number(req.query.price.split(".")[1])
+      req.query.filterPrice && checkValidNumber(req.query.filterPrice)
+        ? Number(req.query.filterPrice.split(".")[1])
         : null;
     const { search } = req.query;
     const parseQuery = {};
 
     const keys = Object.keys(req.query).filter(
-      (query) => query !== "page" && query !== "search" && query !== "price"
+      (key) => key !== "page" && key !== "search" && key !== "filterPrice"
     );
 
     for (const key of keys) {
@@ -120,6 +149,15 @@ const UserProductController = {
 
     const query = {
       public: true,
+    };
+
+    const select = {
+      title: 1,
+      slug: 1,
+      thumbnail: 1,
+      price: 1,
+      promotion_price: 1,
+      inventory: 1,
     };
 
     try {
@@ -145,7 +183,8 @@ const UserProductController = {
         currentPage,
         lte,
         gte,
-        query
+        query,
+        select
       );
 
       if (!products) {

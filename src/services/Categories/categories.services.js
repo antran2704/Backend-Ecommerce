@@ -77,7 +77,8 @@ class CategoriesServices {
     if (!parent_id || !id) return null;
     const category = await Category.findOneAndUpdate(
       { _id: parent_id },
-      { $push: { childrens: id } }
+      { $push: { childrens: id } },
+      { upsert: true, new: true }
     );
 
     return category;
@@ -137,11 +138,12 @@ class CategoriesServices {
       this.insertChildrendCategory(payload.parent_id, id);
     }
 
-    await category.updateOne({
-      $set: { ...payload, updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    await category.updateOne(
+      {
+        $set: { ...payload, updatedAt: date },
+      },
+      { upsert: true, new: true }
+    );
 
     return category;
   }
@@ -152,9 +154,8 @@ class CategoriesServices {
       { parent_id },
       {
         $set: { parent_id: new_parent_id, updatedAt: date },
-        upsert: true,
-        new: true,
-      }
+      },
+      { upsert: true, new: true }
     );
 
     return categories;
@@ -165,12 +166,13 @@ class CategoriesServices {
     const date = getDateTime();
     const category = await Category.findById({ _id: id });
 
-    await category.updateOne({
-      $push: { childrens: { $each: childrens } },
-      $set: { updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    await category.updateOne(
+      {
+        $push: { childrens: { $each: childrens } },
+        $set: { updatedAt: date },
+      },
+      { upsert: true, new: true }
+    );
 
     return category;
   }
@@ -178,7 +180,6 @@ class CategoriesServices {
   async deleteCategory(id) {
     if (!id) return null;
 
-    const date = getDateTime();
     const category = await Category.findByIdAndRemove({ _id: id });
 
     return category;

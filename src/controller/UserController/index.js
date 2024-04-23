@@ -4,6 +4,7 @@ const {
   KeyTokenServices,
   CartServices,
   ApiKeyServices,
+  CacheUserServices,
 } = require("../../services");
 
 const crypto = require("node:crypto");
@@ -51,18 +52,26 @@ const UserController = {
       return new BadResquestError(400, "Id is invalid").send(res);
     }
 
+    const cacheUser = await CacheUserServices.getUser(
+      CacheUserServices.KEY_USER + id
+    );
+
+    if (cacheUser && cacheUser._id) {
+      return new GetResponse(200, cacheUser).send(res);
+    }
+
     try {
-      const users = await UserServices.getUser(id, {
+      const user = await UserServices.getUser(id, {
         name: 1,
         email: 1,
         avartar: 1,
       });
 
-      if (!users) {
+      if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
 
-      return new GetResponse(200, users).send(res);
+      return new GetResponse(200, user).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -128,7 +137,6 @@ const UserController = {
   // [POST] CONFIRM EMAIL AND ADD USER
   creatUser: async (req, res) => {
     const { name, email, avartar } = req.body;
-
     if (!name || !email) {
       return new BadResquestError(400, "Data confirm email invalid").send(res);
     }
@@ -258,6 +266,23 @@ const UserController = {
           });
         }
 
+        // set cache user
+        await CacheUserServices.setCacheUser(
+          CacheUserServices.KEY_USER + user._id,
+          {
+            _id: user._id.toString(),
+            name: user.name,
+            avartar: user.avartar,
+            email: user.email,
+          }
+        );
+        console.log("refreshTokenDecode.exp", refreshTokenDecode.exp);
+        await CacheUserServices.setExpriseUser(
+          CacheUserServices.KEY_USER + user._id,
+          refreshTokenDecode.exp,
+          "GT"
+        );
+
         return new GetResponse(200, {
           accessToken: {
             value: accessToken,
@@ -283,6 +308,23 @@ const UserController = {
         return new BadResquestError(400, "Create key token failed").send(res);
       }
 
+      // set cache user
+      await CacheUserServices.setCacheUser(
+        CacheUserServices.KEY_USER + user._id,
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          avartar: user.avartar,
+          email: user.email,
+        }
+      );
+
+      await CacheUserServices.setExpriseUser(
+        CacheUserServices.KEY_USER + user._id,
+        refreshTokenDecode.exp,
+        "GT"
+      );
+
       return new GetResponse(200, {
         accessToken: {
           value: accessToken,
@@ -294,6 +336,85 @@ const UserController = {
           exp: refreshTokenDecode.exp,
         },
         apiKey: apiKey.key,
+      }).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  creatUserBeta: async (req, res) => {
+    const { password, email } = req.body;
+
+    if (!email || !password) {
+      return new BadResquestError(400, "Data confirm email invalid").send(res);
+    }
+
+    try {
+      const user = await UserServices.getUserByEmail(email);
+
+      if (user) {
+        return new BadResquestError(400, "Email is used").send(res);
+      }
+      const passwordHash = await generateBcrypt(password);
+      const newUser = await UserServices.createUser({
+        email,
+        password: passwordHash,
+        verify: true,
+      });
+
+      if (!newUser) {
+        return new BadResquestError(400, "Create user failed").send(res);
+      }
+
+      const key = crypto.randomUUID();
+      const newApiKey = await ApiKeyServices.createApiKey(
+        newUser._id,
+        key,
+        "1111"
+      );
+
+      if (!newApiKey) {
+        return new BadResquestError(400, "Create api key failed").send(res);
+      }
+
+      const newCart = await CartServices.createCart(newUser._id);
+
+      if (!newCart) {
+        return new BadResquestError(400, "Create cart failed").send(res);
+      }
+
+      return new CreatedResponse(201, {
+        email: newUser.email,
+        avartar: newUser.avartar,
+        _id: newUser._id,
+      }).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
+    }
+  },
+  loginBeta: async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return new BadResquestError(400, "Data login invalid").send(res);
+    }
+
+    const query = req.query;
+    const select = getSelect(query);
+
+    try {
+      const user = await UserServices.getUserByEmail(email, select);
+      if (!user) {
+        return new NotFoundError(404, "Not found user").send(res);
+      }
+
+      if (user.banned) {
+        return new ForbiddenError(403, "User was banned").send(res);
+      }
+
+      return new GetResponse(200, {
+        email: user.email,
+        avartar: user.avartar,
+        _id: user._id,
       }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -313,6 +434,17 @@ const UserController = {
       if (!user) {
         return new BadResquestError(400, "Update user failed").send(res);
       }
+
+      // update cache user
+      await CacheUserServices.setCacheUser(
+        CacheUserServices.KEY_USER + user._id,
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          avartar: user.avartar,
+          email: user.email,
+        }
+      );
 
       return new CreatedResponse().send(res);
     } catch (error) {

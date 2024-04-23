@@ -1,9 +1,9 @@
-const getSelect = (query = {}) => {
+const getSelect = (query = {}, notIn = []) => {
   const select = {};
   const keys = query;
-  
+
   Object.keys(keys).forEach((key) => {
-    if (key !== "page" && key !== "limit") {
+    if (key !== "page" && key !== "limit" && !notIn.includes(key)) {
       select[key] = Number(query[key]);
     }
   });

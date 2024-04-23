@@ -8,7 +8,10 @@ const {
   GetResponse,
   CreatedResponse,
 } = require("../../helpers/successResponse");
-const { CategoriesServices } = require("../../services/index");
+const {
+  CategoriesServices,
+  CacheCategoriesServices,
+} = require("../../services/index");
 
 const AdminCategoryController = {
   // [GET] ALL CATEGORY WITH PAGE
@@ -19,18 +22,18 @@ const AdminCategoryController = {
     try {
       const totalItems = await CategoriesServices.getCategories();
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
+      // if (!totalItems) {
+      //   return new NotFoundError(404, "No category found!").send(res);
+      // }
 
       const categories = await CategoriesServices.getCategoriesWithPage(
         PAGE_SIZE,
         currentPage
       );
 
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
+      // if (!categories) {
+      //   return new NotFoundError(404, "No category found!").send(res);
+      // }
 
       return new GetResponse(200, categories).send(res, {
         pagination: {
@@ -49,9 +52,9 @@ const AdminCategoryController = {
     try {
       const categories = await CategoriesServices.getCategories(select);
 
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
+      // if (!categories) {
+      //   return new NotFoundError(404, "No category found!").send(res);
+      // }
 
       return new GetResponse(200, categories).send(res);
     } catch (error) {
@@ -67,9 +70,9 @@ const AdminCategoryController = {
         childrens: 1,
       });
 
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
+      // if (!categories) {
+      //   return new NotFoundError(404, "No category found!").send(res);
+      // }
 
       return new GetResponse(200, categories).send(res);
     } catch (error) {
@@ -137,6 +140,14 @@ const AdminCategoryController = {
         );
       }
 
+      const isExitedCache = await CacheCategoriesServices.isExitCache(
+        "categories_parent"
+      );
+
+      if (isExitedCache) {
+        await CacheCategoriesServices.clearCache("categories_parent");
+      }
+
       return new CreatedResponse(201, newCategory).send(res, {
         message: "Create category success!",
       });
@@ -153,12 +164,12 @@ const AdminCategoryController = {
     try {
       const totalItems = await CategoriesServices.searchTextItems(search);
 
-      if (!totalItems) {
-        return new NotFoundError(
-          404,
-          `No categoryies with title ${search}`
-        ).send(res);
-      }
+      // if (!totalItems) {
+      //   return new NotFoundError(
+      //     404,
+      //     `No categoryies with title ${search}`
+      //   ).send(res);
+      // }
 
       const items = await CategoriesServices.searchTextWithPage(
         search,
@@ -167,12 +178,12 @@ const AdminCategoryController = {
         limitQuery
       );
 
-      if (!items) {
-        return new NotFoundError(
-          404,
-          `No categories with title ${search}`
-        ).send(res);
-      }
+      // if (!items) {
+      //   return new NotFoundError(
+      //     404,
+      //     `No categories with title ${search}`
+      //   ).send(res);
+      // }
 
       return new GetResponse(200, items).send(res, {
         pagination: {
@@ -197,9 +208,16 @@ const AdminCategoryController = {
       const category = await CategoriesServices.updateCategory(id, req.body);
 
       if (!category) {
-        return new BadResquestError(404, "Update category failed").send(res);
+        return new BadResquestError(400, "Update category failed").send(res);
       }
 
+      const isExitedCache = await CacheCategoriesServices.isExitCache(
+        "categories_parent"
+      );
+
+      if (isExitedCache) {
+        await CacheCategoriesServices.clearCache("categories_parent");
+      }
       return new CreatedResponse(201, "Updated category success!").send(res);
     } catch (error) {
       return new InternalServerError(500, error.stack).send(res);
@@ -232,6 +250,14 @@ const AdminCategoryController = {
         );
 
         CategoriesServices.deleteChildrendCategory(category.parent_id, id);
+      }
+
+      const isExitedCache = await CacheCategoriesServices.isExitCache(
+        "categories_parent"
+      );
+
+      if (isExitedCache) {
+        await CacheCategoriesServices.clearCache("categories_parent");
       }
 
       return new CreatedResponse(201, "Delete category success!").send(res);

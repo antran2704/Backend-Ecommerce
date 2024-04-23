@@ -4,11 +4,15 @@ class ReddisConnect {
   REDIS_CONNECT_TIMEOUT = 10000;
   connectionTimeout;
 
-  async createConnect() {
-    const client = createClient();
-    this.handleEvent(client);
-    this.handleConnect(client);
-    return client;
+
+  constructor() {
+    this.client = createClient();
+    this.handleEvent(this.client);
+    this.handleConnect(this.client);
+  }
+
+  getConnection() {
+    return this.client;
   }
 
   async handleConnect(client) {

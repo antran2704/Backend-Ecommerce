@@ -26,7 +26,8 @@ const ReddisConnect = require("./src/configs/Reddis");
 // database Mongo
 db.connect();
 
-// const client = new ReddisConnect().createConnect();
+const client = new ReddisConnect();
+const redisConnection = client.getConnection();
 
 app.use(cors());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
@@ -43,8 +44,9 @@ const newConnection = new SocketConfig(server);
 const socket = newConnection.getSocket();
 
 socket.on("connection", newConnection.connection);
-
+// redisConnection.expireAt()
 global.socket = socket;
+global.redisGlobal = redisConnection;
 
 // routes
 routes(app);
