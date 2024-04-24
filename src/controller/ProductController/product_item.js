@@ -1,4 +1,4 @@
-const { ProductItemServices } = require("../../services");
+const { ProductItemServices, ProductServices } = require("../../services");
 
 const {
   InternalServerError,
@@ -88,14 +88,24 @@ const ProductItemController = {
     }
   },
   createProductItems: async (req, res) => {
+    const { product_id } = req.params;
     const payloads = req.body;
 
-    if (!payloads || payloads.length === 0) {
+    if (!product_id || !payloads || payloads.length === 0) {
       return new BadResquestError().send(res);
     }
 
     try {
+      const product = await ProductServices.getProductById(product_id);
+
+      if (!product) {
+        return new NotFoundError().send(res);
+      }
+
       let items = [];
+      // let removeItems = product.variations;
+      // console.log("remove 1", removeItems)
+
       for (let i = 0; i < payloads.length; i++) {
         const payloadParse = removeUndefindedObj(payloads[i]);
         let item = null;
@@ -125,9 +135,9 @@ const ProductItemController = {
     }
   },
   updateProductItem: async (req, res) => {
-    const { id } = req.params;
+    const { product_id } = req.params;
 
-    if (!id) {
+    if (!product_id) {
       return new BadResquestError().send(res);
     }
 
@@ -140,7 +150,7 @@ const ProductItemController = {
     try {
       const payloadParse = removeUndefindedObj(payload);
       const item = await ProductItemServices.updateProductItem(
-        id,
+        product_id,
         payloadParse
       );
 
@@ -149,6 +159,32 @@ const ProductItemController = {
       }
 
       return new CreatedResponse(201, item).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  updateProductItems: async (req, res) => {
+    const payload = req.body;
+    if (!payload) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      for (let i = 0; i < payload.length; i++) {
+        const variation_id = payload[i];
+        const body = { available: false };
+        
+        const item = await ProductItemServices.updateProductItem(
+          variation_id,
+          body
+        );
+
+        if (!item) {
+          return new BadResquestError(400, "Update item failed").send(res);
+        }
+      }
+
+      return new CreatedResponse().send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }

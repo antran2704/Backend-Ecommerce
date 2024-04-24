@@ -55,7 +55,7 @@ router.post("/ban", UserController.banUser);
 router.post("/unban", UserController.unbanUser);
 
 // [POST] CONFIRM EMAIL AND ADD USER
-router.post("/beta", UserController.creatUserBeta);
+router.post("/beta", UserMiddleware.checkValidEmail, UserController.creatUserBeta);
 
 // [POST] CONFIRM EMAIL AND ADD USER
 router.post("/", UserController.creatUser);

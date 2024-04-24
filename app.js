@@ -44,7 +44,7 @@ const newConnection = new SocketConfig(server);
 const socket = newConnection.getSocket();
 
 socket.on("connection", newConnection.connection);
-// redisConnection.expireAt()
+// redisConnection.exists()
 global.socket = socket;
 global.redisGlobal = redisConnection;
 

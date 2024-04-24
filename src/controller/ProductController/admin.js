@@ -1,4 +1,8 @@
-const { ProductServices, InventoryServices } = require("../../services");
+const {
+  ProductServices,
+  InventoryServices,
+  CacheProductServices,
+} = require("../../services");
 
 const {
   InternalServerError,
@@ -17,7 +21,7 @@ const AdminProductController = {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = req.query.page ? Number(req.query.page) : 1;
     const select = getSelect(req.query);
-    
+
     try {
       const totalItems = await ProductServices.getProducts();
       // if (!totalItems) {
@@ -222,14 +226,29 @@ const AdminProductController = {
 
     try {
       const product = await ProductServices.updateProduct(id, data);
-
+      
       if (!product) {
         return new BadResquestError(400, "Updated product failed").send(res);
       }
 
+      // check cache and update cache
+      const isExitCache = await CacheProductServices.exitCacheProduct(
+        CacheProductServices.KEY_PRODUCT + product._id
+      );
+
+      if (isExitCache) {
+        await CacheProductServices.deleteCacheProduct(
+          CacheProductServices.KEY_PRODUCT + product._id
+        );
+        await CacheProductServices.setCacheProduct(
+          CacheProductServices.KEY_PRODUCT + product._id,
+          product
+        );
+      }
+
       return new CreatedResponse(201, "Updated product success").send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   // [SEARCH PRODUCT]
@@ -277,6 +296,15 @@ const AdminProductController = {
       const product = await ProductServices.deleteProduct(id);
       if (!product) {
         return new BadResquestError(400, "Delete product failed").send(res);
+      }
+
+      const isExitCache = await CacheProductServices.exitCacheProduct(
+        CacheProductServices.KEY_PRODUCT + product._id
+      );
+      if (isExitCache) {
+        await CacheProductServices.deleteCacheProduct(
+          CacheProductServices.KEY_PRODUCT + product._id
+        );
       }
 
       return new CreatedResponse(201, "Deleted product succesfully").send(res);

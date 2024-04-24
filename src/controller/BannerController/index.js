@@ -1,4 +1,4 @@
-const { BannerServices } = require("../../services");
+const { BannerServices, CacheBannerServices } = require("../../services");
 
 const {
   InternalServerError,
@@ -70,6 +70,20 @@ const BannerController = {
     const select = getSelect(req.query);
     const query = { isShow: true };
 
+    const cacheBanners = await CacheBannerServices.getCacheBanner(
+      CacheBannerServices.KEY_BANNER
+    );
+
+    if (cacheBanners) {
+      return new GetResponse(200, cacheBanners).send(res, {
+        pagination: {
+          totalItems: cacheBanners.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    }
+
     try {
       const totalItems = await BannerServices.getBanners(select, query);
 
@@ -87,6 +101,11 @@ const BannerController = {
       if (!banners) {
         return new NotFoundError(404, "No banner found!").send(res);
       }
+
+      await CacheBannerServices.setCacheBanner(
+        CacheBannerServices.KEY_BANNER,
+        banners
+      );
 
       return new GetResponse(200, banners).send(res, {
         pagination: {

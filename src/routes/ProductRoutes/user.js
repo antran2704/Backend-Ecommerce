@@ -22,7 +22,7 @@ router.get("/other", ProductController.getOtherProducts);
 router.get("/hot", ProductController.getHotProducts);
 
 // [GET] A PRODUCT
-router.get("/:slug", ProductController.getProduct);
+router.get("/:id/:slug", ProductController.getProduct);
 
 // [GET] ALL PRODUCTS
 router.get("/", ProductController.getProducts);

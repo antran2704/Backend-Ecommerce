@@ -1,4 +1,8 @@
-const { ProductServices, InventoryServices } = require("../../services");
+const {
+  ProductServices,
+  InventoryServices,
+  CacheProductServices,
+} = require("../../services");
 
 const {
   InternalServerError,
@@ -204,10 +208,21 @@ const UserProductController = {
   },
   // [GET] A PRODUCT
   getProduct: async (req, res) => {
-    const { slug } = req.params;
+    const { slug, id } = req.params;
+
     const query = {
       public: true,
     };
+
+    const cacheProduct = await CacheProductServices.getProduct(
+      CacheProductServices.KEY_PRODUCT + id
+    );
+
+    if (cacheProduct && cacheProduct._id && cacheProduct.public) {
+      console.log("cache product");
+
+      return new GetResponse(200, cacheProduct).send(res);
+    }
 
     try {
       const product = await ProductServices.getProduct(slug, query);
@@ -215,6 +230,12 @@ const UserProductController = {
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
       }
+
+      // set cache product
+      await CacheProductServices.setCacheProduct(
+        CacheProductServices.KEY_PRODUCT + product._id,
+        product
+      );
 
       return new GetResponse(200, product).send(res);
     } catch (error) {

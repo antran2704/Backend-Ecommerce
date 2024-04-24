@@ -253,7 +253,7 @@ const UserController = {
       if (keyTokenUser) {
         const keyTokenUpdated = await KeyTokenServices.updateKeyToken(
           user._id,
-          { privateKey, publicKey, refreshToken, apiKey }
+          { privateKey, publicKey, refreshToken }
         );
 
         if (keyTokenUpdated.refreshTokenUseds.length > 5) {
@@ -276,7 +276,7 @@ const UserController = {
             email: user.email,
           }
         );
-        console.log("refreshTokenDecode.exp", refreshTokenDecode.exp);
+
         await CacheUserServices.setExpriseUser(
           CacheUserServices.KEY_USER + user._id,
           refreshTokenDecode.exp,
@@ -409,6 +409,12 @@ const UserController = {
 
       if (user.banned) {
         return new ForbiddenError(403, "User was banned").send(res);
+      }
+
+      const paswordCompare = await checkBcrypt(password, user.password);
+
+      if (!paswordCompare) {
+        return new UnauthorizedError().send(res);
       }
 
       return new GetResponse(200, {

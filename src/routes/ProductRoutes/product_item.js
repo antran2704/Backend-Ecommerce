@@ -13,8 +13,12 @@ router.post(
   ProductItemController.uploadImage
 );
 
+
+// [PATCH] UPDATE PRODUCT ITEMS
+router.patch("/items", ProductItemController.updateProductItems);
+
 // [PATCH] UPDATE PRODUCT ITEM
-router.patch("/:id", ProductItemController.updateProductItem);
+router.patch("/:product_id", ProductItemController.updateProductItem);
 
 // [DELETE] A PRODUCT ITEM
 router.delete("/:id", ProductItemController.deleteProductItem);
@@ -26,7 +30,7 @@ router.get("/item/:id", ProductItemController.getProductItem);
 router.get("/all/:product_id", ProductItemController.getProductItems);
 
 // [POST] CREATE PRODUCT ITEM
-router.post("/", ProductItemController.createProductItems);
+router.post("/:product_id", ProductItemController.createProductItems);
 
 // [GET] ALL PRODUCT ITEMS
 router.get("/:product_id", ProductItemController.getProductItemsWithPage);

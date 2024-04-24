@@ -91,7 +91,6 @@ const UserCategoryController = {
     );
 
     if (cacheCategories) {
-      console.log("cacheCategories");
       return new GetResponse(200, cacheCategories).send(res);
     }
 

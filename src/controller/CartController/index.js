@@ -6,6 +6,7 @@ const {
   DiscountServices,
   ProductItemServices,
   CacheCartServices,
+  CacheUserServices,
 } = require("../../services");
 const {
   InternalServerError,
@@ -36,13 +37,13 @@ const CartController = {
       );
 
       if (cacheCart) {
-        const cart_products = await CartServices.getItemsInCart(cacheCart._id);
-        
+        // const cart_products = await CartServices.getItemsInCart(cacheCart._id);
+
         return new GetResponse(200, {
           ...cacheCart,
           cart_count: Number(cacheCart.cart_count),
           cart_total: Number(cacheCart.cart_total),
-          cart_products,
+          // cart_products,
         }).send(res);
       }
 
@@ -52,7 +53,7 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      const cart_products = await CartServices.getItemsInCart(cart._id);
+      // const cart_products = await CartServices.getItemsInCart(cart._id);
 
       await CacheCartServices.setCacheCart(
         CacheCartServices.KEY_CART + user_id,
@@ -65,16 +66,35 @@ const CartController = {
         }
       );
 
-      // await redisGlobal.expire(`cart:${user_id}`, 30)
-
       return new GetResponse(200, {
         _id: cart._id,
         cart_userId: cart.cart_userId,
         cart_status: cart.cart_status,
         cart_count: cart.cart_count,
         cart_total: cart.cart_total,
-        cart_products,
+        // cart_products,
       }).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  getItemsInCart: async (req, res) => {
+    const { user_id } = req.params;
+
+    if (!user_id) {
+      return new BadResquestError(400, "User_id params not found").send(res);
+    }
+
+    try {
+      const cart = await CartServices.getCartByUserId(user_id);
+
+      if (!cart) {
+        return new NotFoundError(404, "Not found cart").send(res);
+      }
+
+      const cart_products = await CartServices.getItemsInCart(cart._id);
+
+      return new GetResponse(200, cart_products).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }
@@ -88,18 +108,52 @@ const CartController = {
       return new BadResquestError().send(res);
     }
 
-    try {
-      const user = await UserServices.getUser(user_id);
+    let user = null;
+    let cart = null;
+
+    // check cache user
+    const cacheUser = await CacheUserServices.getUser(
+      CacheUserServices.KEY_USER + user_id
+    );
+
+    if (cacheUser) {
+      user = cacheUser;
+    } else {
+      user = await UserServices.getUser(user_id);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
+    }
 
-      const cart = await CartServices.getCartByUserId(user_id);
+    // check cache cart
+    const cacheCart = await CacheCartServices.getCart(
+      CacheCartServices.KEY_CART + user_id
+    );
+
+    if (cacheCart) {
+      console.log("cache cart increase");
+      cart = cacheCart;
+    } else {
+      cart = await CartServices.getCartByUserId(user_id);
 
       if (!cart) {
         return new NotFoundError(404, "Not found cart").send(res);
       }
+    }
+
+    try {
+      // const user = await UserServices.getUser(user_id);
+
+      // if (!user) {
+      //   return new NotFoundError(404, "Not found user").send(res);
+      // }
+
+      // const cart = await CartServices.getCartByUserId(user_id);
+
+      // if (!cart) {
+      //   return new NotFoundError(404, "Not found cart").send(res);
+      // }
 
       let inventoryProduct = 0;
 
@@ -195,7 +249,7 @@ const CartController = {
         cart_status: updated.cart_status,
         cart_count: updated.cart_count,
         cart_total: updated.cart_total,
-        cart_products: totalItems,
+        // cart_products: totalItems,
       }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
@@ -210,18 +264,52 @@ const CartController = {
       return new BadResquestError().send(res);
     }
 
-    try {
-      const user = await UserServices.getUser(user_id);
+    let user = null;
+    let cart = null;
+
+    // check cache user
+    const cacheUser = await CacheUserServices.getUser(
+      CacheUserServices.KEY_USER + user_id
+    );
+
+    if (cacheUser) {
+      user = cacheUser;
+    } else {
+      user = await UserServices.getUser(user_id);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
+    }
 
-      const cart = await CartServices.getCartByUserId(user_id);
+    // check cache cart
+    const cacheCart = await CacheCartServices.getCart(
+      CacheCartServices.KEY_CART + user_id
+    );
+
+    if (cacheCart) {
+      console.log("cache cart update");
+      cart = cacheCart;
+    } else {
+      cart = await CartServices.getCartByUserId(user_id);
 
       if (!cart) {
         return new NotFoundError(404, "Not found cart").send(res);
       }
+    }
+
+    try {
+      // const user = await UserServices.getUser(user_id);
+
+      // if (!user) {
+      //   return new NotFoundError(404, "Not found user").send(res);
+      // }
+
+      // const cart = await CartServices.getCartByUserId(user_id);
+
+      // if (!cart) {
+      //   return new NotFoundError(404, "Not found cart").send(res);
+      // }
 
       let inventoryProduct = 0;
 
@@ -314,7 +402,7 @@ const CartController = {
         cart_status: updated.cart_status,
         cart_count: updated.cart_count,
         cart_total: updated.cart_total,
-        cart_products: totalItems,
+        // cart_products: totalItems,
       }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
@@ -335,14 +423,28 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      for (let i = 0; i < data.cart_products.length; i++) {
-        const item = data.cart_products[0];
+      const cart_products = await CartServices.getItemsInCart(cart._id);
+
+      for (let i = 0; i < cart_products.length; i++) {
+        // const item = data.cart_products[0];
+        const item = cart_products[i];
+
         if (item.variation) {
           const product = await ProductItemServices.getProductItemById(
             item.variation._id
           );
 
-          if (!product || product.inventory <= 0) {
+          if (!product) {
+            return new NotFoundError().send(res);
+          }
+
+          if (!product.available || !product.public) {
+            return new BadResquestError(400, "Product in not avaiable").send(
+              res
+            );
+          }
+
+          if (product.inventory <= 0 || product.inventory < item.quantity) {
             // Send notification
             const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
 
@@ -365,7 +467,17 @@ const CartController = {
             item.product._id
           );
 
-          if (!product || product.inventory <= 0) {
+          if (!product) {
+            return new NotFoundError().send(res);
+          }
+
+          if (!product.public) {
+            return new BadResquestError(400, "Product in not avaiable").send(
+              res
+            );
+          }
+
+          if (product.inventory <= 0 || product.inventory < item.quantity) {
             // Send notification
             const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
             const dataNotification = {
@@ -396,18 +508,52 @@ const CartController = {
       return new BadResquestError().send(res);
     }
 
-    try {
-      const user = await UserServices.getUser(user_id);
+    let user = null;
+    let cart = null;
+
+    // check cache user
+    const cacheUser = await CacheUserServices.getUser(
+      CacheUserServices.KEY_USER + user_id
+    );
+
+    if (cacheUser) {
+      user = cacheUser;
+    } else {
+      user = await UserServices.getUser(user_id);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
+    }
 
-      const cart = await CartServices.getCartByUserId(user_id);
+    // check cache cart
+    const cacheCart = await CacheCartServices.getCart(
+      CacheCartServices.KEY_CART + user_id
+    );
+
+    if (cacheCart) {
+      console.log("cache cart delete ");
+      cart = cacheCart;
+    } else {
+      cart = await CartServices.getCartByUserId(user_id);
 
       if (!cart) {
         return new NotFoundError(404, "Not found cart").send(res);
       }
+    }
+
+    try {
+      // const user = await UserServices.getUser(user_id);
+
+      // if (!user) {
+      //   return new NotFoundError(404, "Not found user").send(res);
+      // }
+
+      // const cart = await CartServices.getCartByUserId(user_id);
+
+      // if (!cart) {
+      //   return new NotFoundError(404, "Not found cart").send(res);
+      // }
 
       const updatedCart = await CartServices.deleteItemCart(cart._id, data);
 
@@ -458,17 +604,51 @@ const CartController = {
       return new BadResquestError().send(res);
     }
 
-    try {
-      const user = await UserServices.getUser(user_id);
+    let user = null;
+    let cart = null;
+
+    // check cache user
+    const cacheUser = await CacheUserServices.getUser(
+      CacheUserServices.KEY_USER + user_id
+    );
+
+    if (cacheUser) {
+      user = cacheUser;
+    } else {
+      user = await UserServices.getUser(user_id);
 
       if (!user) {
         return new NotFoundError(404, "Not found user").send(res);
       }
+    }
 
-      const cart = await CartServices.getCartByUserId(user_id);
+    // check cache cart
+    const cacheCart = await CacheCartServices.getCart(
+      CacheCartServices.KEY_CART + user_id
+    );
+
+    if (cacheCart) {
+      console.log("cache cart delete all");
+      cart = cacheCart;
+    } else {
+      cart = await CartServices.getCartByUserId(user_id);
+
       if (!cart) {
         return new NotFoundError(404, "Not found cart").send(res);
       }
+    }
+
+    try {
+      // const user = await UserServices.getUser(user_id);
+
+      // if (!user) {
+      //   return new NotFoundError(404, "Not found user").send(res);
+      // }
+
+      // const cart = await CartServices.getCartByUserId(user_id);
+      // if (!cart) {
+      //   return new NotFoundError(404, "Not found cart").send(res);
+      // }
 
       const updatedCart = await CartServices.deleteAllItemCart(cart._id);
 
