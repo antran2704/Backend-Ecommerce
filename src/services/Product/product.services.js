@@ -244,7 +244,14 @@ class ProductServices {
       totalItems = await Product.countDocuments({
         ...query,
         category,
-        title: { $regex: text, $options: "i" },
+        $or: [
+          {
+            $text: {
+              $search: text,
+            },
+          },
+          { title: { $regex: text, $options: "ui" } },
+        ],
         isDeleted: false,
       });
 
@@ -253,7 +260,14 @@ class ProductServices {
 
     totalItems = await Product.find({
       ...query,
-      title: { $regex: text, $options: "i" },
+      $or: [
+        {
+          $text: {
+            $search: text,
+          },
+        },
+        { title: { $regex: text, $options: "ui" } },
+      ],
       isDeleted: false,
     });
     return totalItems;
@@ -268,12 +282,18 @@ class ProductServices {
     select = null
   ) {
     let products;
-
     if (category.length > 0) {
       products = await Product.find({
         ...query,
         category,
-        title: { $regex: text, $options: "i" },
+        $or: [
+          {
+            $text: {
+              $search: text,
+            },
+          },
+          { title: { $regex: text, $options: "ui" } },
+        ],
         isDeleted: false,
       })
         .populate("category", {
@@ -290,7 +310,14 @@ class ProductServices {
 
     products = await Product.find({
       ...query,
-      title: { $regex: text, $options: "i" },
+      $or: [
+        {
+          $text: {
+            $search: text,
+          },
+        },
+        { title: { $regex: text, $options: "ui" } },
+      ],
       isDeleted: false,
     })
       .populate("category", {

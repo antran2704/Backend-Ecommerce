@@ -279,17 +279,17 @@ const UserProductController = {
     };
 
     try {
-      const totalItems = await ProductServices.searchTextItems(
-        search,
-        category,
-        query
-      );
+      // const totalItems = await ProductServices.searchTextItems(
+      //   search,
+      //   category,
+      //   query
+      // );
 
-      if (!totalItems) {
-        return new NotFoundError(404, `No product with title ${search}`).send(
-          res
-        );
-      }
+      // if (!totalItems) {
+      //   return new NotFoundError(404, `No product with title ${search}`).send(
+      //     res
+      //   );
+      // }
 
       const products = await ProductServices.searchTextWithPage(
         search,
@@ -308,7 +308,8 @@ const UserProductController = {
 
       return new GetResponse(200, products).send(res, {
         pagination: {
-          totalItems: totalItems.length,
+          // totalItems: totalItems.length,
+          totalItems: 0,
           currentPage,
           pageSize: limitQuery,
         },
