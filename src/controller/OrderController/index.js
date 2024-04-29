@@ -85,20 +85,12 @@ const OrderController = {
     try {
       const totalItems = await OrderServices.getOrdersByUserId(user_id, data);
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No order found!").send(res);
-      }
-
       const orders = await OrderServices.getOrdersByUserIdWithPage(
         user_id,
         PAGE_SIZE,
         currentPage,
         data
       );
-
-      if (!orders) {
-        return new NotFoundError(404, "Not found order").send(res);
-      }
 
       return new GetResponse(200, orders).send(res, {
         pagination: {
@@ -598,6 +590,50 @@ const OrderController = {
         restQuery,
         PAGE_SIZE,
         currentPage
+      );
+
+      return new GetResponse(200, orders).send(res, {
+        pagination: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: PAGE_SIZE,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  searchOrdersForUser: async (req, res) => {
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE);
+    const query = req.query;
+    const { user_id } = req.params;
+    const { page, order_id, ...restQuery } = query;
+    const currentPage = page ? Number(page) : 1;
+
+    if (!user_id) {
+      return new BadResquestError(400, "Invalid arguments").send(res);
+    }
+
+    let queryParse = { ...restQuery };
+
+    if (order_id) {
+      queryParse = {
+        ...queryParse,
+        order_id: { $regex: order_id, $options: "ui" },
+      };
+    }
+
+    try {
+      const totalItems = await OrderServices.searchOrdersForUser(
+        user_id,
+        queryParse
+      );
+
+      const orders = await OrderServices.searchOrdersForUserWithPage(
+        user_id,
+        PAGE_SIZE,
+        currentPage,
+        queryParse
       );
 
       return new GetResponse(200, orders).send(res, {

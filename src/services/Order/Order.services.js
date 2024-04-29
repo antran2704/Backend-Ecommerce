@@ -1,6 +1,6 @@
 const { format } = require("date-fns");
 const { getDateTime } = require("../../helpers/getDateTime");
-const {handleCheckQuery} = require("../../helpers/queryParse");
+const { handleCheckQuery } = require("../../helpers/queryParse");
 const { Order } = require("../../models");
 const { paymentStatus } = require("../../controller/OrderController/status");
 
@@ -31,6 +31,46 @@ class OrderServices {
     if (!user_id) return null;
 
     const orders = await Order.find({ user_id, ...query })
+      .populate("items.product", {
+        title: 1,
+        thumbnail: 1,
+        slug: 1,
+      })
+      .populate("items.variation", {
+        title: 1,
+        thumbnail: 1,
+        options: 1,
+      })
+      .skip((currentPage - 1) * pageSize)
+      .limit(pageSize)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return orders;
+  }
+
+  async searchOrdersForUser(user_id, query = {}) {
+    if (!user_id) return null;
+
+    const orders = await Order.find({
+      user_id,
+      ...query,
+    }).lean();
+    return orders;
+  }
+
+  async searchOrdersForUserWithPage(
+    user_id,
+    pageSize,
+    currentPage,
+    query = {}
+  ) {
+    if (!user_id) return null;
+
+    const orders = await Order.find({
+      user_id,
+      ...query,
+    })
       .populate("items.product", {
         title: 1,
         thumbnail: 1,

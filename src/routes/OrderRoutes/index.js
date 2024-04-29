@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const OrderController = require("../../controller/OrderController");
 
+// [GET] SEARCH ORDERS FOR USER
+router.get("/search/user/:user_id", OrderController.searchOrdersForUser);
+
 // [GET] SEARCH ODERS
 router.get("/search", OrderController.searchOrders);
 
@@ -15,20 +18,19 @@ router.get("/:order_id", OrderController.getOrder);
 router.post("/sendEmail", OrderController.sendEmail);
 
 // [PATCH] STATUS ORDER
-router.patch("/status/:order_id", OrderController.updateOrderStatus)
+router.patch("/status/:order_id", OrderController.updateOrderStatus);
 
 // [PATCH] PAYMENT STATUS ORDER
-router.patch("/payment_status/:order_id", OrderController.updatePaymentStatus)
+router.patch("/payment_status/:order_id", OrderController.updatePaymentStatus);
 
 // [PATCH] AN ORDER
-router.patch("/:order_id", OrderController.updateOrder)
+router.patch("/:order_id", OrderController.updateOrder);
 
 // [DELETE] AN ORDER
-router.delete("/:order_id", OrderController.deleteOrder)
+router.delete("/:order_id", OrderController.deleteOrder);
 
 // [GET] ALL ODERS
 router.get("/", OrderController.getOrders);
-
 
 // [POST] AN ORDER
 router.post("/user/:user_id", OrderController.getOrdersByUserId);
