@@ -4,10 +4,11 @@ const router = express.Router();
 const multer = require("../../middlewares/Multer");
 const BannerController = require("../../controller/BannerController");
 const { ImageMiddleware } = require("../../middlewares/Image");
+const AuthenMiddleware = require("../../middlewares/Auth");
+const { PERMISION } = require("../../middlewares/Auth/data");
 
 // [GET] ALL CATEGORIES
 router.get("/admin", BannerController.getBannersWithPage);
-
 
 // UPLOAD THUMBNAIL
 router.post(
@@ -21,7 +22,12 @@ router.post(
 router.patch("/:id", BannerController.updateBanner);
 
 // [DELETE] A CATEGORY
-router.delete("/:id", BannerController.deleteBanner);
+router.delete(
+  "/:id",
+  AuthenMiddleware.authentication,
+  AuthenMiddleware.authorization(PERMISION.ADMIN),
+  BannerController.deleteBanner
+);
 
 // [GET] A CATEGORIES BY ID
 router.get("/:id", BannerController.getBanner);

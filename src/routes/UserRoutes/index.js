@@ -1,38 +1,39 @@
 const express = require("express");
 const router = express.Router();
 const UserController = require("../../controller/UserController");
-const UserMiddleware = require("../../middlewares/Auth");
+const AuthenMiddleware = require("../../middlewares/Auth");
+const ValidInputMiddleware = require("../../middlewares/ValidInput");
 
 // [GET] ALL USERS
-router.get("/getUsers", UserMiddleware.authentication, UserController.getUsers);
+router.get("/getUsers", AuthenMiddleware.authentication, UserController.getUsers);
 
 // [POST] SEND CONFIRM EMAIL
 router.post(
   "/send/confirmEmail",
-  UserMiddleware.checkValidEmail,
-  UserMiddleware.checkValidPassword,
-  UserMiddleware.checkValidName,
+  ValidInputMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidPassword,
+  ValidInputMiddleware.checkValidName,
   UserController.sendConfirmEmail
 );
 
 // [POST] CONFIRM CHANGE PASSWORD
 router.post(
   "/send/changePassword",
-  UserMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidEmail,
   UserController.sendConfirmChangePassword
 );
 
 // [POST] LOGIN
 router.post(
   "/login/beta",
-  UserMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidEmail,
   UserController.loginBeta
 );
 
 // [POST] LOGIN
 router.post(
   "/login",
-  UserMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidEmail,
   UserController.login
 );
 
@@ -46,7 +47,7 @@ router.get("/checkPasswordKey", UserController.checkChangePasswordKey);
 router.post("/changePassword", UserController.changePassword);
 
 // [GET] USER
-router.post("/email",  UserMiddleware.checkValidEmail, UserController.getUserByEmail);
+router.post("/email",  ValidInputMiddleware.checkValidEmail, UserController.getUserByEmail);
 
 // [POST] BAN USER
 router.post("/ban", UserController.banUser);
@@ -55,7 +56,7 @@ router.post("/ban", UserController.banUser);
 router.post("/unban", UserController.unbanUser);
 
 // [POST] CONFIRM EMAIL AND ADD USER
-router.post("/beta", UserMiddleware.checkValidEmail, UserController.creatUserBeta);
+router.post("/beta", ValidInputMiddleware.checkValidEmail, UserController.creatUserBeta);
 
 // [POST] CONFIRM EMAIL AND ADD USER
 router.post("/", UserController.creatUser);
@@ -64,6 +65,6 @@ router.post("/", UserController.creatUser);
 router.patch("/:id", UserController.updateUser);
 
 // [GET] USER
-router.get("/", UserMiddleware.authentication, UserController.getUser);
+router.get("/", AuthenMiddleware.authentication, UserController.getUser);
 
 module.exports = router;

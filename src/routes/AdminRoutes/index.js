@@ -3,48 +3,52 @@ const router = express.Router();
 const multer = require("../../middlewares/Multer");
 
 const AdminController = require("../../controller/AdminController");
-const UserMiddleware = require("../../middlewares/Auth");
+const AuthenMiddleware = require("../../middlewares/Auth");
+const ValidInputMiddleware = require("../../middlewares/ValidInput");
 const { ImageMiddleware } = require("../../middlewares/Image");
 
 // [GET] ALL USERS
 router.get(
   "/getUsers",
-  UserMiddleware.authentication,
+  AuthenMiddleware.authentication,
   AdminController.getUsers
 );
+
+// [POST] REFRESH TOKEN
+router.get("/refreshToken", AdminController.refreshToken);
+
+// [GET] PERMISION
+router.get("/:user_id", AuthenMiddleware.checkAuthorizationHeader, AdminController.getPermission);
 
 // [POST] LOGIN
 router.post(
   "/login",
-  UserMiddleware.checkValidEmail,
-  UserMiddleware.checkValidPassword,
+  ValidInputMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidPassword,
   AdminController.login
 );
 
 // [POST] REFRESH TOKEN
 router.post(
   "/forget-password/send-email",
-  UserMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidEmail,
   AdminController.sendEmailForgetPassword
 );
 
 // [POST] REFRESH TOKEN
 router.post(
   "/forget-password/check-key",
-  UserMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidEmail,
   AdminController.checkForgetKey
 );
 
 // [POST] REFRESH TOKEN
 router.post(
   "/forget-password",
-  UserMiddleware.checkValidEmail,
-  UserMiddleware.checkValidPassword,
+  ValidInputMiddleware.checkValidEmail,
+  ValidInputMiddleware.checkValidPassword,
   AdminController.forgetPassword
 );
-
-// [POST] REFRESH TOKEN
-router.get("/refreshToken", AdminController.refreshToken);
 
 // [GET] CHECK CHANGE PASSWORD KEY
 router.post("/changePassword", AdminController.changePassword);
@@ -70,6 +74,6 @@ router.post(
 );
 
 // [GET] USER
-router.get("/", UserMiddleware.authentication, AdminController.getUser);
+router.get("/", AuthenMiddleware.authentication, AdminController.getUser);
 
 module.exports = router;

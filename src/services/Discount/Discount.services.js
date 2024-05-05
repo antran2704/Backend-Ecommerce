@@ -49,6 +49,16 @@ class DiscountServices {
     return discount;
   }
 
+  async getDiscount(query = {}, select) {
+    const discount = await Discount.findOne({
+      ...query,
+      isDelete: false,
+    })
+      .select({ ...select })
+      .lean();
+    return discount;
+  }
+
   async getDiscountClient(discount_code, select) {
     if (!discount_code) return null;
 

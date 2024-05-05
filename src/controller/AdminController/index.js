@@ -271,13 +271,13 @@ const AdminController = {
       });
     }
 
-    const avartar =  req.file.path;
+    const avartar = req.file.path;
 
     return new CreatedResponse(201, avartar).send(res);
   },
   refreshToken: async (req, res) => {
     const refreshTokenHeader = req.header("refresh-token");
-
+    
     if (!refreshTokenHeader) {
       return new UnauthorizedError().send(res);
     }
@@ -332,6 +332,23 @@ const AdminController = {
       return new GetResponse(200, { newAccessToken }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
+    }
+  },
+  getPermission: async (req, res) => {
+    const { user_id } = req.params;
+
+    if (!user_id) return new BadResquestError().send(res);
+
+    try {
+      const apiKey = await ApiKeyServices.getApiKeyByUserId(user_id, {
+        permissions: 1,
+      });
+
+      if (!apiKey) return new NotFoundError().send(res);
+
+      return new GetResponse(200, apiKey.permissions).send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
     }
   },
   changePassword: async (req, res) => {

@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const DiscountController = require("../../controller/DiscountController");
-const UserMiddleware = require("../../middlewares/Auth");
+const AuthenMiddleware = require("../../middlewares/Auth");
 const multer = require("../../middlewares/Multer");
 const DiscountMiddleware = require("../../middlewares/Discount");
 const { ImageMiddleware } = require("../../middlewares/Image");
 
-router.use(UserMiddleware.authentication);
-router.use(UserMiddleware.authorization("0000"));
+router.use(AuthenMiddleware.authentication);
+router.use(AuthenMiddleware.authorization("0000"));
 
 router.get("/search", DiscountController.searchDiscounts);
 
@@ -24,7 +24,11 @@ router.post(
 );
 
 // [POST] GET DISCOUNT ON CLIENT BY CODE ID
-router.post("/client",DiscountMiddleware.checkDiscount, DiscountController.getDiscount);
+router.post(
+  "/client",
+  DiscountMiddleware.checkDiscount,
+  DiscountController.getDiscount
+);
 
 // [POST] USE DISCOUNT
 router.post(

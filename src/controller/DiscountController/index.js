@@ -216,7 +216,7 @@ const DiscountController = {
       discount_applies,
     } = payload;
 
-    if (!id) {
+    if (!id || !discount_code) {
       return new BadResquestError(400, "Invalid discount code").send(res);
     }
 
@@ -245,15 +245,21 @@ const DiscountController = {
       return new BadResquestError(400, "Invalid discount date").send(res);
     }
 
-    try {
-      if (discount_code) {
-        const discount = await DiscountServices.getDiscountByCode(
-          discount_code
-        );
+    const queryCheckDiscount = {
+      _id: { $ne: id },
+      discount_code,
+    };
 
-        if (discount) {
-          return new BadResquestError(400, "Discount is exited").send(res);
-        }
+    try {
+      const isExitDiscount = await DiscountServices.getDiscount(
+        queryCheckDiscount,
+        { discount_code: 1 }
+      );
+
+      console.log("check:::", isExitDiscount);
+
+      if (isExitDiscount) {
+        return new BadResquestError(400, "Discount is exited").send(res);
       }
 
       const discount = await DiscountServices.updateDiscount(id, payload);
