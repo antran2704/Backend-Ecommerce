@@ -24,20 +24,12 @@ const UserCategoryController = {
     try {
       const totalItems = await CategoriesServices.getCategories(select, query);
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
-
       const categories = await CategoriesServices.getCategoriesWithPage(
         PAGE_SIZE,
         currentPage,
         select,
         query
       );
-
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
 
       return new GetResponse(200, categories).send(res, {
         pagination: {
@@ -59,10 +51,6 @@ const UserCategoryController = {
     try {
       const categories = await CategoriesServices.getCategories(select, query);
 
-      if (!categories) {
-        return new NotFoundError(404, "No category found!").send(res);
-      }
-
       return new GetResponse(200, categories).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -70,20 +58,6 @@ const UserCategoryController = {
   },
   getParentCategories: async (req, res) => {
     const select = getSelect(req.query);
-    // const test = await redisGlobal.lRem(
-    //   "categories_parent",
-    //   0,
-    //   JSON.stringify({
-    //     _id: "65f9905036850919aae0746c",
-    //     title: "test 5",
-    //     description: "asdasd",
-    //     thumbnail:
-    //       "/uploads/category/1710854222269heather-ford-5gkYsrH_ebY-unsplash.jpg",
-    //     slug: "test-5",
-    //   })
-    // );
-
-    // console.log("test", test)
 
     // // check cache
     const cacheCategories = await CacheCategoriesServices.getCache(

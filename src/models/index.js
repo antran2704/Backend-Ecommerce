@@ -14,6 +14,7 @@ const Attribute = require("./Attribute/Attribute.model");
 const Banner = require("./Banner/Banner.model");
 const { GrossDate, GrossMonth, GrossYear } = require("./Gross");
 const { NotificationItemAdmin } = require("./Notification");
+const { Blog, TagBlog } = require("./Blog");
 
 module.exports = {
   Category,
@@ -34,4 +35,6 @@ module.exports = {
   GrossYear,
   Banner,
   NotificationItemAdmin,
+  Blog, 
+  TagBlog
 };

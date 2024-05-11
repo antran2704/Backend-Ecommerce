@@ -34,10 +34,6 @@ const UserProductController = {
         query
       );
 
-      if (!products) {
-        return new NotFoundError(404, "No product found!").send(res);
-      }
-
       return new GetResponse(200, products).send(res, {
         pagination: {
           totalItems: totalItems.length,
@@ -174,9 +170,6 @@ const UserProductController = {
         gte,
         query
       );
-      if (!totalItems) {
-        return new NotFoundError(404, "Not found product!").send(res);
-      }
 
       const products = await ProductServices.getProductsFilterWithPage(
         id,
@@ -190,10 +183,6 @@ const UserProductController = {
         query,
         select
       );
-
-      if (!products) {
-        return new NotFoundError(404, "Not found product!").send(res);
-      }
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -279,17 +268,11 @@ const UserProductController = {
     };
 
     try {
-      // const totalItems = await ProductServices.searchTextItems(
-      //   search,
-      //   category,
-      //   query
-      // );
-
-      // if (!totalItems) {
-      //   return new NotFoundError(404, `No product with title ${search}`).send(
-      //     res
-      //   );
-      // }
+      const totalItems = await ProductServices.searchTextItems(
+        search,
+        category,
+        query
+      );
 
       const products = await ProductServices.searchTextWithPage(
         search,
@@ -300,16 +283,9 @@ const UserProductController = {
         select
       );
 
-      if (!products) {
-        return new NotFoundError(404, `No product with title ${search}`).send(
-          res
-        );
-      }
-
       return new GetResponse(200, products).send(res, {
         pagination: {
-          // totalItems: totalItems.length,
-          totalItems: 0,
+          totalItems: totalItems.length,
           currentPage,
           pageSize: limitQuery,
         },

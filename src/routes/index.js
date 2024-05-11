@@ -1,8 +1,8 @@
 const express = require("express");
 const path = require("path");
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../routes');
-const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("../routes");
+const swaggerJSDoc = require("swagger-jsdoc");
 
 const AdminCategoryRoutes = require("./CategoryRoutes/admin");
 const AdminProductRoutes = require("./ProductRoutes/admin");
@@ -23,32 +23,34 @@ const GrossMonthRoutes = require("./GrossRoutes/GrossMonthRoutes");
 const GrossYearRoutes = require("./GrossRoutes/GrossYearRoutes");
 const NotificationAdminRoutes = require("./NotificationRoutes/admin");
 const BannerRoutes = require("./BannerRoutes");
+const AdminBlogRoutes = require("./BlogRoutes/admin");
+const TagBlogAdminRoutes = require("./TagBlogRoutes/admin");
 const HtmlRoutes = require("./HtmlRoutes");
 
 const swaggerDefinition = {
-  openapi: '3.0.0',
+  openapi: "3.0.0",
   info: {
-    title: 'API for Shop Antran',
-    version: '1.0.0',
-    description: "This is document for api shop Antran. Please check it"
+    title: "API for Shop Antran",
+    version: "1.0.0",
+    description: "This is document for api shop Antran. Please check it",
   },
   servers: [
     {
-      url: 'http://localhost:3001/api/v1',
-      description: 'Development server',
+      url: "http://localhost:3001/api/v1",
+      description: "Development server",
     },
   ],
 };
 
 const options = {
   swaggerDefinition,
-  apis: [__dirname + '/ProductRoutes/*.js'],
+  apis: [__dirname + "/ProductRoutes/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
 
 const routes = (app) => {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.use("/view", HtmlRoutes);
   app.use("/api/v1/carts", CartRoutes);
   app.use("/api/v1/discounts", DiscountRoutes);
@@ -61,6 +63,8 @@ const routes = (app) => {
   app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
   app.use("/api/v1/payment/vnpay", VNPayRoutes);
+  app.use("/api/v1/admin/blogs-tag", TagBlogAdminRoutes);
+  app.use("/api/v1/admin/blogs", AdminBlogRoutes);
   app.use("/api/v1/admin", AdminRoutes);
   app.use("/api/v1/attributes", AttributeRoutes);
   app.use("/api/v1/gross-date", GrossDateRoutes);

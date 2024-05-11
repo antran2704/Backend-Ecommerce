@@ -20,6 +20,8 @@ const {
 
 const { NotificationAdminServices } = require("./Notification");
 
+const { BlogServices, TagBlogServices } = require("./Blog");
+
 // Cache Services
 const CacheCategoriesServices = require("./Categories/cache.serices");
 const CacheCartServices = require("./Cart/cache.services");
@@ -46,9 +48,11 @@ module.exports = {
   GrossYearServices,
   BannerServices,
   NotificationAdminServices,
+  BlogServices,
+  TagBlogServices,
   CacheCategoriesServices,
   CacheCartServices,
   CacheUserServices,
   CacheProductServices,
-  CacheBannerServices
+  CacheBannerServices,
 };

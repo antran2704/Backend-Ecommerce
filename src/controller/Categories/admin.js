@@ -22,18 +22,10 @@ const AdminCategoryController = {
     try {
       const totalItems = await CategoriesServices.getCategories();
 
-      // if (!totalItems) {
-      //   return new NotFoundError(404, "No category found!").send(res);
-      // }
-
       const categories = await CategoriesServices.getCategoriesWithPage(
         PAGE_SIZE,
         currentPage
       );
-
-      // if (!categories) {
-      //   return new NotFoundError(404, "No category found!").send(res);
-      // }
 
       return new GetResponse(200, categories).send(res, {
         pagination: {
@@ -52,10 +44,6 @@ const AdminCategoryController = {
     try {
       const categories = await CategoriesServices.getCategories(select);
 
-      // if (!categories) {
-      //   return new NotFoundError(404, "No category found!").send(res);
-      // }
-
       return new GetResponse(200, categories).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -69,10 +57,6 @@ const AdminCategoryController = {
         title: 1,
         childrens: 1,
       });
-
-      // if (!categories) {
-      //   return new NotFoundError(404, "No category found!").send(res);
-      // }
 
       return new GetResponse(200, categories).send(res);
     } catch (error) {

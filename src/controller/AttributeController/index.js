@@ -17,10 +17,6 @@ const AttributeController = {
     try {
       const attributes = await AttributeServices.getAttributes();
 
-      if (!attributes) {
-        return new NotFoundError(404, "No attributes found!").send(res);
-      }
-
       return new GetResponse(200, attributes).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -33,18 +29,10 @@ const AttributeController = {
     try {
       const totalItems = await AttributeServices.getAttributes();
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No attributes found!").send(res);
-      }
-
       const attributes = await AttributeServices.getAttributesWithPage(
         PAGE_SIZE,
         currentPage
       );
-
-      if (!attributes) {
-        return new NotFoundError(404, "No attribute found!").send(res);
-      }
 
       return new GetResponse(200, attributes).send(res, {
         pagination: {
@@ -61,10 +49,6 @@ const AttributeController = {
     const query = { public: true };
     try {
       const attributes = await AttributeServices.getAttributes(query);
-
-      if (!attributes) {
-        return new NotFoundError(404, "No attributes found!").send(res);
-      }
 
       return new GetResponse(200, attributes).send(res);
     } catch (error) {

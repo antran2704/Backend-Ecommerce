@@ -19,10 +19,6 @@ const BannerController = {
     try {
       const banners = await BannerServices.getBanners();
 
-      if (!banners) {
-        return new NotFoundError(404, "No banner!").send(res);
-      }
-
       return new GetResponse(200, banners).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -35,18 +31,10 @@ const BannerController = {
     try {
       const totalItems = await BannerServices.getBanners();
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No banner found!").send(res);
-      }
-
       const banners = await BannerServices.getBannersWithPage(
         PAGE_SIZE,
         currentPage
       );
-
-      if (!banners) {
-        return new NotFoundError(404, "No banner found!").send(res);
-      }
 
       return new GetResponse(200, banners).send(res, {
         pagination: {

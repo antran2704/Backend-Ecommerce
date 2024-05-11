@@ -25,10 +25,10 @@ const {
   NotificationAdminServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
-const { Order } = require("../../models");
 const { isValidObjectId } = require("mongoose");
 const { NotificationTypes } = require("../../services/Notification");
 const { ADMIN_NOTIFI_PATH } = require("../NotificationController/data");
+const { checkValidEmail } = require("../../helpers/email");
 
 const OrderController = {
   // [GET] ORDERS
@@ -39,10 +39,6 @@ const OrderController = {
 
     try {
       const totalItems = await OrderServices.getOrders();
-
-      if (!totalItems) {
-        return new NotFoundError(404, "Not found order").send(res);
-      }
 
       const orders = await OrderServices.getOrdersWithPage(
         PAGE_SIZE,
@@ -72,15 +68,10 @@ const OrderController = {
 
     const { user_id } = req.params;
     const data = req.body;
-    let query = {};
 
     if (!user_id || !isValidObjectId(user_id)) {
       return new BadResquestError().send(res);
     }
-
-    // if (status) {
-    //   query = { status };
-    // }
 
     try {
       const totalItems = await OrderServices.getOrdersByUserId(user_id, data);
@@ -108,14 +99,11 @@ const OrderController = {
     const { order_id } = req.params;
 
     if (!isValidObjectId(order_id)) {
-      return new NotFoundError(404, "Not found order").send(res);
+      return new BadResquestError().send(res);
     }
 
     try {
       const order = await OrderServices.getOrder(order_id);
-      if (!order) {
-        return new NotFoundError(404, "Not found order").send(res);
-      }
 
       return new GetResponse(200, order).send(res);
     } catch (error) {
@@ -154,6 +142,10 @@ const OrderController = {
       !paymentStatus[data.payment_status] ||
       !paymentMethod[data.payment_method]
     ) {
+      return new BadResquestError(400, { message: "Invalid data" }).send(res);
+    }
+
+    if (!data.user_infor.email || !checkValidEmail(data.user_infor.email)) {
       return new BadResquestError(400, { message: "Invalid data" }).send(res);
     }
 

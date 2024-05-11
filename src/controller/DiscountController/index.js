@@ -22,19 +22,12 @@ const DiscountController = {
 
     try {
       const totalItems = await DiscountServices.getDiscounts(select);
-      if (!totalItems) {
-        return new NotFoundError(404, "No discount found!").send(res);
-      }
 
       const discounts = await DiscountServices.getDiscountsWithPage(
         PAGE_SIZE,
         currentPage,
         select
       );
-
-      if (!discounts) {
-        return new NotFoundError(404, "No discount found!").send(res);
-      }
 
       return new GetResponse(200, discounts).send(res, {
         pagination: {
