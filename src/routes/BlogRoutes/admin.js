@@ -30,7 +30,10 @@ router.delete(
 router.get("/search", AdminBlogController.searchBlog);
 
 // [GET] A BLOG BY ID
-router.get("/:id", AdminBlogController.getBlogById);
+router.get("/id/:id", AdminBlogController.getBlogById);
+
+// [GET] A BLOG BY SLUG
+router.get("/:slug", AdminBlogController.getBlog);
 
 // [GET] ALL BLOGS WITH PAGE
 router.get("/", AdminBlogController.getBlogsWithPage);

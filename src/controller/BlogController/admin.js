@@ -224,7 +224,7 @@ const AdminBlogController = {
     try {
       const blog = await BlogServices.updateBlog(id, payloadParse);
       if (!blog) {
-        return new BadResquestError(400, "Update blog failed");
+        return new BadResquestError(400, "Update blog failed").send(res);
       }
 
       return new CreatedResponse(201, blog).send(res);
@@ -244,8 +244,9 @@ const AdminBlogController = {
 
     try {
       const tag = await TagBlogServices.updateTag(id, payloadParse);
+
       if (!tag) {
-        return new BadResquestError(400, "Update tag failed");
+        return new BadResquestError(400, "Update tag failed").send(res);
       }
 
       return new CreatedResponse(201, tag).send(res);
@@ -255,17 +256,16 @@ const AdminBlogController = {
   },
   // [SEARCH BLOG]
   searchBlog: async (req, res) => {
-    const { search, tag, page, limit } = req.query;
+    const { search = "", tag, page, limit } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
-
-    const select = getSelect(req.query);
+    const select = getSelect(req.query, ["search", "tag"]);
 
     let query = {};
 
     if (tag) {
-      query = { tags: { $in: [tag] } };
+      query = { tags: { $in: tag } };
     }
 
     try {
@@ -292,14 +292,14 @@ const AdminBlogController = {
   },
   // [SEARCH TAG BLOG]
   searchTag: async (req, res) => {
-    const { search, page, limit } = req.query;
+    const { search = "", page, limit } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
 
     const select = getSelect(req.query, ["search"]);
-    let query = {}; 
-    
+    let query = {};
+
     try {
       const totalItems = await TagBlogServices.searchTextItems(search, query);
 
@@ -319,7 +319,7 @@ const AdminBlogController = {
         },
       });
     } catch (error) {
-      return new InternalServerError(error.stack).send(res);
+      return new InternalServerError().send(res);
     }
   },
   deleteBlog: async (req, res) => {

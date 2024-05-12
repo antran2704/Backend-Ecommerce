@@ -73,17 +73,17 @@ const UserBlogController = {
   },
   // [SEARCH BLOG]
   searchBlog: async (req, res) => {
-    const { search, tags, page, limit } = req.query;
+    const { search = "", tag, page, limit } = req.query;
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
 
-    const select = getSelect(req.query);
+    const select = getSelect(req.query, ["search", "tag"]);
 
     let query = {public: true};
 
-    if (tags) {
-      query = { ...query, tags: { $in: [tags] } };
+    if (tag) {
+      query = { ...query, tags: { $in: tag } };
     }
 
     try {

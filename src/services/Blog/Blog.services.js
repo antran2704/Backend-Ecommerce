@@ -16,6 +16,10 @@ class BlogServices {
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
       .select({ ...select })
+      .populate("author", {
+        _id: 1,
+        name: 1,
+      })
       .populate("tags", {
         _id: 1,
         title: 1,
@@ -30,6 +34,10 @@ class BlogServices {
     if (!blog_id || !isValidObjectId(blog_id)) return;
 
     const blog = await Blog.findById({ _id: blog_id })
+      .populate("author", {
+        _id: 1,
+        name: 1,
+      })
       .populate("tags", {
         _id: 1,
         title: 1,
@@ -44,6 +52,10 @@ class BlogServices {
     if (!slug) return;
 
     const blog = await Blog.findOne({ slug })
+      .populate("author", {
+        _id: 1,
+        name: 1,
+      })
       .populate("tags", {
         _id: 1,
         title: 1,
@@ -89,6 +101,10 @@ class BlogServices {
       ],
       isDeleted: false,
     })
+      .populate("author", {
+        _id: 1,
+        name: 1,
+      })
       .populate("tags", {
         _id: 1,
         title: 1,
@@ -115,13 +131,13 @@ class BlogServices {
 
     const date = getDateTime();
 
-    const blog = await Blog.findById({ _id: id });
-
-    await blog.updateOne({
-      $set: { ...payload, updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    const blog = await Blog.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: { ...payload, updatedAt: date },
+      },
+      { upsert: true }
+    );
 
     return blog;
   }
@@ -133,13 +149,13 @@ class BlogServices {
 
     const date = getDateTime();
 
-    const blog = await Blog.findById({ _id: id });
-
-    await blog.updateOne({
-      $set: { isDeleted: true, updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    const blog = await Blog.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: { isDeleted: true, updatedAt: date },
+      },
+      { upsert: true }
+    );
 
     return blog;
   }

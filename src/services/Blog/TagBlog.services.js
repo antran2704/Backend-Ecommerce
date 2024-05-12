@@ -88,13 +88,13 @@ class TagBlogServices {
 
     const date = getDateTime();
 
-    const tag = await TagBlog.findById({ _id: id });
-
-    await tag.updateOne({
-      $set: { ...payload, updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    const tag = await TagBlog.findByIdAndUpdate(
+      { _id: id },
+      {
+        $set: { ...payload, updatedAt: date },
+      },
+      { upsert: true }
+    );
 
     return tag;
   }
@@ -106,13 +106,13 @@ class TagBlogServices {
 
     const date = getDateTime();
 
-    const tag = await TagBlog.findById({ _id: id });
-
-    await tag.updateOne({
-      $set: { isDeleted: true, updatedAt: date },
-      upsert: true,
-      new: true,
-    });
+    const tag = await TagBlog.findById(
+      { _id: id },
+      {
+        $set: { isDeleted: true, updatedAt: date },
+      },
+      { upsert: true }
+    );
 
     return tag;
   }

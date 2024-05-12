@@ -24,6 +24,7 @@ const GrossYearRoutes = require("./GrossRoutes/GrossYearRoutes");
 const NotificationAdminRoutes = require("./NotificationRoutes/admin");
 const BannerRoutes = require("./BannerRoutes");
 const AdminBlogRoutes = require("./BlogRoutes/admin");
+const UserBlogRoutes = require("./BlogRoutes/user");
 const TagBlogAdminRoutes = require("./TagBlogRoutes/admin");
 const HtmlRoutes = require("./HtmlRoutes");
 
@@ -63,6 +64,7 @@ const routes = (app) => {
   app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
   app.use("/api/v1/payment/vnpay", VNPayRoutes);
+  app.use("/api/v1/blogs", UserBlogRoutes);
   app.use("/api/v1/admin/blogs-tag", TagBlogAdminRoutes);
   app.use("/api/v1/admin/blogs", AdminBlogRoutes);
   app.use("/api/v1/admin", AdminRoutes);
@@ -75,5 +77,21 @@ const routes = (app) => {
   app.use("/api/v1/delete", DeleteRoutes);
   app.use("/uploads", express.static("uploads"));
   app.use("/public", express.static(path.resolve(__dirname, "../assets")));
+
+  // middleware when not found route
+  app.use((req, res, next) => {
+    const error = new Error("Not found route");
+    error.status = 404;
+
+    next(error);
+  });
+
+  app.use((error, req, res, next) => {
+    const statusCode = error.status || 500;
+
+    return res
+      .status(statusCode)
+      .json({ status: statusCode, message: error.message });
+  });
 };
 module.exports = routes;

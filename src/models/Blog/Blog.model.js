@@ -18,6 +18,7 @@ const BlogModel = new Schema(
       type: String,
       require: true,
       index: "text",
+      index: true,
     },
     description: {
       type: String,
