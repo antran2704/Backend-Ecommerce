@@ -41,6 +41,8 @@ const AdminBlogController = {
       slug: 1,
       shortDescription: 1,
       tag: 1,
+      public: 1,
+      updatedAt: 1,
     };
 
     try {
@@ -68,9 +70,9 @@ const AdminBlogController = {
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     const select = {
-      title: 1,
-      thumbnail: 1,
-      slug: 1,
+      // title: 1,
+      // thumbnail: 1,
+      // slug: 1,
     };
 
     try {
@@ -265,6 +267,19 @@ const AdminBlogController = {
     let query = {};
 
     if (tag) {
+      const listTag = [...tag];
+      for (let i = 0; i < listTag.length; i++) {
+        if (!isValidObjectId(listTag[i])) {
+          return new GetResponse(200, []).send(res, {
+            pagination: {
+              totalItems: 0,
+              currentPage,
+              pageSize: limitQuery,
+            },
+          });
+        }
+      }
+      
       query = { tags: { $in: tag } };
     }
 
@@ -353,7 +368,7 @@ const AdminBlogController = {
         return new BadResquestError(400, "Delete tag failed").send(res);
       }
 
-      return new CreatedResponse(201, tag).send(res);
+      return new CreatedResponse(201, "Delete success").send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

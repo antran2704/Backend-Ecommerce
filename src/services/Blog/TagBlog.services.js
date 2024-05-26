@@ -106,7 +106,7 @@ class TagBlogServices {
 
     const date = getDateTime();
 
-    const tag = await TagBlog.findById(
+    const tag = await TagBlog.findByIdAndUpdate(
       { _id: id },
       {
         $set: { isDeleted: true, updatedAt: date },

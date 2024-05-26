@@ -26,6 +26,7 @@ const BannerRoutes = require("./BannerRoutes");
 const AdminBlogRoutes = require("./BlogRoutes/admin");
 const UserBlogRoutes = require("./BlogRoutes/user");
 const TagBlogAdminRoutes = require("./TagBlogRoutes/admin");
+const TagBlogRoutes = require("./TagBlogRoutes/user");
 const HtmlRoutes = require("./HtmlRoutes");
 
 const swaggerDefinition = {
@@ -64,6 +65,7 @@ const routes = (app) => {
   app.use("/api/v1/overviews", OverviewRoutes);
   app.use("/api/v1/users", UserRoutes);
   app.use("/api/v1/payment/vnpay", VNPayRoutes);
+  app.use("/api/v1/blogs-tag", TagBlogRoutes);
   app.use("/api/v1/blogs", UserBlogRoutes);
   app.use("/api/v1/admin/blogs-tag", TagBlogAdminRoutes);
   app.use("/api/v1/admin/blogs", AdminBlogRoutes);
