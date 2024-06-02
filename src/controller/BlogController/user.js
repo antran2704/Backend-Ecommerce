@@ -21,6 +21,7 @@ const UserBlogController = {
       thumbnail: 1,
       slug: 1,
       shortDescription: 1,
+      description: 1,
       tag: 1,
     };
 
@@ -31,17 +32,14 @@ const UserBlogController = {
     try {
       const totalItems = await BlogServices.getBlogs(select, query);
 
-      if (!totalItems) {
-        return new NotFoundError(404, "No banner found!").send(res);
-      }
-
-      const banners = await BlogServices.getBlogsWithPage(
+      const blogs = await BlogServices.getBlogsWithPage(
         PAGE_SIZE,
         currentPage,
-        select
+        select,
+        query
       );
 
-      return new GetResponse(200, banners).send(res, {
+      return new GetResponse(200, blogs).send(res, {
         pagination: {
           totalItems: totalItems.length,
           currentPage,
@@ -125,12 +123,18 @@ const UserBlogController = {
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
 
-    const select = getSelect(req.query, ["search", "tag"]);
+    const select = {
+      title: 1,
+      shortDescription: 1,
+      slug: 1,
+      thumbnail: 1,
+      description: 1,
+    };
 
     let query = { public: true };
 
     if (tag) {
-      const listTag = [...tag];
+      const listTag = typeof tag === "string" ? [tag] : [...tag];
       for (let i = 0; i < listTag.length; i++) {
         if (!isValidObjectId(listTag[i])) {
           return new GetResponse(200, []).send(res, {
@@ -168,6 +172,55 @@ const UserBlogController = {
       return new InternalServerError(error.stack).send(res);
     }
   },
+  getOtherBlogs: async (req, res) => {
+    const blogId = req.params.blogId;
+
+    if (!blogId || !isValidObjectId(blogId)) {
+      return new GetResponse(200, []).send(res, {
+        pagination: {
+          totalItems: 0,
+          currentPage,
+          pageSize: limitQuery,
+        },
+      });
+    }
+
+    const { page, limit } = req.query;
+    const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
+    const currentPage = page ? Number(page) : 1;
+    const limitQuery = limit ? Number(limit) : PAGE_SIZE;
+
+    const select = {
+      title: 1,
+      shortDescription: 1,
+      slug: 1,
+      thumbnail: 1,
+      description: 1,
+    };
+    let query = { public: true, _id: { $ne: blogId } };
+
+    try {
+      const totalItems = await BlogServices.getBlogs(select, query);
+
+      const blogs = await BlogServices.getBlogsWithPage(
+        PAGE_SIZE,
+        currentPage,
+        select,
+        query
+      );
+
+      return new GetResponse(200, blogs).send(res, {
+        pagination: {
+          totalItems: totalItems.length,
+          currentPage,
+          pageSize: limitQuery,
+        },
+      });
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+
   // [SEARCH TAG BLOG]
   searchTag: async (req, res) => {
     const { search = "", page, limit } = req.query;

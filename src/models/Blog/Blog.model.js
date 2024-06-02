@@ -20,7 +20,7 @@ const BlogModel = new Schema(
       index: "text",
       index: true,
     },
-    description: {
+    shortDescription: {
       type: String,
       default: null,
     },
