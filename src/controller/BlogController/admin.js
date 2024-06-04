@@ -263,11 +263,10 @@ const AdminBlogController = {
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
     const select = getSelect(req.query, ["search", "tag"]);
-
     let query = {};
 
     if (tag) {
-      const listTag = [...tag];
+      const listTag = typeof tag === "string" ? [tag] : [...tag];
       for (let i = 0; i < listTag.length; i++) {
         if (!isValidObjectId(listTag[i])) {
           return new GetResponse(200, []).send(res, {
@@ -279,8 +278,8 @@ const AdminBlogController = {
           });
         }
       }
-      
-      query = { tags: { $in: tag } };
+
+      query = { ...query, "tags.tag": { $in: tag } };
     }
 
     try {

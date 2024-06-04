@@ -20,10 +20,6 @@ const BlogModel = new Schema(
       index: "text",
       index: true,
     },
-    shortDescription: {
-      type: String,
-      default: null,
-    },
     description: {
       type: String,
       default: null,
@@ -50,7 +46,15 @@ const BlogModel = new Schema(
       unique: true,
     },
     breadcrumbs: [{ type: mongoose.Schema.Types.ObjectId, ref: "tag_blog" }],
-    tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "tag_blog" }],
+    tags: [
+      {
+        tag: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "tag_blog",
+        },
+        slug: String,
+      },
+    ],
     public: {
       type: Boolean,
       default: true,

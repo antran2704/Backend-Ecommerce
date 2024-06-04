@@ -17,12 +17,12 @@ const UserBlogController = {
     const currentPage = req.query.page ? Number(req.query.page) : 1;
 
     const select = {
-      title: 1,
-      thumbnail: 1,
-      slug: 1,
-      shortDescription: 1,
-      description: 1,
-      tag: 1,
+      // title: 1,
+      // thumbnail: 1,
+      // slug: 1,
+      // shortDescription: 1,
+      // description: 1,
+      // tag: 1,
     };
 
     const query = {
@@ -122,7 +122,7 @@ const UserBlogController = {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
-
+    
     const select = {
       title: 1,
       shortDescription: 1,
@@ -132,23 +132,9 @@ const UserBlogController = {
     };
 
     let query = { public: true };
+    const listTag = typeof tag === "string" ? [tag] : [...tag];
 
-    if (tag) {
-      const listTag = typeof tag === "string" ? [tag] : [...tag];
-      for (let i = 0; i < listTag.length; i++) {
-        if (!isValidObjectId(listTag[i])) {
-          return new GetResponse(200, []).send(res, {
-            pagination: {
-              totalItems: 0,
-              currentPage,
-              pageSize: limitQuery,
-            },
-          });
-        }
-      }
-
-      query = { ...query, tags: { $in: tag } };
-    }
+    query = { ...query, "tags.slug": { $in: listTag } };
 
     try {
       const totalItems = await BlogServices.searchTextItems(search, query);

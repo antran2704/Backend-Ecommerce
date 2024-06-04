@@ -20,11 +20,6 @@ class BlogServices {
         _id: 1,
         name: 1,
       })
-      .populate("tags", {
-        _id: 1,
-        title: 1,
-        slug: 1,
-      })
       .lean();
 
     return blogs;
@@ -38,7 +33,7 @@ class BlogServices {
         _id: 1,
         name: 1,
       })
-      .populate("tags", {
+      .populate("tags.tag", {
         _id: 1,
         title: 1,
         slug: 1,
@@ -56,7 +51,7 @@ class BlogServices {
         _id: 1,
         name: 1,
       })
-      .populate("tags", {
+      .populate("tags.tag", {
         _id: 1,
         title: 1,
         slug: 1,
@@ -105,7 +100,7 @@ class BlogServices {
         _id: 1,
         name: 1,
       })
-      .populate("tags", {
+      .populate("tags.tag", {
         _id: 1,
         title: 1,
         slug: 1,
