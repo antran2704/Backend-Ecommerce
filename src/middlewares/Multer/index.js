@@ -11,7 +11,6 @@ const upload = (destination) => {
     );
 
     const mimeType = fileTypes.test(file.mimetype);
-
     if (mimeType && extName) {
       return cb(null, true);
     } else {

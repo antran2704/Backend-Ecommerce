@@ -140,6 +140,14 @@ const BannerController = {
         return new BadResquestError(400, "Create banner failed").send(res);
       }
 
+      const cacheBanners = await CacheBannerServices.getCacheBanner(
+        CacheBannerServices.KEY_BANNER
+      );
+
+      if (cacheBanners) {
+        CacheBannerServices.clearCache(CacheBannerServices.KEY_BANNER);
+      }
+
       return new CreatedResponse(201, newBanner).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
@@ -159,6 +167,14 @@ const BannerController = {
       const banner = await BannerServices.updateBanner(id, payloadParse);
       if (!banner) {
         return new BadResquestError(400, "Update banner failed");
+      }
+
+      const cacheBanners = await CacheBannerServices.getCacheBanner(
+        CacheBannerServices.KEY_BANNER
+      );
+
+      if (cacheBanners) {
+        CacheBannerServices.clearCache(CacheBannerServices.KEY_BANNER);
       }
 
       return new CreatedResponse(201, banner).send(res);

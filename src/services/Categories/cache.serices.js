@@ -1,4 +1,6 @@
 class CacheCategoriesServices {
+  KEY_PARENT_CATEGORIES = "paren_categories"
+
   async getCache(key) {
     const cacheCategories = await redisGlobal.lRange(key, 0, -1);
 

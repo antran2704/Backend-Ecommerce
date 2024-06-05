@@ -125,11 +125,13 @@ const AdminCategoryController = {
       }
 
       const isExitedCache = await CacheCategoriesServices.isExitCache(
-        "categories_parent"
+        CacheCategoriesServices.KEY_PARENT_CATEGORIES
       );
 
       if (isExitedCache) {
-        await CacheCategoriesServices.clearCache("categories_parent");
+        await CacheCategoriesServices.clearCache(
+          CacheCategoriesServices.KEY_PARENT_CATEGORIES
+        );
       }
 
       return new CreatedResponse(201, newCategory).send(res, {
@@ -196,11 +198,13 @@ const AdminCategoryController = {
       }
 
       const isExitedCache = await CacheCategoriesServices.isExitCache(
-        "categories_parent"
+        CacheCategoriesServices.KEY_PARENT_CATEGORIES
       );
 
       if (isExitedCache) {
-        await CacheCategoriesServices.clearCache("categories_parent");
+        await CacheCategoriesServices.clearCache(
+          CacheCategoriesServices.KEY_PARENT_CATEGORIES
+        );
       }
       return new CreatedResponse(201, "Updated category success!").send(res);
     } catch (error) {
@@ -237,11 +241,13 @@ const AdminCategoryController = {
       }
 
       const isExitedCache = await CacheCategoriesServices.isExitCache(
-        "categories_parent"
+        CacheCategoriesServices.KEY_PARENT_CATEGORIES
       );
 
       if (isExitedCache) {
-        await CacheCategoriesServices.clearCache("categories_parent");
+        await CacheCategoriesServices.clearCache(
+          CacheCategoriesServices.KEY_PARENT_CATEGORIES
+        );
       }
 
       return new CreatedResponse(201, "Delete category success!").send(res);

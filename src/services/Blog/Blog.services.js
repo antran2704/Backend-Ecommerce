@@ -64,14 +64,7 @@ class BlogServices {
   async searchTextItems(text, query = {}) {
     const totalItems = await Blog.find({
       ...query,
-      $or: [
-        {
-          $text: {
-            $search: text,
-          },
-        },
-        { title: { $regex: text, $options: "ui" } },
-      ],
+      title: { $regex: text, $options: "ui" },
       isDeleted: false,
     });
     return totalItems;
@@ -86,14 +79,7 @@ class BlogServices {
   ) {
     const blogs = await Blog.find({
       ...query,
-      $or: [
-        {
-          $text: {
-            $search: text,
-          },
-        },
-        { title: { $regex: text, $options: "ui" } },
-      ],
+      title: { $regex: text, $options: "ui" },
       isDeleted: false,
     })
       .populate("author", {

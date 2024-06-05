@@ -1,5 +1,5 @@
 class CacheBannerServices {
-  KEY_BANNER = "banners:";
+  KEY_BANNER = "banners";
 
   async getCacheBanner(key) {
     const cacheBanners = await redisGlobal.lRange(key, 0, -1);

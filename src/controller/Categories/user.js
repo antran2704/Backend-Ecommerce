@@ -59,9 +59,9 @@ const UserCategoryController = {
   getParentCategories: async (req, res) => {
     const select = getSelect(req.query);
 
-    // // check cache
+    //check cache
     const cacheCategories = await CacheCategoriesServices.getCache(
-      "categories_parent"
+      CacheCategoriesServices.KEY_PARENT_CATEGORIES
     );
 
     if (cacheCategories) {
@@ -74,7 +74,7 @@ const UserCategoryController = {
       // add cache
       if (categories.length > 0) {
         await CacheCategoriesServices.createCache(
-          "categories_parent",
+          CacheCategoriesServices.KEY_PARENT_CATEGORIES,
           categories
         );
       }

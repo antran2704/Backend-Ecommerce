@@ -122,7 +122,7 @@ const UserBlogController = {
     const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 16;
     const currentPage = page ? Number(page) : 1;
     const limitQuery = limit ? Number(limit) : PAGE_SIZE;
-    
+
     const select = {
       title: 1,
       shortDescription: 1,
@@ -132,9 +132,11 @@ const UserBlogController = {
     };
 
     let query = { public: true };
-    const listTag = typeof tag === "string" ? [tag] : [...tag];
 
-    query = { ...query, "tags.slug": { $in: listTag } };
+    if (tag) {
+      const listTag = typeof tag === "string" ? [tag] : [...tag];
+      query = { ...query, "tags.slug": { $in: listTag } };
+    }
 
     try {
       const totalItems = await BlogServices.searchTextItems(search, query);
