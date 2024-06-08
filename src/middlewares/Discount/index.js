@@ -1,4 +1,3 @@
-const { isValidObjectId } = require("mongoose");
 const {
   InternalServerError,
   BadResquestError,
@@ -8,7 +7,7 @@ const { DiscountServices } = require("../../services");
 const DiscountMiddleware = {
   checkDiscount: async (req, res, next) => {
     const { discount_code, user_id, total } = req.body;
-
+    
     if (!discount_code) {
       return new BadResquestError().send(res);
     }
