@@ -23,6 +23,7 @@ const {
   ProductItemServices,
   ProductServices,
   NotificationAdminServices,
+  CacheCartServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { isValidObjectId } = require("mongoose");
@@ -540,27 +541,63 @@ const OrderController = {
         }
       }
 
-      if (
-        data.payment_status === paymentStatus.success ||
-        data.payment_status === paymentStatus.cancle
-      ) {
-        const cart = await CartServices.getCartByUserId(order.user_id);
+      // if (
+      //   data.payment_status === paymentStatus.success ||
+      //   data.payment_status === paymentStatus.cancle
+      // ) {
+      //   const cart = await CartServices.getCartByUserId(order.user_id);
 
-        if (!cart) {
-          return new BadResquestError(400, "Not found cart").send(res);
-        }
+      //   if (!cart) {
+      //     return new BadResquestError(400, "Not found cart").send(res);
+      //   }
 
-        CartServices.deleteAllItemCart(cart._id);
-        CartServices.updateCart(order.user_id, {
-          cart_count: 0,
-          cart_total: 0,
-        });
+      //   CartServices.deleteAllItemCart(cart._id);
+      //   CartServices.updateCart(order.user_id, {
+      //     cart_count: 0,
+      //     cart_total: 0,
+      //   });
 
-        if (order.payment_method !== paymentMethod.cod) {
-          return res.redirect(
-            `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`
-          );
-        }
+      //   if (order.payment_method !== paymentMethod.cod) {
+      //     return res.redirect(
+      //       `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`
+      //     );
+      //   }
+      // }
+
+      const cart = await CartServices.getCartByUserId(order.user_id);
+
+      if (!cart) {
+        return new BadResquestError(400, "Not found cart").send(res);
+      }
+
+      CartServices.deleteAllItemCart(cart._id);
+      CartServices.updateCart(order.user_id, {
+        cart_count: 0,
+        cart_total: 0,
+      });
+
+      // check cache cart
+      const cacheCart = await CacheCartServices.getCart(
+        CacheCartServices.KEY_CART + order.user_id
+      );
+
+      if (cacheCart) {
+        await CacheCartServices.setCacheCart(
+          CacheCartServices.KEY_CART + order.user_id,
+          {
+            _id: cacheCart._id.toString(),
+            cart_userId: cacheCart.cart_userId.toString(),
+            cart_status: cacheCart.cart_status,
+            cart_count: 0,
+            cart_total: 0,
+          }
+        );
+      }
+
+      if (order.payment_method !== paymentMethod.cod) {
+        return res.redirect(
+          `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`
+        );
       }
 
       return new CreatedResponse(201, {
