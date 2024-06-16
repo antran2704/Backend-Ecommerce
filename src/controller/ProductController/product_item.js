@@ -1,4 +1,9 @@
-const { ProductItemServices, ProductServices } = require("../../services");
+const {
+  ProductItemServices,
+  ProductServices,
+  InventoryServices,
+  PriceServices,
+} = require("../../services");
 
 const {
   InternalServerError,
@@ -119,6 +124,15 @@ const ProductItemController = {
             item = await ProductItemServices.updateProductItem(_id, rest);
           } else {
             item = await ProductItemServices.createProductItem(rest);
+
+            // create inventory for product
+            InventoryServices.createInventory(item._id, rest.inventory);
+
+            // create price for product
+            PriceServices.createPrice(item._id, {
+              price: rest.price,
+              promotion_price: rest.promotion_price,
+            });
           }
         } else {
           item = await ProductItemServices.createProductItem(rest);
@@ -173,7 +187,7 @@ const ProductItemController = {
       for (let i = 0; i < payload.length; i++) {
         const variation_id = payload[i];
         const body = { available: false };
-        
+
         const item = await ProductItemServices.updateProductItem(
           variation_id,
           body

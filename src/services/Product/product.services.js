@@ -201,7 +201,8 @@ class ProductServices {
         slug: 1,
       })
       .populate("variations")
-      .select({ ...select });
+      .select({ ...select })
+      .lean();
 
     return product;
   }

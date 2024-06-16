@@ -9,6 +9,7 @@ const ApiKey = require("./ApiKey/ApiKey.model");
 const Cart = require("./Cart/Cart.model");
 const CartItem = require("./Cart/CartItem.model");
 const Inventory = require("./Inventory/Inventory.model");
+const Price = require("./Price/Price.model");
 const Discount = require("./Discount/Discount.model");
 const Attribute = require("./Attribute/Attribute.model");
 const Banner = require("./Banner/Banner.model");
@@ -28,6 +29,7 @@ module.exports = {
   Cart,
   CartItem,
   Inventory,
+  Price,
   Discount,
   Attribute,
   GrossDate,
@@ -35,6 +37,6 @@ module.exports = {
   GrossYear,
   Banner,
   NotificationItemAdmin,
-  Blog, 
-  TagBlog
+  Blog,
+  TagBlog,
 };

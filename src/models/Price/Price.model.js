@@ -1,22 +1,25 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const InventoryModel = new Schema(
+const PriceModel = new Schema(
   {
-    inventory_product: {
+    product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "product",
       require: true,
-      index: true
+      index: true,
     },
-    inventory_stock: {
+    price: {
       type: Number,
       require: true,
+    },
+    promotion_price: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
 );
+const Price = mongoose.model("price", PriceModel);
 
-const Inventory = mongoose.model("inventory", InventoryModel);
-
-module.exports = Inventory;
+module.exports = Price;

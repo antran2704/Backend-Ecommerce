@@ -2,6 +2,7 @@ const {
   ProductServices,
   InventoryServices,
   CacheProductServices,
+  PriceServices,
 } = require("../../services");
 
 const {
@@ -28,15 +29,32 @@ const AdminProductController = {
       //   return new NotFoundError(404, "No product found!").send(res);
       // }
 
-      const products = await ProductServices.getProductsWithPage(
+      const items = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
         currentPage,
         select
       );
 
-      // if (!products) {
-      //   return new NotFoundError(404, "No product found!").send(res);
-      // }
+      const products = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const product = items[i];
+        const priceProduct = await PriceServices.getPrice(product._id);
+        const inventoryProduct = await InventoryServices.getInventory(
+          product._id
+        );
+
+        if (!priceProduct || !inventoryProduct) {
+          products.push(product);
+        } else {
+          products.push({
+            ...product,
+            price: priceProduct.price,
+            promotion_price: priceProduct.promotion_price,
+            inventory: inventoryProduct.inventory_stock,
+          });
+        }
+      }
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -81,11 +99,7 @@ const AdminProductController = {
           gte
         );
 
-        // if (!totalItems) {
-        //   return new NotFoundError(404, "Not found product!").send(res);
-        // }
-
-        const products = await ProductServices.getProductsFilterWithPage(
+        const items = await ProductServices.getProductsFilterWithPage(
           id,
           search,
           keys,
@@ -96,9 +110,26 @@ const AdminProductController = {
           gte
         );
 
-        // if (!products) {
-        //   return new NotFoundError(404, "Not found product!").send(res);
-        // }
+        const products = [];
+
+        for (let i = 0; i < items.length; i++) {
+          const product = items[i];
+          const priceProduct = await PriceServices.getPrice(product._id);
+          const inventoryProduct = await InventoryServices.getInventory(
+            product._id
+          );
+
+          if (!priceProduct || !inventoryProduct) {
+            products.push(product);
+          } else {
+            products.push({
+              ...product,
+              price: priceProduct.price,
+              promotion_price: priceProduct.promotion_price,
+              inventory: inventoryProduct.inventory_stock,
+            });
+          }
+        }
 
         return new GetResponse(200, products).send(res, {
           pagination: {
@@ -111,19 +142,32 @@ const AdminProductController = {
 
       const totalItems = await ProductServices.getProductsInCategory(id);
 
-      // if (!totalItems) {
-      //   return new NotFoundError(404, "Not found product!").send(res);
-      // }
-
-      const products = await ProductServices.getProductsInCategoryWithPage(
+      const items = await ProductServices.getProductsInCategoryWithPage(
         id,
         PAGE_SIZE,
         currentPage
       );
 
-      // if (!products) {
-      //   return new NotFoundError(404, "Not found product!").send(res);
-      // }
+      const products = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const product = items[i];
+        const priceProduct = await PriceServices.getPrice(product._id);
+        const inventoryProduct = await InventoryServices.getInventory(
+          product._id
+        );
+
+        if (!priceProduct || !inventoryProduct) {
+          products.push(product);
+        } else {
+          products.push({
+            ...product,
+            price: priceProduct.price,
+            promotion_price: priceProduct.promotion_price,
+            inventory: inventoryProduct.inventory_stock,
+          });
+        }
+      }
 
       return new GetResponse(200, products).send(res, {
         pagination: {
@@ -146,7 +190,21 @@ const AdminProductController = {
         return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      return new GetResponse(200, product).send(res);
+      const priceProduct = await PriceServices.getPrice(product._id);
+      const inventoryProduct = await InventoryServices.getInventory(
+        product._id
+      );
+
+      if (!priceProduct || !inventoryProduct) {
+        return new GetResponse(200, product).send(res);
+      } else {
+        return new GetResponse(200, {
+          ...product,
+          price: priceProduct.price,
+          promotion_price: priceProduct.promotion_price,
+          inventory: inventoryProduct.inventory_stock,
+        }).send(res);
+      }
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -167,7 +225,23 @@ const AdminProductController = {
         return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      return new GetResponse(200, product).send(res);
+      const priceProduct = await PriceServices.getPrice(product._id);
+      const inventoryProduct = await InventoryServices.getInventory(
+        product._id
+      );
+      // console.log(priceProduct);
+      // console.log(inventoryProduct);
+      if (!priceProduct || !inventoryProduct) {
+        return new GetResponse(200, {...product}).send(res);
+      }
+
+      return new GetResponse(200, {
+        ...product,
+        price: priceProduct.price,
+        promotion_price: priceProduct.promotion_price,
+        inventory: inventoryProduct.inventory_stock,
+      }).send(res);
+      // return new GetResponse(200, product).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -182,11 +256,14 @@ const AdminProductController = {
         return new BadResquestError(400, "Create product failed!").send(res);
       }
 
-      const inventory = await InventoryServices.createInventory(newProduct._id);
+      // create inventory for product
+      InventoryServices.createInventory(newProduct._id, data.inventory);
 
-      if (!inventory) {
-        return new BadResquestError(400, "Create inventory failed!").send(res);
-      }
+      // create price for product
+      PriceServices.createPrice(newProduct._id, {
+        price: data.price,
+        promotion_price: data.promotion_price,
+      });
 
       return new CreatedResponse(201, newProduct).send(res);
     } catch (error) {
@@ -226,9 +303,32 @@ const AdminProductController = {
 
     try {
       const product = await ProductServices.updateProduct(id, data);
-      
+
       if (!product) {
         return new BadResquestError(400, "Updated product failed").send(res);
+      }
+
+      const inventoryProduct = await InventoryServices.getInventory(id);
+      const priceProduct = await PriceServices.getPrice(id);
+
+      if (!inventoryProduct | !priceProduct) {
+        return new BadResquestError().send(res);
+      }
+
+      // update inventory
+      if (inventoryProduct !== data.inventory) {
+        InventoryServices.updateInventory(id, { inventory: data.inventory });
+      }
+
+      // update price or promotion price
+      if (
+        priceProduct.price !== data.price ||
+        priceProduct.promotion_price !== data.promotion_price
+      ) {
+        PriceServices.updatePrice(id, {
+          price: data.price,
+          promotion_price: data.promotion_price,
+        });
       }
 
       // check cache and update cache
@@ -240,10 +340,10 @@ const AdminProductController = {
         await CacheProductServices.deleteCacheProduct(
           CacheProductServices.KEY_PRODUCT + product._id
         );
-        await CacheProductServices.setCacheProduct(
-          CacheProductServices.KEY_PRODUCT + product._id,
-          product
-        );
+        // await CacheProductServices.setCacheProduct(
+        //   CacheProductServices.KEY_PRODUCT + product._id,
+        //   product
+        // );
       }
 
       return new CreatedResponse(201, "Updated product success").send(res);
@@ -263,7 +363,7 @@ const AdminProductController = {
         category
       );
 
-      const products = await ProductServices.searchTextWithPage(
+      const items = await ProductServices.searchTextWithPage(
         search,
         category,
         PAGE_SIZE,
@@ -271,10 +371,25 @@ const AdminProductController = {
         limitQuery
       );
 
-      if (!products) {
-        return new NotFoundError(404, `No product with title ${search}`).send(
-          res
+      const products = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const product = items[i];
+        const priceProduct = await PriceServices.getPrice(product._id);
+        const inventoryProduct = await InventoryServices.getInventory(
+          product._id
         );
+
+        if (!priceProduct || !inventoryProduct) {
+          products.push(product);
+        } else {
+          products.push({
+            ...product,
+            price: priceProduct.price,
+            promotion_price: priceProduct.promotion_price,
+            inventory: inventoryProduct.inventory_stock,
+          });
+        }
       }
 
       return new GetResponse(200, products).send(res, {

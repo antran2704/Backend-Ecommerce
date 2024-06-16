@@ -1,6 +1,5 @@
 const {
   ProductServices,
-  InventoryServices,
   CacheProductServices,
 } = require("../../services");
 
@@ -215,7 +214,6 @@ const UserProductController = {
 
     try {
       const product = await ProductServices.getProduct(slug, query);
-
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
       }

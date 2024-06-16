@@ -7,6 +7,7 @@ const KeyTokenServices = require("./KeyToken/keyToken.services");
 const ApiKeyServices = require("./ApiKey/ApiKey.services");
 const CartServices = require("./Cart/Cart.services");
 const InventoryServices = require("./Inventory/Inventory.services");
+const PriceServices = require("./Price/Price.services");
 const DiscountServices = require("./Discount/Discount.services");
 const OrderServices = require("./Order/Order.services");
 const OverviewServices = require("./Overview/Overview.services");
@@ -39,6 +40,7 @@ module.exports = {
   ApiKeyServices,
   CartServices,
   InventoryServices,
+  PriceServices,
   DiscountServices,
   OrderServices,
   AttributeServices,

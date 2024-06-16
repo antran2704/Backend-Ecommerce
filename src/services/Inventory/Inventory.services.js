@@ -2,18 +2,12 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { Inventory } = require("../../models");
 
 class InventoryServices {
-  // thanh toan moi tru hang ton kho
-  async createInventory(
-    product_id,
-    inventory_stock,
-    inventory_location = "Unknow"
-  ) {
+  async createInventory(product_id, inventory_stock) {
     if (!product_id) return null;
 
     const inventory = await Inventory.create({
       inventory_product: product_id,
       inventory_stock,
-      inventory_location,
     });
 
     return inventory;
@@ -38,15 +32,6 @@ class InventoryServices {
     );
 
     return updated;
-  }
-
-  async deleteInventory(product_id) {
-    if (!product_id) return null;
-
-    const deleted = await Inventory.findOneAndRemove({
-      inventory_product: product_id,
-    });
-    return deleted;
   }
 }
 
