@@ -304,7 +304,7 @@ class ProductServices {
         })
         .skip((currentPage - 1) * pageSize)
         .limit(pageSize)
-        .select({ ...select });
+        .select({ ...select }).lean();
 
       return products;
     }
@@ -328,7 +328,7 @@ class ProductServices {
       })
       .skip((currentPage - 1) * pageSize)
       .limit(pageSize)
-      .select({ ...select });
+      .select({ ...select }).lean();
     return products;
   }
 

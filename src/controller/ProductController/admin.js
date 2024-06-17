@@ -312,7 +312,10 @@ const AdminProductController = {
       }
 
       // update inventory
-      if (data.inventory && inventoryProduct.inventory_stock !== data.inventory) {
+      if (
+        data.inventory &&
+        inventoryProduct.inventory_stock !== data.inventory
+      ) {
         InventoryServices.updateInventory(id, {
           inventory_stock: data.inventory,
         });
@@ -339,10 +342,6 @@ const AdminProductController = {
         await CacheProductServices.deleteCacheProduct(
           CacheProductServices.KEY_PRODUCT + product._id
         );
-        // await CacheProductServices.setCacheProduct(
-        //   CacheProductServices.KEY_PRODUCT + product._id,
-        //   product
-        // );
       }
 
       return new CreatedResponse(201, "Updated product success").send(res);
