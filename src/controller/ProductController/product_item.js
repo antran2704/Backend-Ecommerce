@@ -114,14 +114,25 @@ const ProductItemController = {
       for (let i = 0; i < payloads.length; i++) {
         const payloadParse = removeUndefindedObj(payloads[i]);
         let item = null;
-
         const { _id, ...rest } = payloadParse;
 
+        // check logic again
         if (isValidObjectId(_id)) {
           const variation = await ProductItemServices.getProductItemById(_id);
 
           if (variation) {
             item = await ProductItemServices.updateProductItem(_id, rest);
+
+            // update inventory for product
+            InventoryServices.updateInventory(item._id, {
+              inventory_stock: rest.inventory,
+            });
+
+            // create price for product
+            PriceServices.updatePrice(item._id, {
+              price: rest.price,
+              promotion_price: rest.promotion_price,
+            });
           } else {
             item = await ProductItemServices.createProductItem(rest);
 
@@ -136,6 +147,15 @@ const ProductItemController = {
           }
         } else {
           item = await ProductItemServices.createProductItem(rest);
+
+          // create inventory for product
+          InventoryServices.createInventory(item._id, rest.inventory);
+
+          // create price for product
+          PriceServices.createPrice(item._id, {
+            price: rest.price,
+            promotion_price: rest.promotion_price,
+          });
         }
 
         if (item) {
@@ -172,6 +192,35 @@ const ProductItemController = {
         return new BadResquestError(400, "Update item failed").send(res);
       }
 
+      const inventoryProduct = await InventoryServices.getInventory(item._id);
+      const priceProduct = await PriceServices.getPrice(item._id);
+
+      if (!inventoryProduct | !priceProduct) {
+        return new BadResquestError().send(res);
+      }
+
+      // update inventory
+      if (
+        payload.inventory &&
+        inventoryProduct.inventory_stock !== payload.inventory
+      ) {
+        InventoryServices.updateInventory(item._id, {
+          inventory_stock: payload.inventory,
+        });
+      }
+
+      // update price or promotion price
+      if (
+        (payload.price || payload.promotion_price) &&
+        (priceProduct.price !== payload.price ||
+          priceProduct.promotion_price !== payload.promotion_price)
+      ) {
+        PriceServices.updatePrice(item._id, {
+          price: payload.price,
+          promotion_price: payload.promotion_price,
+        });
+      }
+
       return new CreatedResponse(201, item).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
@@ -195,6 +244,35 @@ const ProductItemController = {
 
         if (!item) {
           return new BadResquestError(400, "Update item failed").send(res);
+        }
+
+        const inventoryProduct = await InventoryServices.getInventory(item._id);
+        const priceProduct = await PriceServices.getPrice(item._id);
+
+        if (!inventoryProduct | !priceProduct) {
+          return new BadResquestError().send(res);
+        }
+
+        // update inventory
+        if (
+          payload.inventory &&
+          inventoryProduct.inventory_stock !== payload.inventory
+        ) {
+          InventoryServices.updateInventory(item._id, {
+            inventory_stock: payload.inventory,
+          });
+        }
+
+        // update price or promotion price
+        if (
+          (payload.price || payload.promotion_price) &&
+          (priceProduct.price !== payload.price ||
+            priceProduct.promotion_price !== payload.promotion_price)
+        ) {
+          PriceServices.updatePrice(item._id, {
+            price: payload.price,
+            promotion_price: payload.promotion_price,
+          });
         }
       }
 

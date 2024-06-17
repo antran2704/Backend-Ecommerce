@@ -25,9 +25,6 @@ const AdminProductController = {
 
     try {
       const totalItems = await ProductServices.getProducts();
-      // if (!totalItems) {
-      //   return new NotFoundError(404, "No product found!").send(res);
-      // }
 
       const items = await ProductServices.getProductsWithPage(
         PAGE_SIZE,
@@ -197,14 +194,14 @@ const AdminProductController = {
 
       if (!priceProduct || !inventoryProduct) {
         return new GetResponse(200, product).send(res);
-      } else {
-        return new GetResponse(200, {
-          ...product,
-          price: priceProduct.price,
-          promotion_price: priceProduct.promotion_price,
-          inventory: inventoryProduct.inventory_stock,
-        }).send(res);
       }
+
+      return new GetResponse(200, {
+        ...product,
+        price: priceProduct.price,
+        promotion_price: priceProduct.promotion_price,
+        inventory: inventoryProduct.inventory_stock,
+      }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -229,10 +226,9 @@ const AdminProductController = {
       const inventoryProduct = await InventoryServices.getInventory(
         product._id
       );
-      // console.log(priceProduct);
-      // console.log(inventoryProduct);
+
       if (!priceProduct || !inventoryProduct) {
-        return new GetResponse(200, {...product}).send(res);
+        return new GetResponse(200, product).send(res);
       }
 
       return new GetResponse(200, {
@@ -316,14 +312,17 @@ const AdminProductController = {
       }
 
       // update inventory
-      if (inventoryProduct !== data.inventory) {
-        InventoryServices.updateInventory(id, { inventory: data.inventory });
+      if (data.inventory && inventoryProduct.inventory_stock !== data.inventory) {
+        InventoryServices.updateInventory(id, {
+          inventory_stock: data.inventory,
+        });
       }
 
       // update price or promotion price
       if (
-        priceProduct.price !== data.price ||
-        priceProduct.promotion_price !== data.promotion_price
+        (data.price || data.promotion_price) &&
+        (priceProduct.price !== data.price ||
+          priceProduct.promotion_price !== data.promotion_price)
       ) {
         PriceServices.updatePrice(id, {
           price: data.price,
