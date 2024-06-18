@@ -24,6 +24,7 @@ const {
   ProductServices,
   NotificationAdminServices,
   CacheCartServices,
+  InventoryServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { isValidObjectId } = require("mongoose");
@@ -158,49 +159,53 @@ const OrderController = {
       }
 
       for (let i = 0; i < data.items.length; i++) {
-        // const item = data.items[0];
         const item = data.items[i];
+        let product = null;
 
         if (item.variation) {
-          const product = await ProductItemServices.getProductItemById(
+          product = await ProductItemServices.getProductItemById(
             item.variation
           );
 
-          if (!product) {
-            return new BadResquestError().send(res);
-          }
+          // if (!product) {
+          //   return new BadResquestError().send(res);
+          // }
 
-          if (product.inventory <= 0) {
-            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}${product.product_id}`;
+          // if (product.inventory <= 0) {
+          //   const link = `${ADMIN_NOTIFI_PATH.PRODUCT}${product.product_id}`;
 
-            const dataNotification = {
-              content: `${product.title} hết hàng`,
-              type: NotificationTypes.Product,
-              path: link,
-            };
+          //   const dataNotification = {
+          //     content: `${product.title} hết hàng`,
+          //     type: NotificationTypes.Product,
+          //     path: link,
+          //   };
 
-            NotificationAdminServices.createNotification(dataNotification);
-          }
+          //   NotificationAdminServices.createNotification(dataNotification);
+          // }
         }
 
         if (item.product) {
-          const product = await ProductServices.getProductById(item.product);
+          product = await ProductServices.getProductById(item.product);
+        }
 
-          if (!product) {
-            return new BadResquestError().send(res);
-          }
+        if (!product) {
+          return new BadResquestError().send(res);
+        }
 
-          if (product.inventory <= 0) {
-            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${product._id}`;
+        const inventoryProduct = await InventoryServices.getInventory(
+          product._id
+        );
 
-            const dataNotification = {
-              content: `${product.title} hết hàng`,
-              type: NotificationTypes.Product,
-              path: link,
-            };
+        if (inventoryProduct.inventory_stock <= 0) {
+          const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${product._id}`;
 
-            NotificationAdminServices.createNotification(dataNotification);
-          }
+          const dataNotification = {
+            content: `${product.title} hết hàng`,
+            type: NotificationTypes.Product,
+            path: link,
+          };
+
+          NotificationAdminServices.createNotification(dataNotification);
         }
       }
 
@@ -210,19 +215,35 @@ const OrderController = {
       }
 
       for (let i = 0; i < data.items.length; i++) {
-        // const item = data.items[0];
         const item = data.items[i];
-        const queryDB = {
-          $inc: { inventory: -item.quantity, sold: item.quantity },
-        };
 
-        await ProductServices.updateProduct(item.product, {}, queryDB);
+        // update inventory for product
+        await InventoryServices.updateInventory(
+          item.product,
+          {},
+          { $inc: { inventory_stock: -item.quantity } }
+        );
+
+        // update sold count for product
+        await ProductServices.updateProduct(
+          item.product,
+          {},
+          { $inc: { sold: item.quantity } }
+        );
 
         if (item.variation) {
+          // update inventory for variation of product
+          await InventoryServices.updateInventory(
+            item.variation,
+            {},
+            { $inc: { inventory_stock: -item.quantity } }
+          );
+
+          // update sold count for variation of product
           await ProductItemServices.updateProductItem(
             item.variation,
             {},
-            queryDB
+            { $inc: { sold: item.quantity } }
           );
         }
       }
@@ -525,17 +546,42 @@ const OrderController = {
       if (data.payment_status === paymentStatus.cancle) {
         for (let i = 0; i < order.items.length; i++) {
           const item = order.items[0];
-          const queryDB = {
-            $inc: { inventory: item.quantity, sold: -item.quantity },
-          };
 
-          await ProductServices.updateProduct(item.product._id, {}, queryDB);
+          // restore count sold of product
+          await ProductServices.updateProduct(
+            item.product._id,
+            {},
+            {
+              $inc: { sold: -item.quantity },
+            }
+          );
+
+          // restore inventory of product
+          await InventoryServices.updateInventory(
+            item.product._id,
+            {},
+            {
+              $inc: { inventory: item.quantity },
+            }
+          );
 
           if (item.variation) {
-            await ProductItemServices.updateProductItem(
+            // restore count sold of variation product
+            await ProductServices.updateProduct(
               item.variation._id,
               {},
-              queryDB
+              {
+                $inc: { sold: -item.quantity },
+              }
+            );
+
+            // restore inventory of variation product
+            await InventoryServices.updateInventory(
+              item.variation._id,
+              {},
+              {
+                $inc: { inventory: item.quantity },
+              }
             );
           }
         }

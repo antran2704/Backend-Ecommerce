@@ -282,14 +282,15 @@ const UserProductController = {
   },
   // [GET] A PRODUCT
   getProduct: async (req, res) => {
-    const { slug, id } = req.params;
+    const { slug, product_id } = req.params;
 
     const query = {
       public: true,
     };
 
+    // check already have cache product
     const cacheProduct = await CacheProductServices.getProduct(
-      CacheProductServices.KEY_PRODUCT + id
+      CacheProductServices.KEY_PRODUCT + product_id
     );
 
     if (cacheProduct && cacheProduct._id && cacheProduct.public) {
@@ -303,50 +304,50 @@ const UserProductController = {
         return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      const priceProduct = await PriceServices.getPrice(product._id);
-      const inventoryProduct = await InventoryServices.getInventory(
-        product._id
-      );
+      // const priceProduct = await PriceServices.getPrice(product._id);
+      // const inventoryProduct = await InventoryServices.getInventory(
+      //   product._id
+      // );
 
-      if (!priceProduct || !inventoryProduct) {
-        // set cache product
-        CacheProductServices.setCacheProduct(
-          CacheProductServices.KEY_PRODUCT + product._id,
-          product
-        );
-        return new GetResponse(200, product).send(res);
-      }
-
+      // if (!priceProduct || !inventoryProduct) {
       // set cache product
       CacheProductServices.setCacheProduct(
         CacheProductServices.KEY_PRODUCT + product._id,
-        {
-          ...product,
-          price: priceProduct.price,
-          promotion_price: priceProduct.promotion_price,
-          inventory: inventoryProduct.inventory_stock,
-        }
+        product
       );
+      return new GetResponse(200, product).send(res);
+      // }
 
-      return new GetResponse(200, {
-        ...product,
-        price: priceProduct.price,
-        promotion_price: priceProduct.promotion_price,
-        inventory: inventoryProduct.inventory_stock,
-      }).send(res);
+      // set cache product
+      // CacheProductServices.setCacheProduct(
+      //   CacheProductServices.KEY_PRODUCT + product._id,
+      //   {
+      //     ...product,
+      //     price: priceProduct.price,
+      //     promotion_price: priceProduct.promotion_price,
+      //     inventory: inventoryProduct.inventory_stock,
+      //   }
+      // );
+
+      // return new GetResponse(200, {
+      //   ...product,
+      //   price: priceProduct.price,
+      //   promotion_price: priceProduct.promotion_price,
+      //   inventory: inventoryProduct.inventory_stock,
+      // }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
   },
   getProductById: async (req, res) => {
-    const { id } = req.params;
+    const { product_id } = req.params;
 
-    if (!id) {
+    if (!product_id) {
       return new BadResquestError().send(res);
     }
 
     const cacheProduct = await CacheProductServices.getProduct(
-      CacheProductServices.KEY_PRODUCT + id
+      CacheProductServices.KEY_PRODUCT + product_id
     );
 
     if (cacheProduct && cacheProduct._id && cacheProduct.public) {
@@ -360,43 +361,47 @@ const UserProductController = {
     };
 
     try {
-      const product = await ProductServices.getProductById(id, select, query);
+      const product = await ProductServices.getProductById(
+        product_id,
+        select,
+        query
+      );
 
       if (!product) {
         return new NotFoundError(404, "Not found product!").send(res);
       }
 
-      const priceProduct = await PriceServices.getPrice(product._id);
-      const inventoryProduct = await InventoryServices.getInventory(
-        product._id
-      );
+      // const priceProduct = await PriceServices.getPrice(product._id);
+      // const inventoryProduct = await InventoryServices.getInventory(
+      //   product._id
+      // );
 
-      if (!priceProduct || !inventoryProduct) {
-        // set cache product
-        CacheProductServices.setCacheProduct(
-          CacheProductServices.KEY_PRODUCT + product._id,
-          product
-        );
-        return new GetResponse(200, product).send(res);
-      }
-
+      // if (!priceProduct || !inventoryProduct) {
       // set cache product
       CacheProductServices.setCacheProduct(
         CacheProductServices.KEY_PRODUCT + product._id,
-        {
-          ...product,
-          price: priceProduct.price,
-          promotion_price: priceProduct.promotion_price,
-          inventory: inventoryProduct.inventory_stock,
-        }
+        product
       );
+      return new GetResponse(200, product).send(res);
+      // }
 
-      return new GetResponse(200, {
-        ...product,
-        price: priceProduct.price,
-        promotion_price: priceProduct.promotion_price,
-        inventory: inventoryProduct.inventory_stock,
-      }).send(res);
+      // set cache product
+      // CacheProductServices.setCacheProduct(
+      //   CacheProductServices.KEY_PRODUCT + product._id,
+      //   {
+      //     ...product,
+      //     price: priceProduct.price,
+      //     promotion_price: priceProduct.promotion_price,
+      //     inventory: inventoryProduct.inventory_stock,
+      //   }
+      // );
+
+      // return new GetResponse(200, {
+      //   ...product,
+      //   price: priceProduct.price,
+      //   promotion_price: priceProduct.promotion_price,
+      //   inventory: inventoryProduct.inventory_stock,
+      // }).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
@@ -459,6 +464,30 @@ const UserProductController = {
       });
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
+    }
+  },
+  geInfoProduct: async (req, res) => {
+    const { product_id } = req.params;
+
+    if (!product_id) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      const priceProduct = await PriceServices.getPrice(product_id);
+      const inventoryProduct = await InventoryServices.getInventory(product_id);
+
+      if (!priceProduct || !inventoryProduct) {
+        return new BadResquestError().send(res);
+      }
+
+      return new GetResponse(200, {
+        inventory: inventoryProduct.inventory_stock,
+        price: priceProduct.price,
+        promotion_price: priceProduct.promotion_price,
+      }).send(res);
+    } catch (error) {
+      return new InternalServerError().send(res);
     }
   },
 };

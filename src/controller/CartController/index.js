@@ -7,6 +7,7 @@ const {
   ProductItemServices,
   CacheCartServices,
   CacheUserServices,
+  InventoryServices,
 } = require("../../services");
 const {
   InternalServerError,
@@ -428,70 +429,72 @@ const CartController = {
       for (let i = 0; i < cart_products.length; i++) {
         // const item = data.cart_products[0];
         const item = cart_products[i];
+        let product = null;
 
         if (item.variation) {
-          const product = await ProductItemServices.getProductItemById(
+          product = await ProductItemServices.getProductItemById(
             item.variation._id
           );
 
-          if (!product) {
-            return new NotFoundError().send(res);
-          }
+          // if (!product) {
+          //   return new NotFoundError().send(res);
+          // }
 
-          if (!product.available || !product.public) {
-            return new BadResquestError(400, "Product in not avaiable").send(
-              res
-            );
-          }
+          // if (!product.available || !product.public) {
+          //   return new BadResquestError(400, "Product in not avaiable").send(
+          //     res
+          //   );
+          // }
 
-          if (product.inventory <= 0 || product.inventory < item.quantity) {
-            // Send notification
-            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
+          // if (product.inventory <= 0 || product.inventory < item.quantity) {
+          //   // Send notification
+          //   const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
 
-            const dataNotification = {
-              content: `${product.title} hết hàng`,
-              type: NotificationTypes.Product,
-              path: link,
-            };
+          //   const dataNotification = {
+          //     content: `${product.title} hết hàng`,
+          //     type: NotificationTypes.Product,
+          //     path: link,
+          //   };
 
-            await NotificationAdminServices.createNotification(
-              dataNotification
-            );
+          //   await NotificationAdminServices.createNotification(
+          //     dataNotification
+          //   );
 
-            return new BadResquestError(400, "Out of stock").send(res);
-          }
+          //   return new BadResquestError(400, "Out of stock").send(res);
+          // }
         }
 
         if (!item.variation) {
-          const product = await ProductServices.getProductById(
-            item.product._id
-          );
+          product = await ProductServices.getProductById(item.product._id);
+        }
 
-          if (!product) {
-            return new NotFoundError().send(res);
-          }
+        if (!product) {
+          return new NotFoundError().send(res);
+        }
 
-          if (!product.public) {
-            return new BadResquestError(400, "Product in not avaiable").send(
-              res
-            );
-          }
+        if (!product.public) {
+          return new BadResquestError(400, "Product in not avaiable").send(res);
+        }
 
-          if (product.inventory <= 0 || product.inventory < item.quantity) {
-            // Send notification
-            const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
-            const dataNotification = {
-              content: `${product.title} hết hàng`,
-              type: NotificationTypes.Product,
-              path: link,
-            };
+        const inventoryProduct = await InventoryServices.getInventory(
+          product._id
+        );
 
-            await NotificationAdminServices.createNotification(
-              dataNotification
-            );
+        if (
+          inventoryProduct.inventory_stock <= 0 ||
+          inventoryProduct.inventory_stock < item.quantity
+        ) {
+          // Send notification
+          // const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${item.product._id}`;
+          // const dataNotification = {
+          //   content: `${product.title} hết hàng`,
+          //   type: NotificationTypes.Product,
+          //   path: link,
+          // };
 
-            return new BadResquestError(400, "Out of stock").send(res);
-          }
+          // await NotificationAdminServices.createNotification(dataNotification);
+
+          return new BadResquestError(400, "Out of stock").send(res);
         }
       }
 

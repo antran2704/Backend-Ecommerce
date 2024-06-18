@@ -22,13 +22,13 @@ class InventoryServices {
     return inventory;
   }
 
-  async updateInventory(product_id, payload) {
+  async updateInventory(product_id, payload, query = {}) {
     if (!product_id) return null;
 
     const date = getDateTime();
     const updated = await Inventory.findOneAndUpdate(
       { inventory_product: product_id },
-      { $set: { ...payload, updatedAt: date } }
+      { $set: { ...payload, updatedAt: date }, ...query }
     );
 
     return updated;

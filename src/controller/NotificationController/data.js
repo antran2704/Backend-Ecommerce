@@ -1,5 +1,5 @@
 const ADMIN_NOTIFI_PATH = {
-  PRODUCT: "/edit/product",
+  PRODUCT: "/product",
   ORDER: "/orders",
 };
 

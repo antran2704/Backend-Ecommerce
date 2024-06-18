@@ -4,16 +4,13 @@ const router = express.Router();
 const ProductController = require("../../controller/ProductController/user");
 
 // [GET] ALL PRODUCT
-router.get(
-  "/category/:id",
-  ProductController.getProductsInCategory
-);
+router.get("/category/:id", ProductController.getProductsInCategory);
 
 // [SEARCH] A PRODUCT
 router.get("/search", ProductController.searchProduct);
 
 // [GET] A PRODUCT WITH ID
-router.get("/id/:id", ProductController.getProductById);
+router.get("/id/:product_id", ProductController.getProductById);
 
 // [GET] A PRODUCT WITH ID
 router.get("/other", ProductController.getOtherProducts);
@@ -21,8 +18,11 @@ router.get("/other", ProductController.getOtherProducts);
 // [GET] A PRODUCT WITH ID
 router.get("/hot", ProductController.getHotProducts);
 
+// [GET] A PRODUCT WITH ID
+router.get("/info/:product_id", ProductController.geInfoProduct);
+
 // [GET] A PRODUCT
-router.get("/:id/:slug", ProductController.getProduct);
+router.get("/:product_id/:slug", ProductController.getProduct);
 
 // [GET] ALL PRODUCTS
 router.get("/", ProductController.getProducts);
@@ -47,23 +47,22 @@ module.exports = router;
  *         slug:
  *           type: string
  *           description: Slug of product
- *         categories: 
+ *         categories:
  *           type: array string
  *           description: Categories of product
- *         category: 
+ *         category:
  *           type: string
  *           description: Category of product
- *         description: 
+ *         description:
  *           type: string
  *           description: Description of product
- *         price: 
+ *         price:
  *           type: float
  *           description: price of product
- *         promotion_price: 
+ *         promotion_price:
  *           type: float
  *           description: Promotion price of product
  */
-
 
 /**
  * @swagger
@@ -85,6 +84,6 @@ module.exports = router;
  *            schema:
  *              type: string
  *              format: string
-*/
+ */
 
 // ------------------- SWAGGER ---------------------
