@@ -94,7 +94,31 @@ const CartController = {
         return new NotFoundError(404, "Not found cart").send(res);
       }
 
-      const cart_products = await CartServices.getItemsInCart(cart._id);
+      const items = await CartServices.getItemsInCart(cart._id);
+      let cart_products = [];
+
+      for (let i = 0; i < items.length; i++) {
+        let inventoryProduct = null;
+        let priceProduct = null;
+        if (items[i].variation) {
+          inventoryProduct = await InventoryServices.getInventory(
+            items[i].variation._id
+          );
+          priceProduct = await PriceServices.getPrice(items[i].variation._id);
+        } else {
+          inventoryProduct = await InventoryServices.getInventory(
+            items[i].product._id
+          );
+          priceProduct = await PriceServices.getPrice(items[i].product._id);
+        }
+
+        cart_products.push({
+          ...items[i],
+          inventory: inventoryProduct.inventory_stock,
+          price: priceProduct.price,
+          promotion_price: priceProduct.promotion_price,
+        });
+      }
 
       return new GetResponse(200, cart_products).send(res);
     } catch (error) {
