@@ -20,7 +20,7 @@ class SocketConfig {
   }
 
   connection(socket) {
-    connected++
+    connected++;
     console.log("new connection", connected);
 
     socket.on("disconnect", () => {

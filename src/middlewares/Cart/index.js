@@ -23,15 +23,16 @@ const CartMiddleware = {
     if (variation_id) {
       product = await ProductItemServices.getProductItemById(variation_id, {
         _id: 1,
+        public: 1,
       });
 
-      // if (!product) {
-      //   return new NotFoundError().send(res);
-      // }
+      if (!product) {
+        return new NotFoundError().send(res);
+      }
 
-      // if (!product.available || !product.public) {
-      //   return new BadResquestError(400, "Product in not avaiable").send(res);
-      // }
+      if (!product.public) {
+        return new BadResquestError(400, "Product in not avaiable").send(res);
+      }
 
       // const inventoryProduct = await InventoryServices.getInventory(
       //   product._id
@@ -59,15 +60,16 @@ const CartMiddleware = {
     if (!variation_id) {
       product = await ProductServices.getProductById(product_id, {
         _id: 1,
+        public: 1,
       });
-    }
 
-    if (!product) {
-      return new NotFoundError().send(res);
-    }
+      if (!product) {
+        return new NotFoundError().send(res);
+      }
 
-    if (!product.public) {
-      return new BadResquestError(400, "Product in not avaiable").send(res);
+      if (!product.public) {
+        return new BadResquestError(400, "Product in not avaiable").send(res);
+      }
     }
 
     const inventoryProduct = await InventoryServices.getInventory(product._id);

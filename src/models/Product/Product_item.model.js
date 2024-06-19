@@ -10,12 +10,12 @@ const ProductItemModel = new Schema(
     product_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "product",
-      index: true
+      index: true,
     },
     title: {
       type: String,
       default: null,
-      index: true
+      index: true,
     },
     barcode: {
       type: String,
@@ -25,15 +25,15 @@ const ProductItemModel = new Schema(
       type: Boolean,
       default: true,
     },
-    price: {
-      type: Number,
-      default: 0,
-      require: true,
-    },
-    promotion_price: {
-      type: Number,
-      default: 0,
-    },
+    // price: {
+    //   type: Number,
+    //   default: 0,
+    //   require: true,
+    // },
+    // promotion_price: {
+    //   type: Number,
+    //   default: 0,
+    // },
     sku: {
       type: String,
       default: null,
@@ -59,11 +59,11 @@ const ProductItemModel = new Schema(
       type: String,
       default: null,
     },
-    inventory: {
-      type: Number,
-      default: 0,
-      require: true,
-    },
+    // inventory: {
+    //   type: Number,
+    //   default: 0,
+    //   require: true,
+    // },
     sold: {
       type: Number,
       default: 0,

@@ -8,6 +8,7 @@ const {
   CacheCartServices,
   CacheUserServices,
   InventoryServices,
+  PriceServices,
 } = require("../../services");
 const {
   InternalServerError,
@@ -156,12 +157,12 @@ const CartController = {
       //   return new NotFoundError(404, "Not found cart").send(res);
       // }
 
-      let inventoryProduct = 0;
+      let inventory = 0;
 
       if (variation_id && isValidObjectId(variation_id)) {
         const variationProduct = await ProductItemServices.getProductItemById(
           variation_id,
-          { inventory: 1, price: 1, promotion_price: 1 }
+          { _id: 1 }
         );
 
         if (!variationProduct) {
@@ -170,30 +171,49 @@ const CartController = {
           );
         }
 
-        data.price =
-          variationProduct.promotion_price > 0
-            ? variationProduct.promotion_price
-            : variationProduct.price;
+        const inventoryProduct = await InventoryServices.getInventory(
+          variation_id
+        );
+        const priceProduct = await PriceServices.getPrice(variation_id);
 
-        inventoryProduct = variationProduct.inventory;
+        if (!inventoryProduct || !priceProduct) {
+          return new BadResquestError().send(res);
+        }
+
+        data.price =
+          priceProduct.promotion_price > 0
+            ? priceProduct.promotion_price
+            : priceProduct.price;
+
+        inventory = inventoryProduct.inventory_stock;
       } else {
         if (!product_id || !isValidObjectId(product_id)) {
           return new NotFoundError(400, "Object id invalid").send(res);
         }
 
         const product = await ProductServices.getProductById(data.product_id, {
-          inventory: 1,
-          price: 1,
-          promotion_price: 1,
+          _id: 1,
         });
 
         if (!product) {
           return new NotFoundError(404, "Not found product").send(res);
         }
 
+        const inventoryProduct = await InventoryServices.getInventory(
+          variation_id
+        );
+        const priceProduct = await PriceServices.getPrice(variation_id);
+
+        if (!inventoryProduct || !priceProduct) {
+          return new BadResquestError().send(res);
+        }
+
         data.price =
-          product.promotion_price > 0 ? product.promotion_price : product.price;
-        inventoryProduct = product.inventory;
+          priceProduct.promotion_price > 0
+            ? priceProduct.promotion_price
+            : priceProduct.price;
+
+        inventory = inventoryProduct.inventory_stock;
       }
 
       const checkProductInCart = await CartServices.checkProductInCart(
@@ -204,7 +224,7 @@ const CartController = {
 
       if (
         checkProductInCart &&
-        inventoryProduct < checkProductInCart.quantity + quantity
+        inventory < checkProductInCart.quantity + quantity
       ) {
         return new BadResquestError(
           400,
@@ -250,7 +270,6 @@ const CartController = {
         cart_status: updated.cart_status,
         cart_count: updated.cart_count,
         cart_total: updated.cart_total,
-        // cart_products: totalItems,
       }).send(res);
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
