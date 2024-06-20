@@ -227,8 +227,21 @@ const AdminProductController = {
         product._id
       );
 
-      if (!priceProduct || !inventoryProduct) {
-        return new GetResponse(200, product).send(res);
+      if (product.variations.length > 0) {
+        for (let i = 0; i < product.variations.length; i++) {
+          const item = product.variations[i];
+          const priceVariation = await PriceServices.getPrice(item._id);
+          const inventoryVariation = await InventoryServices.getInventory(
+            item._id
+          );
+
+          product.variations[i] = {
+            ...item,
+            price: priceVariation.price,
+            promotion_price: priceVariation.promotion_price,
+            inventory: inventoryVariation.inventory_stock,
+          };
+        }
       }
 
       return new GetResponse(200, {
@@ -237,7 +250,6 @@ const AdminProductController = {
         promotion_price: priceProduct.promotion_price,
         inventory: inventoryProduct.inventory_stock,
       }).send(res);
-      // return new GetResponse(200, product).send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }

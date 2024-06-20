@@ -100,6 +100,7 @@ const CartController = {
       for (let i = 0; i < items.length; i++) {
         let inventoryProduct = null;
         let priceProduct = null;
+        
         if (items[i].variation) {
           inventoryProduct = await InventoryServices.getInventory(
             items[i].variation._id

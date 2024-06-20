@@ -28,7 +28,7 @@ class InventoryServices {
     const date = getDateTime();
     const updated = await Inventory.findOneAndUpdate(
       { inventory_product: product_id },
-      { $set: { ...payload, updatedAt: date }, ...query }
+      { $set: { ...payload, updatedAt: date }, ...query },
     );
 
     return updated;

@@ -133,6 +133,13 @@ const ProductItemController = {
               price: rest.price,
               promotion_price: rest.promotion_price,
             });
+
+            item = {
+              ...item,
+              inventory: rest.inventory,
+              price: rest.price,
+              promotion_price: rest.promotion_price,
+            };
           } else {
             item = await ProductItemServices.createProductItem(rest);
 
@@ -144,6 +151,13 @@ const ProductItemController = {
               price: rest.price,
               promotion_price: rest.promotion_price,
             });
+
+            item = {
+              ...item,
+              inventory: rest.inventory,
+              price: rest.price,
+              promotion_price: rest.promotion_price,
+            };
           }
         } else {
           item = await ProductItemServices.createProductItem(rest);
