@@ -5,10 +5,10 @@ const { NotificationAdminServices, NotificationTypes } = require("../Notificatio
 const { ADMIN_NOTIFI_PATH } = require("../../controller/NotificationController/data");
 
 class ProductItemServices {
-  async getProductItems(id) {
+  async getProductItems(id, query = {}) {
     if (!id || !isValidObjectId(id)) return null;
 
-    const variations = ProductItem.find({ product_id: id }).lean();
+    const variations = ProductItem.find({ product_id: id, ...query }).lean();
     return variations;
   }
 
@@ -49,7 +49,7 @@ class ProductItemServices {
       { _id: id },
       { $set: { ...payload, updatedAt: date }, ...query },
       { upsert: true, new: true }
-    );
+    ).lean();
 
     if (variation.inventory <= 10) {
       const link = `${ADMIN_NOTIFI_PATH.PRODUCT}/${variation.product_id}`;

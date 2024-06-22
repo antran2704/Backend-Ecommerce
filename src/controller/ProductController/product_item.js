@@ -26,10 +26,7 @@ const ProductItemController = {
     }
 
     try {
-      const items = await ProductItemServices.getProductItems(product_id);
-      if (!items) {
-        return new NotFoundError(404, "No item found!").send(res);
-      }
+      const items = await ProductItemServices.getProductItems(product_id, {available: true});
 
       return new GetResponse(200, items).send(res);
     } catch (error) {
@@ -107,9 +104,13 @@ const ProductItemController = {
         return new NotFoundError().send(res);
       }
 
-      let items = [];
-      // let removeItems = product.variations;
+
+      // const removeItems = payloads.filter((item) => {
+      //     if(item._id && isValidObjectId(item._id) && product.variations)
+      // });
       // console.log("remove 1", removeItems)
+
+      let items = [];
 
       for (let i = 0; i < payloads.length; i++) {
         const payloadParse = removeUndefindedObj(payloads[i]);
@@ -241,6 +242,61 @@ const ProductItemController = {
     }
   },
   updateProductItems: async (req, res) => {
+    const payload = req.body;
+    if (!payload) {
+      return new BadResquestError().send(res);
+    }
+
+    try {
+      for (let i = 0; i < payload.length; i++) {
+        const variation_id = payload[i];
+        const body = { available: false };
+
+        const item = await ProductItemServices.updateProductItem(
+          variation_id,
+          body
+        );
+
+        if (!item) {
+          return new BadResquestError(400, "Update item failed").send(res);
+        }
+
+        const inventoryProduct = await InventoryServices.getInventory(item._id);
+        const priceProduct = await PriceServices.getPrice(item._id);
+
+        if (!inventoryProduct | !priceProduct) {
+          return new BadResquestError().send(res);
+        }
+
+        // update inventory
+        if (
+          payload.inventory &&
+          inventoryProduct.inventory_stock !== payload.inventory
+        ) {
+          InventoryServices.updateInventory(item._id, {
+            inventory_stock: payload.inventory,
+          });
+        }
+
+        // update price or promotion price
+        if (
+          (payload.price || payload.promotion_price) &&
+          (priceProduct.price !== payload.price ||
+            priceProduct.promotion_price !== payload.promotion_price)
+        ) {
+          PriceServices.updatePrice(item._id, {
+            price: payload.price,
+            promotion_price: payload.promotion_price,
+          });
+        }
+      }
+
+      return new CreatedResponse().send(res);
+    } catch (error) {
+      return new InternalServerError(error.stack).send(res);
+    }
+  },
+  deleteProductItems: async (req, res) => {
     const payload = req.body;
     if (!payload) {
       return new BadResquestError().send(res);
