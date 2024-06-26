@@ -9,7 +9,6 @@ const ProductModel = new Schema(
   {
     title: {
       type: String,
-      default: "",
       index: "text",
     },
     categories: [
@@ -31,14 +30,6 @@ const ProductModel = new Schema(
       type: String,
       default: null,
     },
-    // price: {
-    //   type: Number,
-    //   default: 0,
-    // },
-    // promotion_price: {
-    //   type: Number,
-    //   default: 0,
-    // },
     thumbnail: {
       type: String,
       default: null,
@@ -48,10 +39,6 @@ const ProductModel = new Schema(
       type: Boolean,
       default: false,
     },
-    // inventory: {
-    //   type: Number,
-    //   default: 0,
-    // },
     sold: {
       type: Number,
       default: 0,

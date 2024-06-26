@@ -61,8 +61,8 @@ class GrossDateServices {
     return item;
   }
 
-  async createGross(data) {
-    const date = getDateTime();
+  async createGross(date) {
+    // const date = getDateTime();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const day = date.getDate();

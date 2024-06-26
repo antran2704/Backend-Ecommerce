@@ -25,6 +25,7 @@ const {
   NotificationAdminServices,
   CacheCartServices,
   InventoryServices,
+  CacheProductServices,
 } = require("../../services");
 const { GrossYearServices } = require("../../services/Gross");
 const { isValidObjectId } = require("mongoose");
@@ -131,7 +132,7 @@ const OrderController = {
     }
   },
   // [POST] AN ORDER
-  createOrder: async (req, res, next) => {
+  createOrder: async (req, res) => {
     const data = req.body;
 
     if (!data) {
@@ -152,15 +153,21 @@ const OrderController = {
     }
 
     try {
+      const newOrder = await OrderServices.createOrder(data);
+
+      if (!newOrder) {
+        return new BadResquestError(400, "Create new order failed").send(res);
+      }
+
       const cart = await CartServices.getCartByUserId(data.user_id);
 
       if (!cart || cart.cart_count === 0) {
-        return new BadResquestError(400, "No item").send(res);
+        return new BadResquestError().send(res);
       }
 
+      // send notifi if product out of stock
       for (let i = 0; i < data.items.length; i++) {
         const item = data.items[i];
-        // let product = null;
 
         if (item.variation) {
           const product = await ProductItemServices.getProductItemById(
@@ -213,11 +220,7 @@ const OrderController = {
         }
       }
 
-      const newOrder = await OrderServices.createOrder(data);
-      if (!newOrder) {
-        return new BadResquestError(400, "Create new order failed").send(res);
-      }
-
+      // update sold and inventory for product
       for (let i = 0; i < data.items.length; i++) {
         const item = data.items[i];
 
@@ -235,6 +238,18 @@ const OrderController = {
           { $inc: { sold: item.quantity } }
         );
 
+        // check cache and update cache
+        const cacheProduct = await CacheProductServices.getProduct(
+          CacheProductServices.KEY_PRODUCT + item.product
+        );
+
+        if (cacheProduct) {
+          await CacheProductServices.updateCacheProduct(
+            CacheProductServices.KEY_PRODUCT + item.product,
+            { ...cacheProduct, sold: cacheProduct.sold + item.quantity }
+          );
+        }
+
         if (item.variation) {
           // update inventory for variation of product
           InventoryServices.updateInventory(
@@ -250,6 +265,106 @@ const OrderController = {
             { $inc: { sold: item.quantity } }
           );
         }
+      }
+
+      // send mail new order with card payment method
+      if (
+        newOrder.payment_status === paymentStatus.pending &&
+        newOrder.payment_method === paymentMethod.banking
+      ) {
+        const link = `${process.env.ADMIN_ENDPOINT}/orders/${newOrder._id}`;
+        let mailContent = {
+          to: process.env.SHOP_EMAIL,
+          subject: "Antran shop thông báo:",
+          template: templateEmail.order.template,
+          context: {
+            link,
+          },
+        };
+
+        const dataNotification = {
+          content: "Đơn hàng mới",
+          type: NotificationTypes.Order,
+          path: `${ADMIN_NOTIFI_PATH.ORDER}/${newOrder._id}`,
+        };
+
+        NotificationAdminServices.createNotification(dataNotification);
+
+        handleSendMail(mailContent);
+
+        const date = new Date(newOrder.createdAt);
+
+        // update for gross day
+        let grossDay;
+
+        const grossDayQuery = {
+          $push: { orders: newOrder._id },
+          $inc: { sub_gross: newOrder.total },
+        };
+
+        grossDay = await GrossDateServices.getGrossInDay(
+          date.toLocaleDateString("en-GB")
+        );
+
+        if (!grossDay) {
+          grossDay = await GrossDateServices.createGross(date);
+        }
+
+        GrossDateServices.updateGross(grossDay._id, grossDayQuery);
+
+        // update for gross month
+        let grossMonth;
+        const grossMonthQuery = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        grossMonth = await GrossMonthServices.getGrossByMonth(
+          date.getMonth() + 1,
+          date.getFullYear()
+        );
+
+        if (!grossMonth) {
+          grossMonth = await GrossMonthServices.createGross(date);
+        }
+        GrossMonthServices.updateGross(grossMonth._id, grossMonthQuery);
+
+        // update gross year
+        let grossYear;
+        const grossYearQuery = {
+          $inc: { orders: 1, sub_gross: newOrder.total },
+        };
+
+        grossYear = await GrossYearServices.getGrossByYear(date.getFullYear());
+
+        if (!grossYear) {
+          grossYear = await GrossYearServices.createGross(date);
+        }
+
+        GrossYearServices.updateGross(grossYear._id, grossYearQuery);
+      }
+
+      CartServices.deleteAllItemCart(cart._id);
+      CartServices.updateCart(newOrder.user_id, {
+        cart_count: 0,
+        cart_total: 0,
+      });
+
+      // check cache cart
+      const cacheCart = await CacheCartServices.getCart(
+        CacheCartServices.KEY_CART + newOrder.user_id
+      );
+
+      if (cacheCart) {
+        await CacheCartServices.setCacheCart(
+          CacheCartServices.KEY_CART + newOrder.user_id,
+          {
+            _id: cacheCart._id.toString(),
+            cart_userId: cacheCart.cart_userId.toString(),
+            cart_status: cacheCart.cart_status,
+            cart_count: 0,
+            cart_total: 0,
+          }
+        );
       }
 
       return new CreatedResponse(201, newOrder).send(res);
@@ -304,6 +419,7 @@ const OrderController = {
 
       let mailContent;
 
+      // send email for client if delivered
       if (data.status === typeStatus.delivered) {
         const link = `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`;
 
@@ -440,9 +556,10 @@ const OrderController = {
         return new BadResquestError(400, "Updated order failed").send(res);
       }
 
+      // send email for admin if payment status success by VNPay - Card
       if (
         data.payment_status === paymentStatus.success &&
-        order.payment_method !== paymentMethod.cod
+        order.payment_method !== paymentMethod.banking
       ) {
         const link = `${process.env.ADMIN_ENDPOINT}/orders/${order_id}`;
         let mailContent = {
@@ -463,88 +580,62 @@ const OrderController = {
         NotificationAdminServices.createNotification(dataNotification);
 
         handleSendMail(mailContent);
+      }
 
-        const date = new Date();
-        const grossDay = await GrossDateServices.getGrossInDay(
+      // update gross day - month - year if payment status success
+      if (
+        order.payment_method !== paymentMethod.banking &&
+        data.payment_status === paymentStatus.success
+      ) {
+        const date = new Date(order.createdAt);
+
+        // update for gross day
+        let grossDay;
+
+        const grossDayQuery = {
+          $push: { orders: order._id },
+          $inc: { sub_gross: order.total },
+        };
+
+        grossDay = await GrossDateServices.getGrossInDay(
           date.toLocaleDateString("en-GB")
         );
 
         if (!grossDay) {
-          const newGross = await GrossDateServices.createGross();
-
-          if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(
-              res
-            );
-          }
-
-          const query = {
-            $push: { orders: order._id },
-            $inc: { sub_gross: order.total },
-          };
-
-          GrossDateServices.updateGross(newGross._id, query);
-        } else {
-          const query = {
-            $push: { orders: order._id },
-            $inc: { sub_gross: order.total },
-          };
-
-          GrossDateServices.updateGross(grossDay._id, query);
+          grossDay = await GrossDateServices.createGross(date);
         }
 
-        const grossMonth = await GrossMonthServices.getGrossByMonth(
+        GrossDateServices.updateGross(grossDay._id, grossDayQuery);
+
+        // update for gross month
+        let grossMonth;
+        const grossMonthQuery = {
+          $inc: { orders: 1, sub_gross: order.total },
+        };
+
+        grossMonth = await GrossMonthServices.getGrossByMonth(
           date.getMonth() + 1,
           date.getFullYear()
         );
 
         if (!grossMonth) {
-          const newGross = await GrossMonthServices.createGross();
-
-          if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(
-              res
-            );
-          }
-
-          const query = {
-            $inc: { orders: 1, sub_gross: order.total },
-          };
-
-          GrossMonthServices.updateGross(newGross._id, query);
-        } else {
-          const query = {
-            $inc: { orders: 1, sub_gross: order.total },
-          };
-
-          GrossMonthServices.updateGross(grossMonth._id, query);
+          grossMonth = await GrossMonthServices.createGross(date);
         }
+        GrossMonthServices.updateGross(grossMonth._id, grossMonthQuery);
 
-        const grossYear = await GrossYearServices.getGrossByYear(
-          date.getFullYear()
-        );
+        // update gross year
+        let grossYear;
+        const grossYearQuery = {
+          $inc: { orders: 1, sub_gross: order.total },
+        };
+
+        grossYear = await GrossYearServices.getGrossByYear(date.getFullYear());
 
         if (!grossYear) {
-          const newGross = await GrossYearServices.createGross();
-
-          if (!newGross) {
-            return new BadResquestError(400, "Create new gross failed").send(
-              res
-            );
-          }
-
-          const query = {
-            $inc: { orders: 1, sub_gross: order.total },
-          };
-
-          GrossYearServices.updateGross(newGross._id, query);
-        } else {
-          const query = {
-            $inc: { orders: 1, sub_gross: order.total },
-          };
-
-          GrossYearServices.updateGross(grossYear._id, query);
+          grossYear = await GrossYearServices.createGross(date);
         }
+
+        GrossYearServices.updateGross(grossYear._id, grossYearQuery);
       }
 
       if (data.payment_status === paymentStatus.cancle) {
@@ -589,59 +680,6 @@ const OrderController = {
             );
           }
         }
-      }
-
-      // if (
-      //   data.payment_status === paymentStatus.success ||
-      //   data.payment_status === paymentStatus.cancle
-      // ) {
-      //   const cart = await CartServices.getCartByUserId(order.user_id);
-
-      //   if (!cart) {
-      //     return new BadResquestError(400, "Not found cart").send(res);
-      //   }
-
-      //   CartServices.deleteAllItemCart(cart._id);
-      //   CartServices.updateCart(order.user_id, {
-      //     cart_count: 0,
-      //     cart_total: 0,
-      //   });
-
-      //   if (order.payment_method !== paymentMethod.cod) {
-      //     return res.redirect(
-      //       `${process.env.CLIENT_ENDPOINT}/checkout/${order_id}`
-      //     );
-      //   }
-      // }
-
-      const cart = await CartServices.getCartByUserId(order.user_id);
-
-      if (!cart) {
-        return new BadResquestError(400, "Not found cart").send(res);
-      }
-
-      CartServices.deleteAllItemCart(cart._id);
-      CartServices.updateCart(order.user_id, {
-        cart_count: 0,
-        cart_total: 0,
-      });
-
-      // check cache cart
-      const cacheCart = await CacheCartServices.getCart(
-        CacheCartServices.KEY_CART + order.user_id
-      );
-
-      if (cacheCart) {
-        await CacheCartServices.setCacheCart(
-          CacheCartServices.KEY_CART + order.user_id,
-          {
-            _id: cacheCart._id.toString(),
-            cart_userId: cacheCart.cart_userId.toString(),
-            cart_status: cacheCart.cart_status,
-            cart_count: 0,
-            cart_total: 0,
-          }
-        );
       }
 
       if (order.payment_method !== paymentMethod.cod) {
