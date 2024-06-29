@@ -3,6 +3,8 @@ const {
   ProductServices,
   InventoryServices,
   PriceServices,
+  CacheInventoryServices,
+  CachePriceServices,
 } = require("../../services");
 
 const {
@@ -26,7 +28,9 @@ const ProductItemController = {
     }
 
     try {
-      const items = await ProductItemServices.getProductItems(product_id, {available: true});
+      const items = await ProductItemServices.getProductItems(product_id, {
+        available: true,
+      });
 
       return new GetResponse(200, items).send(res);
     } catch (error) {
@@ -104,7 +108,6 @@ const ProductItemController = {
         return new NotFoundError().send(res);
       }
 
-
       // const removeItems = payloads.filter((item) => {
       //     if(item._id && isValidObjectId(item._id) && product.variations)
       // });
@@ -134,6 +137,15 @@ const ProductItemController = {
               price: rest.price,
               promotion_price: rest.promotion_price,
             });
+
+            // Delete cache price and inventory of product
+            CacheInventoryServices.deleteCacheInventory(
+              CacheInventoryServices.KEY_INVENTORY + item._id
+            );
+
+            CachePriceServices.deleteCachePrice(
+              CachePriceServices.KEY_PRICE + item._id
+            );
 
             item = {
               ...item,
@@ -222,6 +234,11 @@ const ProductItemController = {
         InventoryServices.updateInventory(item._id, {
           inventory_stock: payload.inventory,
         });
+
+        // Delete cache inventory of product
+        CacheInventoryServices.deleteCacheInventory(
+          CacheInventoryServices.KEY_INVENTORY + item._id
+        );
       }
 
       // update price or promotion price
@@ -234,6 +251,11 @@ const ProductItemController = {
           price: payload.price,
           promotion_price: payload.promotion_price,
         });
+
+        // Delete cache price of product
+        CachePriceServices.deleteCachePrice(
+          CachePriceServices.KEY_PRICE + item._id
+        );
       }
 
       return new CreatedResponse(201, item).send(res);
@@ -276,6 +298,11 @@ const ProductItemController = {
           InventoryServices.updateInventory(item._id, {
             inventory_stock: payload.inventory,
           });
+
+          // Delete cache inventory of product
+          CacheInventoryServices.deleteCacheInventory(
+            CacheInventoryServices.KEY_INVENTORY + item._id
+          );
         }
 
         // update price or promotion price
@@ -288,6 +315,11 @@ const ProductItemController = {
             price: payload.price,
             promotion_price: payload.promotion_price,
           });
+
+          // Delete cache price of product
+          CachePriceServices.deleteCachePrice(
+            CachePriceServices.KEY_PRICE + item._id
+          );
         }
       }
 
@@ -331,6 +363,11 @@ const ProductItemController = {
           InventoryServices.updateInventory(item._id, {
             inventory_stock: payload.inventory,
           });
+          
+          // Delete cache inventory of product
+          CacheInventoryServices.deleteCacheInventory(
+            CacheInventoryServices.KEY_INVENTORY + item._id
+          );
         }
 
         // update price or promotion price
@@ -343,6 +380,11 @@ const ProductItemController = {
             price: payload.price,
             promotion_price: payload.promotion_price,
           });
+
+          // Delete cache price of product
+          CachePriceServices.deleteCachePrice(
+            CachePriceServices.KEY_PRICE + item._id
+          );
         }
       }
 

@@ -4,9 +4,4 @@ const HEADER = {
   PUBLIC_KEY: "public-key",
 };
 
-const PERMISION = {
-  ADMIN: "0000",
-  USER: "1111",
-};
-
-module.exports = { HEADER, PERMISION };
+module.exports = { HEADER };

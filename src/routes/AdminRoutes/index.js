@@ -6,6 +6,7 @@ const AdminController = require("../../controller/AdminController");
 const AuthenMiddleware = require("../../middlewares/Auth");
 const ValidInputMiddleware = require("../../middlewares/ValidInput");
 const { ImageMiddleware } = require("../../middlewares/Image");
+const { ROLE, PERMISION } = require("../../common");
 
 // [GET] ALL USERS
 router.get(
@@ -18,7 +19,15 @@ router.get(
 router.get("/refreshToken", AdminController.refreshToken);
 
 // [GET] PERMISION
-router.get("/:user_id", AuthenMiddleware.checkAuthorizationHeader, AdminController.getPermission);
+router.get(
+  "/:user_id",
+  AuthenMiddleware.authentication,
+  AuthenMiddleware.authorization(
+    [ROLE.ADMIN, ROLE.STAFF],
+    [PERMISION.ADMIN, PERMISION.STAFF]
+  ),
+  AdminController.getPermission
+);
 
 // [POST] LOGIN
 router.post(

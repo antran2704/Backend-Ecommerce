@@ -3,6 +3,8 @@ const {
   CacheProductServices,
   PriceServices,
   InventoryServices,
+  CachePriceServices,
+  CacheInventoryServices,
 } = require("../../services");
 
 const {
@@ -473,9 +475,45 @@ const UserProductController = {
       return new BadResquestError().send(res);
     }
 
+    let priceProduct = null;
+    let inventoryProduct = null;
+
+    const priceCache = await CachePriceServices.getPrice(
+      CachePriceServices.KEY_PRICE + product_id
+    );
+
+    if (priceCache) {
+      priceProduct = priceCache;
+    }
+
+    const inventoryCache = await CacheInventoryServices.getInventory(
+      CacheInventoryServices.KEY_INVENTORY + product_id
+    );
+
+    if (inventoryCache) {
+      inventoryProduct = inventoryCache;
+    }
+
     try {
-      const priceProduct = await PriceServices.getPrice(product_id);
-      const inventoryProduct = await InventoryServices.getInventory(product_id);
+      if (!priceProduct) {
+        priceProduct = await PriceServices.getPrice(product_id);
+
+        // set cache for price of product
+        CachePriceServices.setCachePrice(
+          CachePriceServices.KEY_PRICE + product_id,
+          priceProduct
+        );
+      }
+
+      if (!inventoryProduct) {
+        inventoryProduct = await InventoryServices.getInventory(product_id);
+
+        // set cache for inventory of product
+        CacheInventoryServices.setCacheInventory(
+          CacheInventoryServices.KEY_INVENTORY + product_id,
+          inventoryProduct
+        );
+      }
 
       if (!priceProduct || !inventoryProduct) {
         return new BadResquestError().send(res);

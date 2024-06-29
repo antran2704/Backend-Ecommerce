@@ -3,6 +3,8 @@ const {
   InventoryServices,
   CacheProductServices,
   PriceServices,
+  CacheInventoryServices,
+  CachePriceServices,
 } = require("../../services");
 
 const {
@@ -331,6 +333,8 @@ const AdminProductController = {
         InventoryServices.updateInventory(id, {
           inventory_stock: data.inventory,
         });
+
+        CacheInventoryServices.deleteCacheInventory(CacheInventoryServices.KEY_INVENTORY + id)
       }
 
       // update price or promotion price
@@ -343,6 +347,8 @@ const AdminProductController = {
           price: data.price,
           promotion_price: data.promotion_price,
         });
+
+        CachePriceServices.deleteCachePrice(CachePriceServices.KEY_PRICE + id)
       }
 
       // check cache and update cache

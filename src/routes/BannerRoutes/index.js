@@ -5,7 +5,7 @@ const multer = require("../../middlewares/Multer");
 const BannerController = require("../../controller/BannerController");
 const { ImageMiddleware } = require("../../middlewares/Image");
 const AuthenMiddleware = require("../../middlewares/Auth");
-const { PERMISION } = require("../../middlewares/Auth/data");
+const { PERMISION } = require("../../common");
 
 // [GET] ALL CATEGORIES
 router.get("/admin", BannerController.getBannersWithPage);

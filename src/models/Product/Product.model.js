@@ -9,7 +9,7 @@ const ProductModel = new Schema(
   {
     title: {
       type: String,
-      index: "text",
+      index: "true",
     },
     categories: [
       {

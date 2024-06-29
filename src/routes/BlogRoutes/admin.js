@@ -5,7 +5,7 @@ const multer = require("../../middlewares/Multer");
 const { AdminBlogController } = require("../../controller/BlogController");
 const { ImageMiddleware } = require("../../middlewares/Image");
 const AuthenMiddleware = require("../../middlewares/Auth");
-const { PERMISION } = require("../../middlewares/Auth/data");
+const { PERMISION } = require("../../common");
 
 // UPLOAD THUMBNAIL
 router.post(

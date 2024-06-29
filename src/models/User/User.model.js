@@ -25,6 +25,10 @@ const UserModel = new Schema(
       type: String,
       default: null,
     },
+    role: {
+      type: String,
+      default: "USER"
+    },
     banned: {
       type: Boolean,
       default: false,

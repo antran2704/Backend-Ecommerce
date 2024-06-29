@@ -246,11 +246,6 @@ class ProductServices {
         ...query,
         category,
         $or: [
-          {
-            $text: {
-              $search: text,
-            },
-          },
           { title: { $regex: text, $options: "ui" } },
         ],
         isDeleted: false,
@@ -288,11 +283,6 @@ class ProductServices {
         ...query,
         category,
         $or: [
-          {
-            $text: {
-              $search: text,
-            },
-          },
           { title: { $regex: text, $options: "ui" } },
         ],
         isDeleted: false,

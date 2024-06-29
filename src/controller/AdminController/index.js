@@ -28,6 +28,7 @@ const getSelect = require("../../helpers/getSelect");
 const { isValidObjectId } = require("mongoose");
 const { templateEmail } = require("../UserController/emailTemplate");
 const handleSendMail = require("../../configs/mailServices");
+const { PERMISION, ROLE } = require("../../common");
 
 const AdminController = {
   // [GET] USERS
@@ -69,7 +70,7 @@ const AdminController = {
   },
   // [POST] CONFIRM EMAIL AND ADD USER
   creatUser: async (req, res) => {
-    const { name, password, email } = req.body;
+    const { name, password, email, role } = req.body;
 
     if (!name || !email || !password) {
       return new BadResquestError(400, "Data confirm email invalid").send(res);
@@ -81,12 +82,19 @@ const AdminController = {
       if (user) {
         return new BadResquestError(400, "Email is used").send(res);
       }
+
+      // check role is valid
+      if (!ROLE[role]) {
+        return new BadResquestError(400, "Role incorrect").send(res);
+      }
+
       const passwordHash = await generateBcrypt(password);
       const newUser = await AdminServices.createUser({
         name,
         email,
         password: passwordHash,
         verify: true,
+        role: ROLE[role],
       });
 
       if (!newUser) {
@@ -97,7 +105,7 @@ const AdminController = {
       const newApiKey = await ApiKeyServices.createApiKey(
         newUser._id,
         key,
-        "0000"
+        PERMISION[role]
       );
 
       if (!newApiKey) {
@@ -133,21 +141,21 @@ const AdminController = {
       const paswordCompare = await checkBcrypt(password, user.password);
 
       if (!paswordCompare) {
-        return new UnauthorizedError().send(res);
+        return new NotFoundError(404, "Email or password incorect").send(res);
       }
 
       const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
         key: 1,
-        permissions: 1,
+        permission: 1,
       });
 
       if (!apiKey) {
-        return new NotFoundError(404, "Not found api key");
+        return new NotFoundError();
       }
 
-      if (!apiKey.permissions.includes("0000")) {
-        return new ForbiddenError().send(res);
-      }
+      // if (apiKey.permission !== PERMISION.ADMIN) {
+      //   return new ForbiddenError().send(res);
+      // }
 
       const privateKey = crypto.randomUUID();
       const publicKey = crypto.randomUUID();
@@ -159,6 +167,7 @@ const AdminController = {
       const accessToken = generateToken(
         {
           id: convertObjectToString(user._id),
+          role: user.role,
         },
         publicKey,
         process.env.ACCESS_TOKEN_LIFE
@@ -240,7 +249,7 @@ const AdminController = {
         apiKey: apiKey.key,
       }).send(res);
     } catch (error) {
-      return new InternalServerError().send(res);
+      return new InternalServerError(error.stack).send(res);
     }
   },
   updateUser: async (req, res) => {
@@ -277,7 +286,7 @@ const AdminController = {
   },
   refreshToken: async (req, res) => {
     const refreshTokenHeader = req.header("refresh-token");
-    
+
     if (!refreshTokenHeader) {
       return new UnauthorizedError().send(res);
     }
@@ -318,7 +327,7 @@ const AdminController = {
       }
 
       const newAccessToken = generateToken(
-        { id: convertObjectToString(user._id) },
+        { id: convertObjectToString(user._id), role: user.role },
         keyToken.publicKey,
         process.env.ACCESS_TOKEN_LIFE
       );
@@ -336,17 +345,19 @@ const AdminController = {
   },
   getPermission: async (req, res) => {
     const { user_id } = req.params;
-
-    if (!user_id) return new BadResquestError().send(res);
+    const role = req.role;
+    if (!user_id || !role) return new BadResquestError().send(res);
 
     try {
       const apiKey = await ApiKeyServices.getApiKeyByUserId(user_id, {
-        permissions: 1,
+        permission: 1,
       });
 
       if (!apiKey) return new NotFoundError().send(res);
 
-      return new GetResponse(200, apiKey.permissions).send(res);
+      return new GetResponse(200, { permission: apiKey.permission, role }).send(
+        res
+      );
     } catch (error) {
       return new InternalServerError(error.stack).send(res);
     }

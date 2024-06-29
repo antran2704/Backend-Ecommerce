@@ -6,12 +6,12 @@ const AdminModel = new Schema(
     name: {
       type: String,
       default: null,
-      index: true
+      index: true,
     },
     email: {
       type: String,
       default: null,
-      index: true
+      index: true,
     },
     password: {
       type: String,
@@ -25,6 +25,7 @@ const AdminModel = new Schema(
       type: String,
       default: null,
     },
+    role: { type: String, require: true },
     banned: {
       type: Boolean,
       default: false,

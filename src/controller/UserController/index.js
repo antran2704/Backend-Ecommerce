@@ -29,6 +29,8 @@ const convertObjectToString = require("../../helpers/convertObjectString");
 const keyTokenServices = require("../../services/KeyToken/keyToken.services");
 const getSelect = require("../../helpers/getSelect");
 const { isValidObjectId } = require("mongoose");
+const PERMISSION = require("../../common/permission.enum");
+const { ROLE } = require("../../common");
 
 const UserController = {
   // [GET] USERS
@@ -153,6 +155,7 @@ const UserController = {
         email,
         avartar,
         verify: true,
+        role: ROLE.USER,
       });
       if (!newUser) {
         return new BadResquestError(400, "Create user failed").send(res);
@@ -164,7 +167,7 @@ const UserController = {
       const newApiKey = await ApiKeyServices.createApiKey(
         newUser._id,
         key,
-        "1111"
+        PERMISSION.USER
       );
 
       if (!newCart) {
@@ -202,16 +205,16 @@ const UserController = {
 
       const apiKey = await ApiKeyServices.getApiKeyByUserId(user._id, {
         key: 1,
-        permissions: 1,
+        permission: 1,
       });
 
       if (!apiKey) {
         return new NotFoundError(404, "Not found api key");
       }
 
-      if (!apiKey.permissions.includes("1111")) {
-        return new ForbiddenError().send(res);
-      }
+      // if (apiKey.permissions.includes("1111")) {
+      //   return new ForbiddenError().send(res);
+      // }
 
       const privateKey = crypto.randomUUID();
       const publicKey = crypto.randomUUID();
@@ -223,6 +226,7 @@ const UserController = {
       const accessToken = generateToken(
         {
           id: convertObjectToString(user._id),
+          role: user.role,
         },
         publicKey,
         process.env.ACCESS_TOKEN_LIFE
@@ -499,7 +503,7 @@ const UserController = {
       }
 
       const newAccessToken = generateToken(
-        { id: convertObjectToString(user._id) },
+        { id: convertObjectToString(user._id), role: user.role },
         keyToken.publicKey,
         process.env.ACCESS_TOKEN_LIFE
       );

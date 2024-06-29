@@ -29,6 +29,8 @@ const CacheCartServices = require("./Cart/cache.services");
 const CacheUserServices = require("./User/cache.services");
 const CacheProductServices = require("./Product/cache.services");
 const CacheBannerServices = require("./Banner/cache.serices");
+const CachePriceServices = require("./Price/cache.services");
+const CacheInventoryServices = require("./Inventory/cache.services");
 
 module.exports = {
   CategoriesServices,
@@ -57,4 +59,6 @@ module.exports = {
   CacheUserServices,
   CacheProductServices,
   CacheBannerServices,
+  CachePriceServices,
+  CacheInventoryServices
 };

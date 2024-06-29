@@ -30,6 +30,7 @@ const AuthenMiddleware = {
       return new UnauthorizedError().send(res);
     }
 
+    req.role = decoded.role;
     req.user_id = keyToken.user;
     req.accessToken = accessToken;
     req.publicKey = publicKey;
@@ -37,23 +38,39 @@ const AuthenMiddleware = {
 
     next();
   },
-  authorization: (permission) => {
+
+  /**
+   * Middleware check role and permission
+   * @param {string[]} roles
+   * @param {string[]} permissions
+   * @returns
+   */
+  authorization: (roles, permissions) => {
     return async (req, res, next) => {
+      // get key token from authentication middleware
       const keyToken = req.keyToken;
+
+      // get role from authentication middleware
+      const role = req.role;
       const apiKeyHeader = req.header(HEADER.API_KEY);
 
-      if (!apiKeyHeader) {
+      if (!apiKeyHeader || !roles.includes(role)) {
         return new ForbiddenError().send(res);
       }
 
       const key = apiKeyHeader.split(" ")[1];
-      const apikey = await ApiKeyServices.getApiKey(key);
+
+      // get permssion of user
+      const apikey = await ApiKeyServices.getApiKey(key, {
+        permission: 1,
+        user_id: 1,
+      });
 
       if (!apikey || apikey.user_id.toString() !== keyToken.user.toString()) {
         return new ForbiddenError().send(res);
       }
 
-      if (!apikey.permissions.includes(permission)) {
+      if (!permissions.includes(apikey.permission)) {
         return new ForbiddenError().send(res);
       }
 
@@ -64,7 +81,7 @@ const AuthenMiddleware = {
   },
   checkAuthorizationHeader: (req, res, next) => {
     const apiKeyHeader = req.header(HEADER.API_KEY);
-    
+
     if (!apiKeyHeader) {
       return new BadResquestError().send(res);
     }
