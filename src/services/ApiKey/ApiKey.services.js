@@ -3,13 +3,13 @@ const { getDateTime } = require("../../helpers/getDateTime");
 const { isValidObjectId } = require("mongoose");
 
 class ApiKeyServices {
-  async createApiKey(user_id, key, permissions) {
+  async createApiKey(user_id, key, permission) {
     if (!user_id || !key || !isValidObjectId(user_id)) return null;
 
     const newApiKey = await ApiKey.create({
       key,
       user_id,
-      permissions,
+      permission,
       status: true,
     });
 
@@ -19,14 +19,18 @@ class ApiKeyServices {
   async getApiKey(key, select = {}) {
     if (!key) return null;
 
-    const apiKey = await ApiKey.findOne({ key }).select({...select}).lean();
+    const apiKey = await ApiKey.findOne({ key })
+      .select({ ...select })
+      .lean();
     return apiKey;
   }
 
   async getApiKeyByUserId(user_id, select = {}) {
     if (!user_id || !isValidObjectId(user_id)) return null;
 
-    const apiKey = await ApiKey.findOne({ user_id }).select({...select}).lean();
+    const apiKey = await ApiKey.findOne({ user_id })
+      .select({ ...select })
+      .lean();
     return apiKey;
   }
 

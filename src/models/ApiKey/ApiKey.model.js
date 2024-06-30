@@ -13,8 +13,8 @@ const ApiKeyModel = new Schema(
       require: true,
       index: true,
     },
-    permissions: {
-      type: [String],
+    permission: {
+      type: String,
       require: true,
     },
     status: {
