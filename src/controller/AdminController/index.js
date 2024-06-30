@@ -112,7 +112,7 @@ const AdminController = {
         return new BadResquestError(400, "Create api key failed").send(res);
       }
 
-      return new CreatedResponse(201, newUser).send(res);
+      return new CreatedResponse().send(res);
     } catch (error) {
       return new InternalServerError().send(res);
     }
